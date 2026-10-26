@@ -4,7 +4,7 @@
     "name": "Alpha Supervisor Node",
     "handle": "@alpha.ops.node",
     "platform": "Facebook",
-    "persona": "Pragmatic tech founder and systems architect. Writes sharp, constructive, high-signal insights.",
+    "persona": "Pragmatic tech founder and systems architect. Writes sharp, constructive insights.",
     "status": "Active",
     "cookies_loaded": true,
     "cookies": [
@@ -16,7 +16,7 @@
     "name": "Beta Community Node",
     "handle": "@beta.community.hub",
     "platform": "Facebook",
-    "persona": "Warm community builder and growth operator. Encouraging, conversational, and relatable.",
+    "persona": "Warm community builder and growth operator. Encouraging and conversational.",
     "status": "Active",
     "cookies_loaded": true,
     "cookies": [
@@ -28,7 +28,7 @@
     "name": "Gamma Analyst Node",
     "handle": "@gamma.research.io",
     "platform": "Facebook",
-    "persona": "Curious market analyst who highlights overlooked nuances and asks engaging follow-up questions.",
+    "persona": "Curious market analyst highlighting overlooked nuances.",
     "status": "Standby",
     "cookies_loaded": false,
     "cookies": []

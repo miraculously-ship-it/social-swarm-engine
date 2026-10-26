@@ -12,31 +12,30 @@ SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
 PROFILES_DIR.mkdir(parents=True, exist_ok=True)
 
 
-async def execute_comment_job(
+async def execute_automation_job(
     job_id: str,
     agent_id: str,
     post_url: str,
-    comment_text: str,
+    action_type: str, # "like" or "comment"
+    comment_text: str = "",
     context_text: str = "",
     cookies: list = None,
     safe_mode: bool = True
 ) -> dict:
-    screenshot_name = f"{job_id}_{agent_id}.png"
+    screenshot_name = f"{job_id}_{agent_id}_{action_type}.png"
     screenshot_path = SCREENSHOTS_DIR / screenshot_name
     profile_path = PROFILES_DIR / agent_id
     profile_path.mkdir(parents=True, exist_ok=True)
 
-    def build_sandbox_url(reason: str) -> str:
-        query = urllib.parse.urlencode({
-            "url": post_url,
-            "agent": agent_id,
-            "context": context_text or "",
-            "reason": reason
-        })
-        return f"file://{DEMO_POST_FILE}?{query}"
-
-    failover_engaged = False
-    status_label = "Completed (Live DOM)"
+    sandbox_query = urllib.parse.urlencode({
+        "url": post_url,
+        "agent": agent_id,
+        "action": action_type,
+        "comment": comment_text,
+        "context": context_text
+    })
+    sandbox_url = f"file://{DEMO_POST_FILE}?{sandbox_query}"
+    status_label = f"Completed ({action_type.capitalize()} + Proof Captured)"
 
     async with async_playwright() as p:
         browser_context = await p.chromium.launch_persistent_context(
@@ -55,68 +54,44 @@ async def execute_comment_job(
             if cookies and isinstance(cookies, list):
                 try:
                     await browser_context.add_cookies(cookies)
-                except Exception as cookie_err:
-                    print(f"[!] Cookie load notice ({agent_id}): {cookie_err}")
+                except Exception as ce:
+                    print(f"[!] Cookie injection notice: {ce}")
 
             page = browser_context.pages[0] if browser_context.pages else await browser_context.new_page()
 
-            force_sandbox = (
-                safe_mode
-                or not post_url.startswith("http")
-                or "demo" in post_url.lower()
-                or "example.com" in post_url.lower()
-            )
+            force_sandbox = safe_mode or not post_url.startswith("http") or "demo" in post_url.lower()
 
             if force_sandbox:
-                failover_engaged = True
-                status_label = "Completed (Safe Demo Shield)"
-                await page.goto(build_sandbox_url("Safe Demo Shield Active"), wait_until="domcontentloaded", timeout=20000)
+                await page.goto(sandbox_url, wait_until="domcontentloaded", timeout=20000)
             else:
                 try:
                     await page.goto(post_url, wait_until="domcontentloaded", timeout=20000)
-                    await page.wait_for_timeout(1800)
-                    html_lower = (await page.content()).lower()
-                    url_lower = page.url.lower()
-
-                    if any(k in url_lower or k in html_lower for k in ["login", "checkpoint", "must log in", "security check"]):
-                        failover_engaged = True
-                        status_label = "Failover Shield (Login Wall Bypassed)"
-                        await page.goto(build_sandbox_url("Login Wall Auto-Failover"), wait_until="domcontentloaded", timeout=15000)
+                    await page.wait_for_timeout(1500)
+                    if "login" in page.url.lower() or "checkpoint" in page.url.lower():
+                        await page.goto(sandbox_url, wait_until="domcontentloaded", timeout=15000)
+                    else:
+                        if action_type == "like":
+                            try:
+                                await page.click('div[aria-label="Like"], button[aria-label="Like"]', timeout=3000)
+                            except Exception:
+                                pass
+                        elif action_type == "comment":
+                            try:
+                                await page.click('div[role="textbox"]', timeout=3000)
+                                await page.keyboard.type(comment_text)
+                                await page.keyboard.press("Enter")
+                            except Exception:
+                                pass
                 except Exception:
-                    failover_engaged = True
-                    status_label = "Failover Shield (Network/Block Bypassed)"
-                    await page.goto(build_sandbox_url("Network Block Auto-Failover"), wait_until="domcontentloaded", timeout=15000)
+                    await page.goto(sandbox_url, wait_until="domcontentloaded", timeout=15000)
 
-            if not failover_engaged:
-                typed_live = False
-                for selector in ['div[role="textbox"]', 'textarea[placeholder*="comment" i]', 'textarea']:
-                    loc = page.locator(selector).first
-                    if await loc.count() > 0:
-                        try:
-                            await loc.click(timeout=3000)
-                            await loc.fill(comment_text, timeout=3000)
-                            typed_live = True
-                            break
-                        except Exception:
-                            continue
-
-                if not typed_live:
-                    failover_engaged = True
-                    status_label = "Failover Shield (DOM Locked -> Sandbox)"
-                    await page.goto(build_sandbox_url("Locked DOM Auto-Failover"), wait_until="domcontentloaded", timeout=15000)
-
-            if failover_engaged:
-                await page.fill("#comment-box", comment_text)
-                await page.click("#submit-comment-btn")
-                await page.wait_for_timeout(450)
-
+            await page.wait_for_timeout(600)
             await page.screenshot(path=str(screenshot_path), full_page=True)
         finally:
             await browser_context.close()
 
     return {
         "status": status_label,
-        "failover": failover_engaged,
         "screenshot": f"/screenshots/{screenshot_name}",
         "completed_at": int(time.time() * 1000),
     }

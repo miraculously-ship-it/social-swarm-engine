@@ -12,7 +12,7 @@ DEFAULT_ACCOUNTS = [
         "name": "Alpha Supervisor Node",
         "handle": "@alpha.ops.node",
         "platform": "Facebook",
-        "persona": "Pragmatic tech founder and systems architect. Writes sharp, constructive, high-signal insights.",
+        "persona": "Pragmatic tech founder and systems architect.",
         "status": "Active",
         "cookies_loaded": True,
         "cookies": [{"name": "c_user", "value": "100098412001", "domain": ".facebook.com", "path": "/"}]
@@ -22,7 +22,7 @@ DEFAULT_ACCOUNTS = [
         "name": "Beta Community Node",
         "handle": "@beta.community.hub",
         "platform": "Facebook",
-        "persona": "Warm community builder and growth operator. Encouraging, conversational, and relatable.",
+        "persona": "Warm community builder and growth operator.",
         "status": "Active",
         "cookies_loaded": True,
         "cookies": [{"name": "c_user", "value": "100098412002", "domain": ".facebook.com", "path": "/"}]
@@ -32,7 +32,7 @@ DEFAULT_ACCOUNTS = [
         "name": "Gamma Analyst Node",
         "handle": "@gamma.research.io",
         "platform": "Facebook",
-        "persona": "Curious market analyst who highlights overlooked nuances and asks engaging follow-up questions.",
+        "persona": "Curious market analyst.",
         "status": "Standby",
         "cookies_loaded": False,
         "cookies": []
@@ -79,8 +79,6 @@ def update_account(agent_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
                 acc["persona"] = updates["persona"]
             if "name" in updates and updates["name"]:
                 acc["name"] = updates["name"]
-            if "status" in updates and updates["status"]:
-                acc["status"] = updates["status"]
             _write_json(ACCOUNTS_FILE, accounts)
             return acc
     raise ValueError(f"Agent '{agent_id}' not found")
@@ -118,6 +116,5 @@ def delete_job(job_id: str) -> bool:
 
 def clear_all_jobs() -> int:
     jobs = get_jobs()
-    count = len(jobs)
     _write_json(JOBS_FILE, [])
-    return count
+    return len(jobs)

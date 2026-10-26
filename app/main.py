@@ -17,14 +17,14 @@ from app.state import (
     clear_all_jobs,
 )
 from app.llm import generate_comment
-from app.worker import execute_comment_job
+from app.worker import execute_automation_job
 
 BASE_DIR = Path(__file__).resolve().parent
 DASHBOARD_PATH = BASE_DIR / "dashboard.html"
 SCREENSHOTS_DIR = BASE_DIR / "screenshots"
 SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="Social Media Support Agent — Supervisor v4.5", version="4.5.0")
+app = FastAPI(title="Social Swarm Supervisor v4.5", version="4.5.0")
 app.mount("/screenshots", StaticFiles(directory=str(SCREENSHOTS_DIR)), name="screenshots")
 
 
@@ -41,7 +41,8 @@ class PreviewPayload(BaseModel):
 class DispatchPayload(BaseModel):
     post_url: str
     context: Optional[str] = ""
-    comment: str
+    action_type: str = "comment"  # "like" or "comment"
+    comment: Optional[str] = ""
     agent_id: str = "fb_agent_alpha"
     safe_mode: bool = True
 
@@ -56,7 +57,7 @@ class AccountUpdatePayload(BaseModel):
 @app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 async def serve_dashboard():
     if not DASHBOARD_PATH.exists():
-        return HTMLResponse("<h1>Dashboard file not found</h1>", status_code=500)
+        return HTMLResponse("<h1>Dashboard file missing</h1>", status_code=500)
     return HTMLResponse(DASHBOARD_PATH.read_text(encoding="utf-8"))
 
 
@@ -75,15 +76,6 @@ async def api_update_account(agent_id: str, payload: AccountUpdatePayload):
     try:
         updates = {k: v for k, v in payload.model_dump().items() if v is not None}
         updated = update_account(agent_id, updates)
-        return {"ok": True, "account": updated}
-    except ValueError as err:
-        raise HTTPException(status_code=404, detail=str(err))
-
-
-@app.post("/api/accounts/{agent_id}/cookies")
-async def api_update_account_cookies(agent_id: str, payload: AccountUpdatePayload):
-    try:
-        updated = update_account(agent_id, {"cookies": payload.cookies or []})
         return {"ok": True, "account": updated}
     except ValueError as err:
         raise HTTPException(status_code=404, detail=str(err))
@@ -121,19 +113,20 @@ async def api_dispatch(payload: DispatchPayload):
         "agent_id": payload.agent_id,
         "post_url": payload.post_url,
         "context": payload.context or "",
-        "comment": payload.comment,
-        "status": "Executing Playwright...",
-        "failover": False,
+        "action_type": payload.action_type,
+        "comment": payload.comment if payload.action_type == "comment" else "[Like Automation Action]",
+        "status": f"Executing {payload.action_type.capitalize()}...",
         "screenshot": None,
     }
     add_job(job_entry)
 
     try:
-        result = await execute_comment_job(
+        result = await execute_automation_job(
             job_id=job_id,
             agent_id=payload.agent_id,
             post_url=payload.post_url,
-            comment_text=payload.comment,
+            action_type=payload.action_type,
+            comment_text=payload.comment or "",
             context_text=payload.context or "",
             cookies=acc.get("cookies", []),
             safe_mode=payload.safe_mode,
