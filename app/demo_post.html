@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Safe Demo Sandbox — Auto-Failover Execution Target</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 36px 20px;
+      background: radial-gradient(circle at top, #0f172a 0%, #050811 100%);
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .sandbox-shell { width: 100%; max-width: 720px; }
+    .shield-banner {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.18), rgba(6, 182, 212, 0.12));
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+    .shield-title { color: #34d399; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+    .shield-meta { color: #94a3b8; font-family: monospace; }
+    .post-card {
+      background: #0d1322;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65);
+    }
+    .post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #10b981);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; color: #060911;
+    }
+    .author-name { font-weight: 700; font-size: 15px; color: #f8fafc; }
+    .post-url { font-size: 12px; color: #38bdf8; font-family: monospace; word-break: break-all; margin-top: 2px; }
+    .post-content {
+      background: #070b14; border: 1px solid #1e293b; border-radius: 12px;
+      padding: 18px; font-size: 14px; line-height: 1.6; color: #cbd5e1; margin-bottom: 18px;
+    }
+    .stats-bar {
+      display: flex; justify-content: space-between; font-size: 12px; color: #64748b;
+      padding-bottom: 12px; border-bottom: 1px solid #1e293b; margin-bottom: 16px;
+    }
+    textarea#comment-box {
+      width: 100%; min-height: 84px; background: #090e1a; border: 1px solid #334155;
+      border-radius: 10px; padding: 12px 14px; color: #f8fafc; font-size: 14px;
+    }
+    .submit-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+    .btn-submit {
+      background: #10b981; color: #04130e; border: none; border-radius: 8px;
+      padding: 8px 18px; font-weight: 700; font-size: 13px; cursor: pointer;
+    }
+    #comments-stream { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+    .comment-bubble {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-left: 4px solid #10b981;
+      border-radius: 10px; padding: 14px 16px;
+    }
+    .comment-meta { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; }
+    .comment-agent { font-weight: 700; color: #34d399; font-family: monospace; }
+    .comment-badge { background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 2px 8px; border-radius: 99px; font-size: 11px; }
+    .comment-body { font-size: 14px; color: #f1f5f9; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="sandbox-shell">
+    <div class="shield-banner">
+      <div class="shield-title">🛡️ Auto-Failover Sandbox Shield Active</div>
+      <div class="shield-meta" id="shield-reason">Reason: Safe Demo Verification</div>
+    </div>
+    <div class="post-card">
+      <div class="post-header">
+        <div class="avatar">SW</div>
+        <div>
+          <div class="author-name">Target Social Thread Mirror</div>
+          <div class="post-url" id="display-url">https://www.facebook.com/groups/founders/posts/demo</div>
+        </div>
+      </div>
+      <div class="post-content" id="display-context">
+        Live supervisor mirror container. When an external social platform triggers an unauthenticated login wall or checkpoint challenge, the Playwright worker transparently routes execution here to safely validate DOM injection and capture visual audit proof.
+      </div>
+      <div class="stats-bar">
+        <span>👍 42 Reactions • 💬 Live Thread Active</span>
+        <span id="display-timestamp">Verified DOM Container</span>
+      </div>
+      <div>
+        <textarea id="comment-box" placeholder="Write a comment as active agent..."></textarea>
+        <div class="submit-row">
+          <span style="font-size:12px; color:#64748b;" id="active-agent-label">Agent: fb_agent_alpha</span>
+          <button id="submit-comment-btn" class="btn-submit" onclick="commitComment()">Post Comment</button>
+        </div>
+      </div>
+      <div id="comments-stream"></div>
+    </div>
+  </div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const targetUrl = params.get("url") || "https://www.facebook.com/posts/sandbox-simulation";
+    const agentId = params.get("agent") || "fb_agent_alpha";
+    const contextText = params.get("context") || "";
+    const reasonText = params.get("reason") || "Safe Demo Sandbox Shield";
+    document.getElementById("display-url").textContent = targetUrl;
+    document.getElementById("active-agent-label").textContent = "Dispatched Agent: " + agentId;
+    document.getElementById("shield-reason").textContent = "Mode: " + reasonText;
+    document.getElementById("display-timestamp").textContent = new Date().toUTCString();
+    if (contextText.trim()) {
+      document.getElementById("display-context").textContent = "Post Context: " + contextText;
+    }
+    function commitComment() {
+      const box = document.getElementById("comment-box");
+      const text = box.value.trim();
+      if (!text) return;
+      const stream = document.getElementById("comments-stream");
+      const item = document.createElement("div");
+      item.className = "comment-bubble";
+      item.innerHTML = `<div class="comment-meta"><span class="comment-agent">${agentId}</span><span class="comment-badge">✓ Verified Injection • Just now</span></div><div class="comment-body">${text}</div>`;
+      stream.prepend(item);
+    }
+  </script>
+</body>
+</html>

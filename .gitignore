@@ -1,0 +1,11 @@
+.env
+build.py
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+app/profiles/*
+!app/profiles/.gitkeep
+app/screenshots/*
+!app/screenshots/.gitkeep
