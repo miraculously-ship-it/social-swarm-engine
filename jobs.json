@@ -1,5 +1,23 @@
 [
   {
+    "id": "job_1792980542179_alpha",
+    "agent_id": "fb_agent_alpha",
+    "account_name": "FB_Account_100062273714859",
+    "fb_uid": "100062273714859",
+    "post_url": "https://www.facebook.com/reel/2062417224438860/",
+    "comment": "Heads up neighbors - just saw this reel from the community watch page. Something looks concerning at that intersection, better stay alert and check it out if you're in the area.",
+    "status": "Completed (Live via FB_Account_100062273714859)",
+    "logs": [
+      "[*] Agent fb_agent_alpha (FB_Account_100062273714859 | UID: 100062273714859) initialized.",
+      "[*] Normalized 8 session cookies for Playwright injection.",
+      "[+] Injected 8 cookies (c_user=100062273714859) into Chromium context.",
+      "[*] Navigating to https://www.facebook.com/reel/2062417224438860/ ...",
+      "[+] Clicked Like button on live target.",
+      "[📸] Captured HD visual proof screenshot: /screenshots/job_1792980542179_alpha_fb_agent_alpha.png"
+    ],
+    "screenshot": "/screenshots/job_1792980542179_alpha_fb_agent_alpha.png"
+  },
+  {
     "id": "job_1792979156825",
     "timestamp": 1792979156825,
     "agent_id": "undefined",
