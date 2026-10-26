@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from typing import List, Dict, Any
 
@@ -10,7 +11,7 @@ DEFAULT_ACCOUNTS = [
     {
         "id": "fb_agent_alpha",
         "name": "Alpha Supervisor Node",
-        "handle": "@alpha.ops.node",
+        "account_handle": "miracle.abrham.alpha",
         "platform": "Facebook",
         "persona": "Pragmatic tech founder and systems architect.",
         "status": "Active",
@@ -20,7 +21,7 @@ DEFAULT_ACCOUNTS = [
     {
         "id": "fb_agent_beta",
         "name": "Beta Community Node",
-        "handle": "@beta.community.hub",
+        "account_handle": "swarm.community.beta",
         "platform": "Facebook",
         "persona": "Warm community builder and growth operator.",
         "status": "Active",
@@ -30,7 +31,7 @@ DEFAULT_ACCOUNTS = [
     {
         "id": "fb_agent_gamma",
         "name": "Gamma Analyst Node",
-        "handle": "@gamma.research.io",
+        "account_handle": "data.analyst.gamma",
         "platform": "Facebook",
         "persona": "Curious market analyst.",
         "status": "Standby",
@@ -57,7 +58,13 @@ def _write_json(path: Path, data: Any) -> None:
 
 
 def get_accounts() -> List[Dict[str, Any]]:
-    return _read_json(ACCOUNTS_FILE, DEFAULT_ACCOUNTS)
+    accounts = _read_json(ACCOUNTS_FILE, DEFAULT_ACCOUNTS)
+    for acc in accounts:
+        cookies = acc.get("cookies", [])
+        acc["cookies_loaded"] = len(cookies) > 0
+        if not acc.get("account_handle"):
+            acc["account_handle"] = acc["id"]
+    return accounts
 
 
 def get_account_by_id(agent_id: str) -> Dict[str, Any]:
@@ -68,7 +75,7 @@ def get_account_by_id(agent_id: str) -> Dict[str, Any]:
 
 
 def update_account(agent_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
-    accounts = get_accounts()
+    accounts = _read_json(ACCOUNTS_FILE, DEFAULT_ACCOUNTS)
     for acc in accounts:
         if acc.get("id") == agent_id:
             if "cookies" in updates and isinstance(updates["cookies"], list):
@@ -79,8 +86,10 @@ def update_account(agent_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
                 acc["persona"] = updates["persona"]
             if "name" in updates and updates["name"]:
                 acc["name"] = updates["name"]
+            if "account_handle" in updates and updates["account_handle"]:
+                acc["account_handle"] = updates["account_handle"]
             _write_json(ACCOUNTS_FILE, accounts)
-            return acc
+            return get_account_by_id(agent_id)
     raise ValueError(f"Agent '{agent_id}' not found")
 
 
@@ -109,7 +118,7 @@ def delete_job(job_id: str) -> bool:
     jobs = get_jobs()
     new_jobs = [j for j in jobs if j.get("id") != job_id]
     if len(new_jobs) == len(jobs):
-        return False
+        return false
     _write_json(JOBS_FILE, new_jobs)
     return True
 
