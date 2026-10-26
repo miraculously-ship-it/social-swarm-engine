@@ -1,9 +1,7 @@
-import asyncio
-import time
 import html
 from pathlib import Path
 from playwright.async_api import async_playwright
-from app.state import normalize_playwright_cookies, append_job_log, set_detected_account_name
+from app.state import normalize_playwright_cookies, append_job_log, set_detected_account_name, is_valid_owner_name
 
 BASE_DIR = Path(__file__).resolve().parent
 SCREENSHOTS_DIR = BASE_DIR / "screenshots"
@@ -25,18 +23,18 @@ def build_verified_mirror_html(post_url: str, agent_id: str, account_name: str, 
       .interaction-col {{ display:flex; flex-direction:column; justify-content:space-between; background:#0f172a; border:1px solid #1e293b; border-radius:12px; padding:18px; }}
       .comment-bubble {{ background:#1e293b; border-left:3px solid #10b981; border-radius:10px; padding:12px; margin-top:12px; }}
     </style></head><body><div class="frame">
-      <div class="topbar"><span>facebook • Authenticated Session Proof</span><span>UID: {safe_uid} ({cookie_count} Cookies Active)</span></div>
+      <div class="topbar"><span>facebook • Authenticated Session Proof</span><span>{safe_acc} • ID: {safe_uid} ({cookie_count} Cookies)</span></div>
       <div class="urlbar"><span>🔒 {safe_url}</span><span style="color:#34d399;">● Auto-Failover Shield Proof</span></div>
       <div class="body-grid">
         <div class="reel-box">
           <div><h3 style="margin:0 0 8px 0;">Facebook Post / Reel Target</h3><p style="font-size:12px;color:#94a3b8;word-break:break-all;">{safe_url}</p></div>
-          <div style="background:rgba(0,0,0,0.45);padding:12px;border-radius:8px;font-size:12px;">⚡ Executed via <b>{html.escape(agent_id)}</b> ({safe_acc})</div>
+          <div style="background:rgba(0,0,0,0.45);padding:12px;border-radius:8px;font-size:12px;">⚡ Executed via <b>{html.escape(agent_id)}</b> • Owner: <b>{safe_acc}</b> ({safe_uid})</div>
         </div>
         <div class="interaction-col">
           <div>
             <div style="font-size:13px;font-weight:700;margin-bottom:10px;">{like_badge} • 💬 {"Comment Submitted" if do_comment else "Skipped"}</div>
             <div class="comment-bubble">
-              <div style="font-size:12px;font-weight:700;color:#34d399;margin-bottom:4px;">👤 {safe_acc} • Just now</div>
+              <div style="font-size:12px;font-weight:700;color:#34d399;margin-bottom:4px;">👤 {safe_acc} <span style="font-weight:400;color:#94a3b8;">({safe_uid})</span></div>
               <div style="font-size:13px;color:#f8fafc;">"{safe_comment}"</div>
             </div>
           </div>
@@ -61,7 +59,7 @@ async def execute_automation_job(
     screenshot_path = SCREENSHOTS_DIR / screenshot_name
     pw_cookies = normalize_playwright_cookies(cookies or [])
 
-    append_job_log(job_id, f"[*] Normalized {len(pw_cookies)} cookies (UID: {fb_uid}). Launching Chromium...", status="Launching Browser...")
+    append_job_log(job_id, f"[*] Normalized {len(pw_cookies)} cookies (ID: {fb_uid}). Launching Chromium...", status="Launching Browser...")
 
     try:
         async with async_playwright() as p:
@@ -86,26 +84,34 @@ async def execute_automation_job(
                 await page.goto(post_url, wait_until="domcontentloaded", timeout=16000)
                 await page.wait_for_timeout(2000)
 
-                # Close any popup login/cookie dialog if dismissible
+                # Extract real logged-in owner name from Facebook's internal CurrentUserInitialData module
+                try:
+                    detected_owner = await page.evaluate("""() => {
+                        try {
+                            const d = window.require && window.require("CurrentUserInitialData");
+                            if (d && d.NAME) return d.NAME;
+                        } catch (e) {}
+                        const html = document.documentElement.innerHTML;
+                        const m = html.match(/"CurrentUserInitialData"\s*,\s*\[\]\s*,\s*\{[^}]*?"NAME"\s*:\s*"([^"]+)"/);
+                        if (m && m[1]) return JSON.parse('"' + m[1] + '"');
+                        return null;
+                    }""")
+                    if detected_owner and is_valid_owner_name(detected_owner):
+                        account_name = detected_owner.strip()
+                        set_detected_account_name(agent_id, account_name)
+                        append_job_log(job_id, f"[+] Verified Account Owner Name: {account_name} (ID: {fb_uid})", account_name=account_name)
+                except Exception:
+                    pass
+
+                # Dismiss any overlay modal close button if present
                 for close_sel in ['div[aria-label="Close"]', 'div[role="button"][aria-label="Close"]']:
                     loc = page.locator(close_sel).first
                     if await loc.count() > 0:
                         try:
                             await loc.click(timeout=1500)
-                            await page.wait_for_timeout(500)
+                            await page.wait_for_timeout(400)
                         except Exception:
                             pass
-
-                # Try to auto-detect logged-in user's real name from FB DOM
-                for nav_sel in ['svg[aria-label^="Your profile"]', 'a[aria-label*="Profile"]', 'div[aria-label="Account Controls and Settings"] a']:
-                    loc = page.locator(nav_sel).first
-                    if await loc.count() > 0:
-                        lbl = await loc.get_attribute("aria-label")
-                        if lbl and lbl not in ("Your profile", "Profile"):
-                            account_name = f"{lbl} ({fb_uid})"
-                            set_detected_account_name(agent_id, account_name)
-                            append_job_log(job_id, f"[+] Auto-detected Facebook profile name: {account_name}", account_name=account_name)
-                            break
 
                 title_lower = (await page.title()).lower()
                 if "log in" in title_lower or "security check" in title_lower:
@@ -128,7 +134,6 @@ async def execute_automation_job(
                             append_job_log(job_id, "[i] Like button selector not exposed on current reel layout.")
 
                     if do_comment and comment_text:
-                        # On Reels, click the Comment icon first if textbox is hidden
                         for c_icon in ['div[aria-label="Comment"]', 'div[aria-label*="comment" i][role="button"]']:
                             loc = page.locator(c_icon).first
                             if await loc.count() > 0:
@@ -169,9 +174,9 @@ async def execute_automation_job(
                 )
                 await page.set_content(mirror_html, wait_until="domcontentloaded")
                 await page.wait_for_timeout(300)
-                final_status = f"Completed (Verified via {account_name})"
+                final_status = f"Completed (Verified • {account_name})"
             else:
-                final_status = f"Completed (Live via {account_name})"
+                final_status = f"Completed (Live • {account_name})"
 
             await page.screenshot(path=str(screenshot_path), full_page=False)
             append_job_log(

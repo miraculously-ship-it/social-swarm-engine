@@ -1,7 +1,7 @@
 {
   "fb_agent_alpha": {
     "agent_id": "fb_agent_alpha",
-    "account_name": "FB_Account_100062273714859",
+    "account_name": "Mirpap Day",
     "fb_uid": "100062273714859",
     "cookie_count": 8,
     "health": "Active Session Armed",
@@ -90,7 +90,7 @@
   },
   "fb_agent_beta": {
     "agent_id": "fb_agent_beta",
-    "account_name": "Unlinked_fb_agent_beta",
+    "account_name": "Unlinked Account",
     "fb_uid": "Unlinked",
     "cookie_count": 0,
     "health": "Sandbox Ready",
@@ -98,7 +98,7 @@
   },
   "fb_agent_gamma": {
     "agent_id": "fb_agent_gamma",
-    "account_name": "Unlinked_fb_agent_gamma",
+    "account_name": "Unlinked Account",
     "fb_uid": "Unlinked",
     "cookie_count": 0,
     "health": "Sandbox Ready",

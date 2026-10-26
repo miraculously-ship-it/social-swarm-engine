@@ -41,14 +41,14 @@
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-400 mb-1">Target Facebook Post / Reel URL</label>
-            <input id="post_url" type="text" value="https://www.facebook.com/reel/2062417224438860/" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono" />
+            <input id="post_url" type="text" value="" placeholder="Paste target Facebook post or reel URL here..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-indigo-500" />
           </div>
           <div>
             <div class="flex justify-between items-center mb-1">
               <label class="text-xs font-medium text-slate-400">Post Context / Direction for AI</label>
               <button onclick="previewComment()" class="text-[11px] bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20 px-2.5 py-1 rounded-lg border border-indigo-500/30 cursor-pointer">✨ Preview AI Comment</button>
             </div>
-            <textarea id="post_text" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-white">its just a local breaking news make it sound alerting</textarea>
+            <textarea id="post_text" rows="3" placeholder="Enter post context or direction for AI (leave blank or describe what the post is about)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
             <div id="previewBox" class="hidden mt-2 bg-slate-950 border border-emerald-500/30 rounded-xl p-3 text-xs text-emerald-300 font-medium space-y-2">
               <div id="previewText"></div>
               <div class="flex justify-end border-t border-slate-800/80 pt-2">
@@ -107,7 +107,7 @@
     <div id="tabAccounts" class="hidden space-y-6">
       <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl">
         <h2 class="text-lg font-semibold text-white">👥 Agent-to-Account Roster & Cookie Vault</h2>
-        <p class="text-xs text-slate-400 mt-1 mb-6">Paste your Cookie-Editor JSON array below. Account identity is automatically extracted from your <code class="text-emerald-300">c_user</code> cookie by default.</p>
+        <p class="text-xs text-slate-400 mt-1 mb-6">Paste your Cookie-Editor JSON array below. Account owner name and <code class="text-emerald-300">c_user</code> ID are automatically extracted from your cookie.</p>
         <div id="accountsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
       </div>
     </div>
@@ -130,10 +130,18 @@
       const isDeploy = tab === 'deploy';
       document.getElementById('tabDeploy').classList.toggle('hidden', !isDeploy);
       document.getElementById('tabAccounts').classList.toggle('hidden', isDeploy);
+      document.getElementById('tabDeployBtn').className = isDeploy ? 'px-5 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition cursor-pointer' : 'px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition cursor-pointer';
+      document.getElementById('tabAccountsBtn').className = !isDeploy ? 'px-5 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition flex items-center gap-2 cursor-pointer' : 'px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer';
       if (!isDeploy) loadAccounts();
     }
 
     async function previewComment() {
+      const urlVal = document.getElementById('post_url').value.trim();
+      const ctxVal = document.getElementById('post_text').value.trim();
+      if (!urlVal && !ctxVal) {
+        showToast('Enter a Target URL or Post Context first to preview!', 'info');
+        return;
+      }
       const box = document.getElementById('previewBox');
       const textEl = document.getElementById('previewText');
       box.classList.remove('hidden');
@@ -143,8 +151,8 @@
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           agent_id: document.getElementById('agent_id').value,
-          post_url: document.getElementById('post_url').value,
-          post_text: document.getElementById('post_text').value,
+          post_url: urlVal || 'https://www.facebook.com/',
+          post_text: ctxVal,
           persona: document.getElementById('persona').value,
           tone: document.getElementById('tone').value
         })
@@ -160,25 +168,40 @@
       const currentVal = select.value;
       const entries = Object.values(cachedAccounts);
       document.getElementById('rosterBadge').innerText = `${entries.filter(a => (a.cookie_count || 0) > 0).length}/${entries.length} Armed`;
-      select.innerHTML = entries.map(a => `<option value="${a.agent_id}">${a.agent_id} ➔ ${a.account_name} (${a.cookie_count > 0 ? '🟢 ' + a.cookie_count + ' cookies' : '⚪ Sandbox Ready'})</option>`).join('');
+      select.innerHTML = entries.map(a => {
+        const idTag = a.fb_uid && a.fb_uid !== 'Unlinked' ? ` • ${a.fb_uid}` : '';
+        return `<option value="${a.agent_id}">${a.agent_id} ➔ ${a.account_name}${idTag} (${a.cookie_count > 0 ? '🟢 ' + a.cookie_count + ' cookies' : '⚪ Unlinked'})</option>`;
+      }).join('');
       if (currentVal) select.value = currentVal;
+
       document.getElementById('accountsGrid').innerHTML = entries.map(a => {
         const cookieJsonStr = (a.cookies && a.cookies.length > 0) ? JSON.stringify(a.cookies, null, 2) : '';
+        const isArmed = (a.cookie_count || 0) > 0;
+        const ownerDisplay = a.account_name || (isArmed ? 'Authenticated Owner' : 'Unlinked Account');
+        const uidDisplay = (a.fb_uid && a.fb_uid !== 'Unlinked') ? `ID: ${a.fb_uid}` : 'No c_user ID linked';
+
         return `
-        <div class="bg-slate-950 border ${a.cookie_count > 0 ? 'border-emerald-500/40' : 'border-slate-800'} rounded-2xl p-5 flex flex-col justify-between space-y-4">
+        <div class="bg-slate-950 border ${isArmed ? 'border-emerald-500/40' : 'border-slate-800'} rounded-2xl p-5 flex flex-col justify-between space-y-4">
           <div class="space-y-3">
             <div class="flex items-center justify-between">
               <span class="font-mono text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-md">${a.agent_id}</span>
-              <span class="text-xs font-mono px-2.5 py-0.5 rounded-full ${a.cookie_count > 0 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}">${a.cookie_count > 0 ? '🟢 ' + a.cookie_count + ' Cookies' : '⚪ Unlinked'}</span>
+              <span class="text-xs font-mono px-2.5 py-0.5 rounded-full ${isArmed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}">${isArmed ? '🟢 ' + a.cookie_count + ' Cookies' : '⚪ Unlinked'}</span>
             </div>
+
+            <!-- ACCOUNT OWNER BOX: BIG OWNER NAME ON TOP, SMALL ID NUMBER UNDERNEATH -->
             <div>
-              <label class="block text-[11px] uppercase font-mono text-slate-500 mb-1">Account Name (Auto-Fetched from Cookie)</label>
-              <input id="name_${a.agent_id}" type="text" value="${a.account_name || ''}" readonly class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-3.5 py-2 text-sm font-semibold text-emerald-300" />
+              <label class="block text-[11px] uppercase font-mono text-slate-500 mb-1">Account Owner (Auto-Fetched from Cookie)</label>
+              <div class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 flex flex-col justify-center">
+                <div class="text-lg font-bold tracking-tight ${isArmed ? 'text-emerald-300' : 'text-slate-400'} leading-snug truncate">${ownerDisplay}</div>
+                <div class="text-xs font-mono text-slate-400 mt-0.5 tracking-wide">${uidDisplay}</div>
+              </div>
             </div>
-            <div class="grid grid-cols-2 gap-2 text-xs font-mono bg-slate-900/70 p-3 rounded-xl border border-slate-800">
-              <div><span class="text-slate-500 text-[10px]">USER ID (c_user)</span><span class="text-emerald-300 block truncate">${a.fb_uid || 'Unlinked'}</span></div>
-              <div><span class="text-slate-500 text-[10px]">STATUS</span><span class="text-slate-300 block truncate">${a.health || 'Ready'}</span></div>
+
+            <div class="flex items-center justify-between text-xs font-mono bg-slate-900/70 px-3.5 py-2.5 rounded-xl border border-slate-800">
+              <span class="text-slate-500 text-[10px]">SESSION STATUS</span>
+              <span class="${isArmed ? 'text-emerald-300' : 'text-slate-400'} font-semibold">${a.health || 'Ready'}</span>
             </div>
+
             <div>
               <label class="block text-[11px] font-mono text-slate-400 mb-1">Cookie-Editor JSON:</label>
               <textarea id="cookies_${a.agent_id}" rows="4" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs font-mono text-emerald-300" placeholder='Paste Cookie-Editor JSON array...'>${cookieJsonStr}</textarea>
@@ -227,6 +250,12 @@
     }
 
     async function deployAgent(swarmMode = false) {
+      const postUrl = document.getElementById('post_url').value.trim();
+      if (!postUrl) {
+        showToast('Please paste a Target Facebook Post / Reel URL first!', 'info');
+        document.getElementById('post_url').focus();
+        return;
+      }
       const btn = document.getElementById('deployBtn');
       btn.disabled = true;
       btn.innerText = '🚀 Launching Browser Task...';
@@ -236,8 +265,8 @@
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
             agent_id: document.getElementById('agent_id').value,
-            post_url: document.getElementById('post_url').value,
-            post_text: document.getElementById('post_text').value,
+            post_url: postUrl,
+            post_text: document.getElementById('post_text').value.trim(),
             persona: document.getElementById('persona').value,
             tone: document.getElementById('tone').value,
             do_like: document.getElementById('do_like').checked,
@@ -259,12 +288,12 @@
       const res = await fetch('/api/jobs');
       const jobs = await res.json();
       const rawJson = JSON.stringify(jobs);
-      if (rawJson === lastJobsJson) return; // Prevent DOM/image re-download spam when nothing changed
+      if (rawJson === lastJobsJson) return;
       lastJobsJson = rawJson;
 
       const container = document.getElementById('jobsContainer');
       if (!jobs || !jobs.length) {
-        container.innerHTML = `<div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-10 text-center text-slate-500 text-sm">Clean slate ready — click <b>Like, Comment & Capture Proof</b> to launch.</div>`;
+        container.innerHTML = `<div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-10 text-center text-slate-500 text-sm">Clean slate ready — paste a target URL on the left and click <b>Like, Comment & Capture Proof</b>.</div>`;
         return;
       }
       container.innerHTML = jobs.map(j => {
@@ -276,7 +305,7 @@
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
               <span class="font-mono text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">${j.agent_id}</span>
-              <span class="text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">👤 ${j.account_name}</span>
+              <span class="text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">👤 ${j.account_name} <span class="text-slate-400 font-mono text-[10px]">(${j.fb_uid || ''})</span></span>
             </div>
             <div class="flex items-center gap-2">
               <button onclick="editJobComment('${j.id}', '${safeComment}')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-700 cursor-pointer">✏️ Edit</button>
