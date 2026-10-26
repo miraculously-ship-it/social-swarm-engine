@@ -1,45 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Safe Demo Sandbox — Automation Proof</title>
-  <style>
-    body { background: #080c14; color: #f1f5f9; font-family: sans-serif; display: flex; justify-content: center; padding: 40px 20px; margin: 0; }
-    .card { width: 100%; max-width: 680px; background: #111827; border: 1px solid #1f2937; border-radius: 14px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
-    .badge { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 99px; display: inline-block; margin-bottom: 12px; }
-    .post-box { background: #070b14; border: 1px solid #1e293b; padding: 16px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; line-height: 1.5; }
-    .action-badge { display: inline-block; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 13px; margin-bottom: 14px; }
-    .liked { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
-    .commented { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-    .comment-item { background: rgba(59, 130, 246, 0.08); border-left: 4px solid #3b82f6; padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 14px; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Social Media Simulation Post</title>
+    <style>
+        body { background: #0f172a; color: #f8fafc; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .post-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px; width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .avatar { width: 40px; height: 40px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .content { font-size: 14px; line-height: 1.5; color: #cbd5e1; margin-bottom: 16px; }
+        .badge { display: inline-block; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+    </style>
 </head>
 <body>
-  <div class="card">
-    <div class="badge">🛡️ PLAYWRIGHT VISUAL PROOF SANDBOX</div>
-    <div id="action-indicator" class="action-badge liked">👍 Action Verified: Liked Successfully</div>
-    <h3 style="margin:0 0 8px 0; font-size:18px;" id="target-title">Target Social Thread Simulation</h3>
-    <div style="font-size:12px; color:#38bdf8; font-family:monospace; margin-bottom:12px;" id="target-url">URL: </div>
-    <div class="post-box" id="post-context">Simulation container verifying automated interaction and visual screenshot proof.</div>
-    <div id="comments-container"></div>
-  </div>
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("url")) document.getElementById("target-url").textContent = "URL: " + params.get("url");
-    if (params.get("action") === "like") {
-      document.getElementById("action-indicator").className = "action-badge liked";
-      document.getElementById("action-indicator").textContent = "👍 Action Verified: Liked Post Successfully";
-    } else {
-      document.getElementById("action-indicator").className = "action-badge commented";
-      document.getElementById("action-indicator").textContent = "💬 Action Verified: Comment Posted Successfully";
-      const comm = params.get("comment");
-      if (comm) {
-        const div = document.createElement("div");
-        div.className = "comment-item";
-        div.innerHTML = `<strong>${params.get("agent") || "Agent"}</strong>: ${decodeURIComponent(comm)}`;
-        document.getElementById("comments-container").appendChild(div);
-      }
-    }
-  </script>
+    <div class="post-card">
+        <div class="header">
+            <div class="avatar">MS</div>
+            <div>
+                <div style="font-weight: bold;">Milestone Feed Simulation</div>
+                <div style="font-size: 12px; color: #94a3b8;">Autonomous Agent Sandbox Test</div>
+            </div>
+        </div>
+        <div class="content">
+            This is the secure local sandbox environment. The autonomous worker has successfully intercepted this target to prevent security blocks while validating comment injection and capturing visual proof.
+        </div>
+        <div>
+            <span class="badge">Safe Demo Shield Active</span>
+        </div>
+    </div>
 </body>
 </html>

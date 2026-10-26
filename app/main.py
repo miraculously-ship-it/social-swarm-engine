@@ -41,7 +41,7 @@ class PreviewPayload(BaseModel):
 class DispatchPayload(BaseModel):
     post_url: str
     context: Optional[str] = ""
-    action_type: str = "comment"  # "like" or "comment"
+    action_type: str = "comment"
     comment: Optional[str] = ""
     agent_id: str = "fb_agent_alpha"
     safe_mode: bool = True
@@ -49,6 +49,7 @@ class DispatchPayload(BaseModel):
 
 class AccountUpdatePayload(BaseModel):
     name: Optional[str] = None
+    account_handle: Optional[str] = None
     persona: Optional[str] = None
     status: Optional[str] = None
     cookies: Optional[List[Dict[str, Any]]] = None
@@ -106,11 +107,13 @@ async def api_dispatch(payload: DispatchPayload):
     now_ms = int(time.time() * 1000)
     job_id = f"job_{now_ms}"
     acc = get_account_by_id(payload.agent_id)
+    account_handle = acc.get("account_handle", payload.agent_id)
 
     job_entry = {
         "id": job_id,
         "timestamp": now_ms,
         "agent_id": payload.agent_id,
+        "account_handle": account_handle,
         "post_url": payload.post_url,
         "context": payload.context or "",
         "action_type": payload.action_type,
@@ -124,6 +127,7 @@ async def api_dispatch(payload: DispatchPayload):
         result = await execute_automation_job(
             job_id=job_id,
             agent_id=payload.agent_id,
+            account_handle=account_handle,
             post_url=payload.post_url,
             action_type=payload.action_type,
             comment_text=payload.comment or "",

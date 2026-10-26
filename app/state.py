@@ -1,5 +1,4 @@
 import json
-import os
 from pathlib import Path
 from typing import List, Dict, Any
 
@@ -10,36 +9,35 @@ JOBS_FILE = ROOT_DIR / "jobs.json"
 DEFAULT_ACCOUNTS = [
     {
         "id": "fb_agent_alpha",
-        "name": "Alpha Supervisor Node",
-        "account_handle": "miracle.abrham.alpha",
+        "name": "Alpha Node",
+        "account_handle": "unassigned",
         "platform": "Facebook",
-        "persona": "Pragmatic tech founder and systems architect.",
-        "status": "Active",
-        "cookies_loaded": True,
-        "cookies": [{"name": "c_user", "value": "100098412001", "domain": ".facebook.com", "path": "/"}]
+        "persona": "Tech-savvy industry expert and community builder",
+        "status": "Standby",
+        "cookies_loaded": False,
+        "cookies": []
     },
     {
         "id": "fb_agent_beta",
-        "name": "Beta Community Node",
-        "account_handle": "swarm.community.beta",
+        "name": "Beta Node",
+        "account_handle": "unassigned",
         "platform": "Facebook",
-        "persona": "Warm community builder and growth operator.",
-        "status": "Active",
-        "cookies_loaded": True,
-        "cookies": [{"name": "c_user", "value": "100098412002", "domain": ".facebook.com", "path": "/"}]
+        "persona": "Engaging community builder",
+        "status": "Standby",
+        "cookies_loaded": False,
+        "cookies": []
     },
     {
         "id": "fb_agent_gamma",
-        "name": "Gamma Analyst Node",
-        "account_handle": "data.analyst.gamma",
+        "name": "Gamma Node",
+        "account_handle": "unassigned",
         "platform": "Facebook",
-        "persona": "Curious market analyst.",
+        "persona": "Market analyst",
         "status": "Standby",
         "cookies_loaded": False,
         "cookies": []
     }
 ]
-
 
 def _read_json(path: Path, default: Any) -> Any:
     if not path.exists():
@@ -51,28 +49,18 @@ def _read_json(path: Path, default: Any) -> Any:
     except Exception:
         return default
 
-
 def _write_json(path: Path, data: Any) -> None:
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
-
 def get_accounts() -> List[Dict[str, Any]]:
-    accounts = _read_json(ACCOUNTS_FILE, DEFAULT_ACCOUNTS)
-    for acc in accounts:
-        cookies = acc.get("cookies", [])
-        acc["cookies_loaded"] = len(cookies) > 0
-        if not acc.get("account_handle"):
-            acc["account_handle"] = acc["id"]
-    return accounts
-
+    return _read_json(ACCOUNTS_FILE, DEFAULT_ACCOUNTS)
 
 def get_account_by_id(agent_id: str) -> Dict[str, Any]:
     for acc in get_accounts():
         if acc.get("id") == agent_id:
             return acc
     return DEFAULT_ACCOUNTS[0]
-
 
 def update_account(agent_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
     accounts = _read_json(ACCOUNTS_FILE, DEFAULT_ACCOUNTS)
@@ -82,27 +70,20 @@ def update_account(agent_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
                 acc["cookies"] = updates["cookies"]
                 acc["cookies_loaded"] = len(updates["cookies"]) > 0
                 acc["status"] = "Active" if acc["cookies_loaded"] else "Standby"
-            if "persona" in updates and updates["persona"]:
-                acc["persona"] = updates["persona"]
-            if "name" in updates and updates["name"]:
-                acc["name"] = updates["name"]
             if "account_handle" in updates and updates["account_handle"]:
                 acc["account_handle"] = updates["account_handle"]
             _write_json(ACCOUNTS_FILE, accounts)
             return get_account_by_id(agent_id)
     raise ValueError(f"Agent '{agent_id}' not found")
 
-
 def get_jobs() -> List[Dict[str, Any]]:
     return _read_json(JOBS_FILE, [])
-
 
 def add_job(job: Dict[str, Any]) -> Dict[str, Any]:
     jobs = get_jobs()
     jobs.insert(0, job)
     _write_json(JOBS_FILE, jobs)
     return job
-
 
 def update_job(job_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
     jobs = get_jobs()
@@ -113,15 +94,13 @@ def update_job(job_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
             return job
     return {}
 
-
 def delete_job(job_id: str) -> bool:
     jobs = get_jobs()
     new_jobs = [j for j in jobs if j.get("id") != job_id]
     if len(new_jobs) == len(jobs):
-        return false
+        return False
     _write_json(JOBS_FILE, new_jobs)
     return True
-
 
 def clear_all_jobs() -> int:
     jobs = get_jobs()

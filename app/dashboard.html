@@ -32,6 +32,9 @@
     }
     body { background-color: var(--bg-primary); color: #e2e8f0; font-family: ui-sans-serif, system-ui, sans-serif; }
     .cyber-panel { background: var(--bg-panel); backdrop-filter: blur(14px); border: 1px solid var(--border-panel); box-shadow: 0 18px 45px rgba(0,0,0,0.45); }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #030712; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 99px; }
   </style>
 </head>
 <body class="theme-cyberpunk min-h-screen pb-20">
@@ -47,7 +50,7 @@
             <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-white">SOCIAL SWARM ENGINE</h1>
             <span class="text-[11px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Supervisor v4.5</span>
           </div>
-          <p class="text-xs text-slate-400">Like & Comment Automation, Full Cookie Manager & Visual Proof Suite</p>
+          <p class="text-xs text-slate-400">Live Status Terminal, Like & Comment Automation, Account Mapping</p>
         </div>
       </div>
 
@@ -97,21 +100,21 @@
       </div>
       <div class="cyber-panel rounded-xl p-4 flex items-center justify-between">
         <div>
-          <div class="text-[11px] uppercase tracking-wider text-slate-400">Automation Engine</div>
-          <div class="text-sm font-mono font-bold text-emerald-400 mt-1">Playwright + Proof</div>
+          <div class="text-[11px] uppercase tracking-wider text-slate-400">Status Terminal</div>
+          <div class="text-sm font-mono font-bold text-emerald-400 mt-1">Streaming Active</div>
         </div>
-        <i class="fa-solid fa-bolt text-amber-400 text-xl"></i>
+        <i class="fa-solid fa-terminal text-amber-400 text-xl"></i>
       </div>
     </section>
 
-    <!-- Roster & Cookie Session Vault -->
+    <!-- Roster & Account Mapping Vault -->
     <section class="cyber-panel rounded-2xl p-5">
       <div class="flex items-center justify-between mb-4">
         <div>
           <h2 class="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
-            <i class="fa-solid fa-cookie-bite text-amber-400"></i> Agent Roster & Full Cookie Manager (Add / Remove / Edit)
+            <i class="fa-solid fa-network-wired text-emerald-400"></i> Bot Node to Account Mapping & Cookie Vault
           </h2>
-          <p class="text-xs text-slate-400">Add or remove cookies securely for any agent node</p>
+          <p class="text-xs text-slate-400">Assign handles and manage cookies for each bot node.</p>
         </div>
       </div>
       <div id="accounts-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
@@ -124,7 +127,7 @@
           <h2 class="text-base font-bold text-white flex items-center gap-2">
             <i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i> Bulk Target Workspace (Like & Comment Automation)
           </h2>
-          <p class="text-xs text-slate-400">Paste post URLs below and choose whether to execute <strong>Like</strong> or <strong>Comment</strong> automation independently.</p>
+          <p class="text-xs text-slate-400">Generate rows and execute independent <strong>Like</strong> or <strong>Comment</strong> actions.</p>
         </div>
         <div class="flex items-center gap-2">
           <button onclick="insertSampleUrls()" class="text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 px-3 py-2 rounded-lg border border-slate-700">Load Sample URLs</button>
@@ -151,14 +154,31 @@
       </div>
     </section>
 
+    <!-- LIVE STATUS LOG TERMINAL -->
+    <section class="cyber-panel rounded-2xl p-6 space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
+          <i class="fa-solid fa-terminal text-emerald-400"></i> Live Status Log Terminal
+        </h2>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs font-mono text-slate-400">Stream Live</span>
+          <button onclick="clearTerminalLog()" class="text-[11px] bg-slate-900 hover:bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700 ml-2">Clear Terminal</button>
+        </div>
+      </div>
+      <div id="status-terminal-box" class="w-full h-44 bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-400 overflow-y-auto custom-scroll space-y-1">
+        <div>[SYSTEM] Supervisor Control Center v4.5 initialized. Ready for automation tasks...</div>
+      </div>
+    </section>
+
     <!-- Execution Logs & Visual Proof Table -->
     <section class="cyber-panel rounded-2xl p-6 space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-list-check text-sky-400"></i> Execution Logs & Visual Proof Screenshots
+            <i class="fa-solid fa-list-check text-sky-400"></i> Execution Logs & Account Audit Trail
           </h2>
-          <p class="text-xs text-slate-400">View proof screenshots for every like and comment automation action.</p>
+          <p class="text-xs text-slate-400">Verifies which bot node and account executed the action, complete with screenshot proof.</p>
         </div>
         <button onclick="clearAllJobLogs()" class="text-xs bg-rose-950/60 text-rose-300 px-3 py-1.5 rounded-lg border border-rose-800/60">Purge All Logs</button>
       </div>
@@ -168,7 +188,7 @@
           <thead>
             <tr class="border-b border-slate-800 text-[11px] uppercase text-slate-400">
               <th class="py-3 px-3">Job ID / Time</th>
-              <th class="py-3 px-3">Agent</th>
+              <th class="py-3 px-3">Bot Node & Account</th>
               <th class="py-3 px-3">Target URL</th>
               <th class="py-3 px-3">Action & Content</th>
               <th class="py-3 px-3">Status</th>
@@ -182,20 +202,26 @@
 
   </main>
 
-  <!-- Cookie Modal -->
+  <!-- Cookie & Account Mapping Modal -->
   <div id="cookie-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="cyber-panel rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-700">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-sm font-bold text-white">Manage Cookies for <span id="cookie-agent-id" class="text-emerald-400 font-mono"></span></h3>
+        <h3 class="text-sm font-bold text-white">Configure Node: <span id="cookie-agent-id" class="text-emerald-400 font-mono"></span></h3>
         <button onclick="closeCookieModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="space-y-3">
-        <p class="text-xs text-slate-400">Add, edit or remove cookies below as a JSON array. Clear the box and save to remove all cookies.</p>
-        <textarea id="cookie-json-input" rows="7" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-emerald-300"></textarea>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Assigned Social Account Handle</label>
+          <input type="text" id="modal-account-handle" placeholder="e.g. miracle.abrham.alpha" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-white" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Cookies JSON Array (Add / Edit / Clear)</label>
+          <textarea id="cookie-json-input" rows="5" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-emerald-300" placeholder='[{"name":"c_user","value":"1000...","domain":".facebook.com","path":"/"}]'></textarea>
+        </div>
       </div>
       <div class="flex justify-end gap-2 pt-2">
         <button onclick="closeCookieModal()" class="text-xs bg-slate-800 text-slate-300 px-4 py-2 rounded-lg">Cancel</button>
-        <button onclick="saveCookieModal()" class="text-xs bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-lg">Save Cookies</button>
+        <button onclick="saveCookieModal()" class="text-xs bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-lg">Save Configuration</button>
       </div>
     </div>
   </div>
@@ -228,6 +254,24 @@
       document.getElementById('workspace-empty-banner').style.display = cards.length > 0 ? 'none' : 'block';
     }
 
+    function logToTerminal(text, type = 'info') {
+      const term = document.getElementById('status-terminal-box');
+      const div = document.createElement('div');
+      const timeStr = new Date().toLocaleTimeString();
+      let colorClass = 'text-emerald-400';
+      if (type === 'error') colorClass = 'text-rose-400';
+      if (type === 'warn') colorClass = 'text-amber-400';
+      if (type === 'action') colorClass = 'text-sky-400';
+      div.className = colorClass;
+      div.textContent = `[${timeStr}] ${text}`;
+      term.appendChild(div);
+      term.scrollTop = term.scrollHeight;
+    }
+
+    function clearTerminalLog() {
+      document.getElementById('status-terminal-box').innerHTML = '<div>[SYSTEM] Terminal log cleared.</div>';
+    }
+
     async function fetchAccounts() {
       const res = await fetch('/api/accounts');
       cachedAccounts = await res.json();
@@ -239,20 +283,27 @@
             <div class="flex items-center justify-between gap-2 mb-2">
               <span class="font-mono text-xs font-bold text-emerald-400">${acc.id}</span>
               <span class="text-[10px] px-2 py-0.5 rounded-full ${acc.cookies_loaded ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'}">
-                ${acc.cookies_loaded ? '● Cookies Active' : '○ No Cookies'}
+                ${acc.cookies_loaded ? '● Active Session' : '○ No Session'}
               </span>
             </div>
             <div class="text-sm font-bold text-white">${acc.name}</div>
+            <div class="text-xs font-mono text-sky-400 mt-0.5"><i class="fa-solid fa-at mr-1"></i>@${acc.account_handle || 'unassigned'}</div>
             <p class="text-xs text-slate-400 mt-1">${acc.persona}</p>
           </div>
           <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-xs">
             <span class="text-slate-500"><i class="fa-brands fa-facebook text-blue-400 mr-1"></i>${acc.platform}</span>
             <button onclick="openCookieModal('${acc.id}')" class="text-sky-400 hover:text-sky-300 font-medium">
-              <i class="fa-solid fa-cookie-bite mr-1"></i>Manage Cookies (${(acc.cookies || []).length})
+              <i class="fa-solid fa-link mr-1"></i>Assign Account & Cookies
             </button>
           </div>
         </div>
       `).join('');
+
+      document.querySelectorAll('.agent-selector').forEach(sel => {
+        const currentVal = sel.value;
+        sel.innerHTML = cachedAccounts.map(a => `<option value="${a.id}">${a.id} (@${a.account_handle})</option>`).join('');
+        if (currentVal) sel.value = currentVal;
+      });
     }
 
     function openCookieModal(agentId) {
@@ -260,6 +311,7 @@
       if (!acc) return;
       currentCookieAgent = agentId;
       document.getElementById('cookie-agent-id').textContent = agentId;
+      document.getElementById('modal-account-handle').value = acc.account_handle || '';
       document.getElementById('cookie-json-input').value = JSON.stringify(acc.cookies || [], null, 2);
       document.getElementById('cookie-modal').classList.remove('hidden');
     }
@@ -271,6 +323,7 @@
 
     async function saveCookieModal() {
       if (!currentCookieAgent) return;
+      const handleVal = document.getElementById('modal-account-handle').value.trim();
       const val = document.getElementById('cookie-json-input').value.trim();
       let cookies = [];
       try {
@@ -283,8 +336,9 @@
       await fetch(`/api/accounts/${currentCookieAgent}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cookies })
+        body: JSON.stringify({ account_handle: handleVal, cookies })
       });
+      logToTerminal(`Updated configuration and cookies for node '${currentCookieAgent}' (@${handleVal})`, 'warn');
       closeCookieModal();
       await fetchAccounts();
     }
@@ -294,11 +348,13 @@
         'https://www.facebook.com/groups/indiehackers/posts/88192014',
         'https://www.facebook.com/groups/aioperators/posts/55920144'
       ].join('\n');
+      logToTerminal('Loaded sample post URLs into bulk workspace.', 'info');
     }
 
     function clearWorkspaceRows() {
       document.querySelectorAll('.workspace-row-card').forEach(el => el.remove());
       updateWorkspaceCounter();
+      logToTerminal('Workspace rows cleared.', 'info');
     }
 
     function generateWorkspaceRows() {
@@ -312,6 +368,7 @@
         rowSequence++;
         const rowId = `ws_row_${rowSequence}`;
         const safeUrl = url.replace(/'/g, "\\'");
+        const agentOptions = cachedAccounts.map(a => `<option value="${a.id}">${a.id} (@${a.account_handle})</option>`).join('');
 
         const card = document.createElement('div');
         card.id = rowId;
@@ -324,10 +381,8 @@
               <span class="text-xs font-mono text-sky-400 break-all">${url}</span>
             </div>
             <div class="flex items-center gap-2">
-              <select id="${rowId}_agent" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white">
-                <option value="fb_agent_alpha">fb_agent_alpha</option>
-                <option value="fb_agent_beta">fb_agent_beta</option>
-                <option value="fb_agent_gamma">fb_agent_gamma</option>
+              <select id="${rowId}_agent" class="agent-selector bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white">
+                ${agentOptions}
               </select>
               <button onclick="document.getElementById('${rowId}').remove(); updateWorkspaceCounter();" class="text-slate-500 hover:text-rose-400 px-2"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -335,7 +390,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label class="block text-[11px] uppercase tracking-wider text-slate-400 mb-1">Context / Topic Directives</label>
+              <label class="block text-[11px] uppercase tracking-wider text-slate-400 mb-1">Context / Directives</label>
               <textarea id="${rowId}_context" rows="2" placeholder="Post context..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200"></textarea>
             </div>
             <div>
@@ -343,7 +398,7 @@
                 <label class="block text-[11px] uppercase tracking-wider text-slate-400">AI Comment Preview</label>
                 <span id="${rowId}_model_badge" class="text-[10px] font-mono text-emerald-400"></span>
               </div>
-              <textarea id="${rowId}_comment" rows="2" placeholder="AI generated comment..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-emerald-300"></textarea>
+              <textarea id="${rowId}_comment" rows="2" placeholder="AI comment..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-emerald-300"></textarea>
             </div>
           </div>
 
@@ -367,6 +422,7 @@
 
       input.value = '';
       updateWorkspaceCounter();
+      logToTerminal(`Generated ${urls.length} workspace rows successfully.`, 'info');
     }
 
     async function synthesizeRowPreview(rowId, postUrl) {
@@ -377,6 +433,7 @@
       const statusEl = document.getElementById(`${rowId}_status`);
 
       statusEl.textContent = 'Synthesizing...';
+      logToTerminal(`Requesting AI comment preview for ${postUrl} via OpenRouter...`, 'action');
       try {
         const res = await fetch('/api/preview', {
           method: 'POST',
@@ -387,8 +444,10 @@
         commentBox.value = data.comment || '';
         badge.textContent = data.model_used || '';
         statusEl.textContent = 'Ready';
+        logToTerminal(`Successfully generated AI comment preview (${data.model_used})`, 'info');
       } catch (e) {
         statusEl.textContent = 'Preview error';
+        logToTerminal(`Failed to generate AI comment preview: ${e}`, 'error');
       }
     }
 
@@ -403,6 +462,8 @@
       }
 
       statusEl.textContent = `Running ${actionType}...`;
+      logToTerminal(`Dispatched [${actionType.toUpperCase()}] task via node '${agentSelect.value}' for target: ${postUrl}`, 'action');
+
       try {
         const res = await fetch('/api/dispatch', {
           method: 'POST',
@@ -418,9 +479,11 @@
         });
         const job = await res.json();
         statusEl.textContent = job.status || 'Completed';
+        logToTerminal(`Job ${job.id} completed: ${job.status}`, 'info');
         await fetchJobs();
       } catch (e) {
         statusEl.textContent = 'Failed';
+        logToTerminal(`Job dispatch failed: ${e}`, 'error');
       }
     }
 
@@ -443,7 +506,10 @@
             <div>${j.id}</div>
             <div class="text-[10px] text-slate-500">${j.timestamp ? new Date(j.timestamp).toLocaleTimeString() : ''}</div>
           </td>
-          <td class="py-3 px-3 font-mono text-emerald-400">${j.agent_id}</td>
+          <td class="py-3 px-3 font-mono">
+            <div class="text-emerald-400 font-bold">${j.agent_id}</div>
+            <div class="text-xs text-sky-400">@${j.account_handle || 'unassigned'}</div>
+          </td>
           <td class="py-3 px-3 max-w-[200px] truncate font-mono text-sky-400">${j.post_url}</td>
           <td class="py-3 px-3 max-w-md text-slate-200">
             <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-slate-900 text-sky-300 border border-slate-700 mr-1">${j.action_type || 'comment'}</span>
@@ -462,13 +528,14 @@
       document.getElementById('proof-img').src = url;
       document.getElementById('proof-title').textContent = `(${id})`;
       document.getElementById('proof-modal').classList.remove('hidden');
+      logToTerminal(`Opened visual proof screenshot for job ${id}`, 'info');
     }
     function closeProofModal() { document.getElementById('proof-modal').classList.add('hidden'); }
 
-    async function deleteJob(id) { await fetch(`/api/jobs/${id}`, { method: 'DELETE' }); await fetchJobs(); }
-    async function clearAllJobLogs() { await fetch('/api/jobs', { method: 'DELETE' }); await fetchJobs(); }
+    async function deleteJob(id) { await fetch(`/api/jobs/${id}`, { method: 'DELETE' }); logToTerminal(`Deleted job log ${id}`, 'warn'); await fetchJobs(); }
+    async function clearAllJobLogs() { await fetch('/api/jobs', { method: 'DELETE' }); logToTerminal('Purged all execution logs.', 'warn'); await fetchJobs(); }
 
-    async function refreshAll() { await Promise.all([fetchAccounts(), fetchJobs()]); }
+    async function refreshAll() { await Promise.all([fetchAccounts(), fetchJobs()]); logToTerminal('Synced telemetry and accounts data.', 'info'); }
     refreshAll();
     setInterval(fetchJobs, 5000);
   </script>

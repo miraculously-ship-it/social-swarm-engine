@@ -1,34 +1,30 @@
 [
   {
     "id": "fb_agent_alpha",
-    "name": "Alpha Supervisor Node",
-    "handle": "@alpha.ops.node",
+    "name": "Alpha Node",
+    "account_handle": "unassigned",
     "platform": "Facebook",
-    "persona": "Pragmatic tech founder and systems architect. Writes sharp, constructive insights.",
-    "status": "Active",
-    "cookies_loaded": true,
-    "cookies": [
-      {"name": "c_user", "value": "100098412001", "domain": ".facebook.com", "path": "/"}
-    ]
+    "persona": "Tech-savvy industry expert and community builder",
+    "status": "Standby",
+    "cookies_loaded": false,
+    "cookies": []
   },
   {
     "id": "fb_agent_beta",
-    "name": "Beta Community Node",
-    "handle": "@beta.community.hub",
+    "name": "Beta Node",
+    "account_handle": "unassigned",
     "platform": "Facebook",
-    "persona": "Warm community builder and growth operator. Encouraging and conversational.",
-    "status": "Active",
-    "cookies_loaded": true,
-    "cookies": [
-      {"name": "c_user", "value": "100098412002", "domain": ".facebook.com", "path": "/"}
-    ]
+    "persona": "Engaging community builder",
+    "status": "Standby",
+    "cookies_loaded": false,
+    "cookies": []
   },
   {
     "id": "fb_agent_gamma",
-    "name": "Gamma Analyst Node",
-    "handle": "@gamma.research.io",
+    "name": "Gamma Node",
+    "account_handle": "unassigned",
     "platform": "Facebook",
-    "persona": "Curious market analyst highlighting overlooked nuances.",
+    "persona": "Market analyst",
     "status": "Standby",
     "cookies_loaded": false,
     "cookies": []
