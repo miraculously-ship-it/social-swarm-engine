@@ -1,8 +1,9 @@
+import asyncio
 import time
 from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -13,6 +14,7 @@ from app.state import (
     add_job,
     update_job,
     delete_job,
+    clear_jobs,
 )
 from app.llm import generate_comment
 from app.worker import execute_automation_job
@@ -25,12 +27,10 @@ SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
 app = FastAPI(title="Social Media Support Agent — Supervisor Suite v4.5", version="4.5.0")
 app.mount("/screenshots", StaticFiles(directory=str(SCREENSHOTS_DIR)), name="screenshots")
 
-
 class AccountSavePayload(BaseModel):
     agent_id: str
     account_name: Optional[str] = ""
     cookies_raw: Optional[str] = ""
-
 
 class PreviewPayload(BaseModel):
     agent_id: Optional[str] = "fb_agent_alpha"
@@ -38,7 +38,6 @@ class PreviewPayload(BaseModel):
     post_text: Optional[str] = ""
     persona: Optional[str] = "Alert Local Community Watcher"
     tone: Optional[str] = "Urgent, alerting, and authentic"
-
 
 class DispatchPayload(BaseModel):
     agent_id: str = "fb_agent_alpha"
@@ -50,16 +49,17 @@ class DispatchPayload(BaseModel):
     do_comment: bool = True
     auto_failover: bool = True
 
-
 @app.get("/", response_class=HTMLResponse)
 async def serve_dashboard():
     return HTMLResponse(DASHBOARD_PATH.read_text(encoding="utf-8"))
 
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return Response(status_code=204)
 
 @app.get("/api/accounts")
 async def api_get_accounts():
     return get_accounts()
-
 
 @app.post("/api/accounts")
 async def api_save_account(payload: AccountSavePayload):
@@ -71,17 +71,15 @@ async def api_save_account(payload: AccountSavePayload):
         )
         return {
             "ok": True,
-            "message": f"Saved {updated['agent_id']} ➔ {updated['account_name']} ({updated['cookie_count']} cookies armed)",
+            "message": f"Armed {updated['agent_id']} ➔ {updated['account_name']} ({updated['cookie_count']} cookies)",
             "account": updated,
         }
     except Exception as e:
         return {"ok": False, "message": f"Error: {str(e)}"}
 
-
 @app.get("/api/jobs")
 async def api_get_jobs():
     return get_jobs()
-
 
 @app.post("/api/preview")
 async def api_preview(payload: PreviewPayload):
@@ -93,8 +91,7 @@ async def api_preview(payload: PreviewPayload):
     )
     return {"ok": True, "comment": res["comment"], "model_used": res.get("model_used", "ai")}
 
-
-async def _run_single_agent_dispatch(agent_id: str, payload: DispatchPayload) -> dict:
+async def _queue_agent_job(agent_id: str, payload: DispatchPayload) -> dict:
     accounts = get_accounts()
     acc = accounts.get(agent_id) or list(accounts.values())[0]
 
@@ -114,42 +111,42 @@ async def _run_single_agent_dispatch(agent_id: str, payload: DispatchPayload) ->
         "fb_uid": acc.get("fb_uid", "Unlinked"),
         "post_url": payload.post_url,
         "comment": comment_text,
-        "status": "Executing...",
-        "logs": [f"[*] Dispatching {agent_id} ({acc.get('account_name')})..."],
+        "status": "Starting Agent...",
+        "logs": [f"[*] Dispatched {agent_id} ({acc.get('account_name')}) for {payload.post_url}"],
         "screenshot": None,
     }
     add_job(job_record)
 
-    result = await execute_automation_job(
-        job_id=job_id,
-        agent_id=agent_id,
-        account_name=acc.get("account_name", agent_id),
-        fb_uid=acc.get("fb_uid", "Unlinked"),
-        post_url=payload.post_url,
-        comment_text=comment_text,
-        cookies=acc.get("cookies", []),
-        do_like=payload.do_like,
-        do_comment=payload.do_comment,
-        auto_failover=payload.auto_failover,
+    # Fire-and-forget background task so API responds immediately and streams logs live
+    asyncio.create_task(
+        execute_automation_job(
+            job_id=job_id,
+            agent_id=agent_id,
+            account_name=acc.get("account_name", agent_id),
+            fb_uid=acc.get("fb_uid", "Unlinked"),
+            post_url=payload.post_url,
+            comment_text=comment_text,
+            cookies=acc.get("cookies", []),
+            do_like=payload.do_like,
+            do_comment=payload.do_comment,
+            auto_failover=payload.auto_failover,
+        )
     )
-    return update_job(job_id, result)
-
+    return job_record
 
 @app.post("/api/dispatch")
 async def api_dispatch(payload: DispatchPayload):
-    job = await _run_single_agent_dispatch(payload.agent_id, payload)
-    return {"ok": True, "message": f"Dispatched {payload.agent_id} successfully!", "job": job}
-
+    job = await _queue_agent_job(payload.agent_id, payload)
+    return {"ok": True, "message": f"Agent {payload.agent_id} launched! Watch live logs.", "job": job}
 
 @app.post("/api/dispatch-swarm")
 async def api_dispatch_swarm(payload: DispatchPayload):
     accounts = get_accounts()
-    results = []
+    jobs = []
     for aid in accounts.keys():
-        job = await _run_single_agent_dispatch(aid, payload)
-        results.append(job)
-    return {"ok": True, "message": f"Swarm dispatched across all {len(results)} agents!", "jobs": results}
-
+        job = await _queue_agent_job(aid, payload)
+        jobs.append(job)
+    return {"ok": True, "message": f"Swarm launched across {len(jobs)} agents!", "jobs": jobs}
 
 @app.put("/api/jobs/{job_id}")
 async def api_edit_job(job_id: str, payload: dict):
@@ -159,10 +156,14 @@ async def api_edit_job(job_id: str, payload: dict):
     updated = update_job(job_id, {"comment": new_comment})
     if not updated:
         raise HTTPException(status_code=404, detail="Job not found")
-    return {"ok": True, "message": "Comment updated successfully!", "job": updated}
-
+    return {"ok": True, "message": "Comment updated!", "job": updated}
 
 @app.delete("/api/jobs/{job_id}")
 async def api_delete_job(job_id: str):
     delete_job(job_id)
-    return {"ok": True, "message": f"Deleted job {job_id}"}
+    return {"ok": True, "message": f"Deleted {job_id}"}
+
+@app.delete("/api/jobs")
+async def api_clear_all_jobs():
+    clear_jobs()
+    return {"ok": True, "message": "Cleared all job logs!"}

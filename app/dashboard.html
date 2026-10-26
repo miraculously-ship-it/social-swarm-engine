@@ -4,25 +4,17 @@
   <meta charset="UTF-8">
   <title>Social Media Support Agent — Supervisor Suite v4.5</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans pb-12">
-  
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
   <div class="max-w-7xl mx-auto p-6">
     <div class="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-5 mb-6 gap-4">
-      <div class="animate-fade-in">
+      <div>
         <div class="flex items-center gap-3">
           <span class="h-3 w-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></span>
           <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-            Social Media Support Agent 
+            Social Media Support Agent
             <span class="text-xs font-mono bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 px-2.5 py-1 rounded-full">PRO v4.5</span>
           </h1>
         </div>
@@ -30,46 +22,44 @@
       </div>
 
       <div class="flex bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
-        <button id="tabDeployBtn" onclick="switchTab('deploy')" class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition active:scale-95">🚀 Deploy & Feed</button>
-        <button id="tabAccountsBtn" onclick="switchTab('accounts')" class="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition active:scale-95 flex items-center gap-2"><span>👥 Agent Roster</span><span id="rosterBadge" class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full text-[11px] font-mono">1/3 Armed</span></button>
+        <button id="tabDeployBtn" onclick="switchTab('deploy')" class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition cursor-pointer">🚀 Deploy & Feed</button>
+        <button id="tabAccountsBtn" onclick="switchTab('accounts')" class="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer"><span>👥 Agent Roster</span><span id="rosterBadge" class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full text-[11px] font-mono">1/3 Armed</span></button>
       </div>
     </div>
 
     <!-- TAB 1 -->
-    <div id="tabDeploy" class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
+    <div id="tabDeploy" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <div class="lg:col-span-5 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl h-fit space-y-4">
         <h2 class="text-lg font-semibold text-white">⚡ Dispatch Support Agent</h2>
         <div class="space-y-4">
           <div>
             <div class="flex justify-between items-center mb-1">
               <label class="text-xs font-medium text-slate-400">Select Agent & Linked Account</label>
-              <button onclick="switchTab('accounts')" class="text-[11px] text-indigo-400 hover:underline">Manage Accounts →</button>
+              <button onclick="switchTab('accounts')" class="text-[11px] text-indigo-400 hover:underline cursor-pointer">Manage Accounts →</button>
             </div>
-            <select id="agent_id" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-sm text-white font-medium focus:outline-none focus:border-indigo-500"></select>
+            <select id="agent_id" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-sm text-white font-medium"></select>
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-400 mb-1">Target Facebook Post / Reel URL</label>
-            <input id="post_url" type="text" value="https://www.facebook.com/reel/2062417224438860/" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-indigo-500" />
+            <input id="post_url" type="text" value="https://www.facebook.com/reel/2062417224438860/" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono" />
           </div>
           <div>
             <div class="flex justify-between items-center mb-1">
               <label class="text-xs font-medium text-slate-400">Post Context / Direction for AI</label>
-              <button onclick="previewComment()" class="text-[11px] bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20 px-2.5 py-1 rounded-lg border border-indigo-500/30 transition">✨ Preview AI Comment</button>
+              <button onclick="previewComment()" class="text-[11px] bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20 px-2.5 py-1 rounded-lg border border-indigo-500/30 cursor-pointer">✨ Preview AI Comment</button>
             </div>
-            <textarea id="post_text" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-indigo-500">its just a local breaking news make it sound alerting</textarea>
-            
-            <!-- PREVIEW BOX WITH REGENERATE BUTTON -->
-            <div id="previewBox" class="hidden mt-2 bg-slate-950 border border-emerald-500/30 rounded-xl p-3 text-xs text-emerald-300 font-medium space-y-2 animate-fade-in">
+            <textarea id="post_text" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-white">its just a local breaking news make it sound alerting</textarea>
+            <div id="previewBox" class="hidden mt-2 bg-slate-950 border border-emerald-500/30 rounded-xl p-3 text-xs text-emerald-300 font-medium space-y-2">
               <div id="previewText"></div>
               <div class="flex justify-end border-t border-slate-800/80 pt-2">
-                <button onclick="previewComment()" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-md border border-slate-700 transition flex items-center gap-1">🔄 Regenerate Variation</button>
+                <button onclick="previewComment()" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-md border border-slate-700 cursor-pointer">🔄 Regenerate Variation</button>
               </div>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-medium text-slate-400 mb-1">Agent Persona</label>
-              <select id="persona" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+              <select id="persona" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white">
                 <option value="Alert Local Community Watcher">Community Watcher</option>
                 <option value="Helpful Brand Support Specialist">Support Specialist</option>
                 <option value="Insightful News Commentator">News Commentator</option>
@@ -77,7 +67,7 @@
             </div>
             <div>
               <label class="block text-xs font-medium text-slate-400 mb-1">Reply Tone</label>
-              <select id="tone" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+              <select id="tone" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white">
                 <option value="Urgent, alerting, and authentic">Urgent & Alerting</option>
                 <option value="Warm, authentic, and helpful">Warm & Helpful</option>
                 <option value="Direct, sharp, and professional">Sharp & Direct</option>
@@ -93,8 +83,8 @@
             <label class="flex items-center gap-2 text-xs text-emerald-300 cursor-pointer pt-2 border-t border-slate-800"><input id="auto_failover" type="checkbox" checked class="accent-emerald-500 w-4 h-4 rounded" /><span>⚡ <b>Auto-Failover Demo Shield</b></span></label>
           </div>
           <div class="space-y-2.5 pt-1">
-            <button id="deployBtn" onclick="deployAgent(false)" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 text-white font-semibold py-3.5 rounded-xl shadow-xl transition active:scale-95 flex items-center justify-center gap-2"><span>🚀 Like, Comment & Capture Proof</span></button>
-            <button onclick="deployAgent(true)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold py-3 rounded-xl transition active:scale-95">🐝 Swarm Mode: Dispatch All 3 Agents</button>
+            <button id="deployBtn" onclick="deployAgent(false)" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 text-white font-semibold py-3.5 rounded-xl shadow-xl transition cursor-pointer">🚀 Like, Comment & Capture Proof</button>
+            <button onclick="deployAgent(true)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold py-3 rounded-xl transition cursor-pointer">🐝 Swarm Mode: Dispatch All 3 Agents</button>
           </div>
         </div>
       </div>
@@ -102,21 +92,22 @@
       <div class="lg:col-span-7 space-y-4">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold text-white">📡 Live Agent Execution Feed & CRUD Logs</h2>
-          <span class="text-xs font-mono text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full flex items-center gap-2">
-            <span class="h-2 w-2 rounded-full bg-emerald-400"></span> Live Feed Active
-          </span>
+          <div class="flex items-center gap-2">
+            <button onclick="clearAllJobs()" class="text-xs bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 border border-rose-800/50 px-3 py-1 rounded-full cursor-pointer">Purge Feed</button>
+            <span class="text-xs font-mono text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> Live Stream
+            </span>
+          </div>
         </div>
-        <div id="jobsContainer" class="space-y-4">
-          <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-10 text-center text-slate-500 text-sm">Ready for deployment.</div>
-        </div>
+        <div id="jobsContainer" class="space-y-4"></div>
       </div>
     </div>
 
     <!-- TAB 2 -->
-    <div id="tabAccounts" class="hidden space-y-6 animate-fade-in">
+    <div id="tabAccounts" class="hidden space-y-6">
       <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl">
         <h2 class="text-lg font-semibold text-white">👥 Agent-to-Account Roster & Cookie Vault</h2>
-        <p class="text-xs text-slate-400 mt-1 mb-6">Paste your Cookie-Editor JSON array below. The Account Name and Facebook UID are automatically extracted from your <code class="text-emerald-300">c_user</code> cookie by default.</p>
+        <p class="text-xs text-slate-400 mt-1 mb-6">Paste your Cookie-Editor JSON array below. Account identity is automatically extracted from your <code class="text-emerald-300">c_user</code> cookie by default.</p>
         <div id="accountsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
       </div>
     </div>
@@ -124,22 +115,21 @@
 
   <script>
     let cachedAccounts = {};
+    let lastJobsJson = "";
+
     function showToast(message, type = 'success') {
-      const safeMsg = message || 'Operation completed successfully!';
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
-      toast.className = `pointer-events-auto border ${type === 'success' ? 'border-emerald-500/40 bg-emerald-950/90 text-emerald-200' : 'border-indigo-500/40 bg-indigo-950/90 text-indigo-200'} backdrop-blur-md px-4 py-3 rounded-xl shadow-2xl text-xs font-medium animate-fade-in flex items-center gap-2.5`;
-      toast.innerHTML = `<span>${type === 'success' ? '✅' : '✨'}</span> <span>${safeMsg}</span>`;
+      toast.className = `pointer-events-auto border ${type === 'success' ? 'border-emerald-500/40 bg-emerald-950/90 text-emerald-200' : 'border-indigo-500/40 bg-indigo-950/90 text-indigo-200'} px-4 py-3 rounded-xl shadow-2xl text-xs font-medium flex items-center gap-2.5`;
+      toast.innerHTML = `<span>${type === 'success' ? '✅' : '✨'}</span> <span>${message || 'Done!'}</span>`;
       container.appendChild(toast);
-      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3500);
+      setTimeout(() => toast.remove(), 3500);
     }
 
     function switchTab(tab) {
       const isDeploy = tab === 'deploy';
       document.getElementById('tabDeploy').classList.toggle('hidden', !isDeploy);
       document.getElementById('tabAccounts').classList.toggle('hidden', isDeploy);
-      document.getElementById('tabDeployBtn').className = isDeploy ? 'px-5 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition active:scale-95' : 'px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition active:scale-95';
-      document.getElementById('tabAccountsBtn').className = !isDeploy ? 'px-5 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition active:scale-95 flex items-center gap-2' : 'px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition active:scale-95 flex items-center gap-2';
       if (!isDeploy) loadAccounts();
     }
 
@@ -160,8 +150,7 @@
         })
       });
       const data = await res.json();
-      textEl.innerText = '💬 Preview: "' + (data.comment || 'Ready') + '"';
-      showToast('AI Comment variation ready!', 'info');
+      textEl.innerText = '💬 Preview: "' + (data.comment || '') + '"';
     }
 
     async function loadAccounts() {
@@ -183,63 +172,64 @@
               <span class="text-xs font-mono px-2.5 py-0.5 rounded-full ${a.cookie_count > 0 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}">${a.cookie_count > 0 ? '🟢 ' + a.cookie_count + ' Cookies' : '⚪ Unlinked'}</span>
             </div>
             <div>
-              <div class="flex justify-between items-center mb-1">
-                <label class="text-[11px] uppercase font-mono text-slate-500">Account Name (Auto-Fetched)</label>
-                <span class="text-[10px] font-mono text-emerald-400">From Cookie</span>
-              </div>
-              <input id="name_${a.agent_id}" type="text" value="${a.account_name || ''}" placeholder="Auto-filled from c_user cookie" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-sm font-semibold text-white" />
+              <label class="block text-[11px] uppercase font-mono text-slate-500 mb-1">Account Name (Auto-Fetched from Cookie)</label>
+              <input id="name_${a.agent_id}" type="text" value="${a.account_name || ''}" readonly class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-3.5 py-2 text-sm font-semibold text-emerald-300" />
             </div>
             <div class="grid grid-cols-2 gap-2 text-xs font-mono bg-slate-900/70 p-3 rounded-xl border border-slate-800">
               <div><span class="text-slate-500 text-[10px]">USER ID (c_user)</span><span class="text-emerald-300 block truncate">${a.fb_uid || 'Unlinked'}</span></div>
               <div><span class="text-slate-500 text-[10px]">STATUS</span><span class="text-slate-300 block truncate">${a.health || 'Ready'}</span></div>
             </div>
             <div>
-              <label class="block text-[11px] font-mono text-slate-400 mb-1">Cookie-Editor JSON (Persisted):</label>
-              <textarea id="cookies_${a.agent_id}" rows="4" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs font-mono text-emerald-300" placeholder='Paste Cookie-Editor JSON array here...'>${cookieJsonStr}</textarea>
+              <label class="block text-[11px] font-mono text-slate-400 mb-1">Cookie-Editor JSON:</label>
+              <textarea id="cookies_${a.agent_id}" rows="4" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs font-mono text-emerald-300" placeholder='Paste Cookie-Editor JSON array...'>${cookieJsonStr}</textarea>
             </div>
           </div>
-          <button onclick="saveAgentAccount('${a.agent_id}')" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-semibold py-3 rounded-xl transition cursor-pointer">💾 Save Account & Auto-Link Cookie</button>
+          <button onclick="saveAgentAccount('${a.agent_id}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-3 rounded-xl transition cursor-pointer">💾 Save & Auto-Fetch Account from Cookie</button>
         </div>
       `}).join('');
     }
 
     async function saveAgentAccount(agentId) {
       const cookiesVal = document.getElementById(`cookies_${agentId}`).value;
-      const nameVal = document.getElementById(`name_${agentId}`).value;
       const res = await fetch('/api/accounts', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ agent_id: agentId, account_name: nameVal, cookies_raw: cookiesVal })
+        body: JSON.stringify({ agent_id: agentId, account_name: "", cookies_raw: cookiesVal })
       });
       const data = await res.json();
-      showToast(data.message || data.detail || 'Account saved!', data.ok === false ? 'info' : 'success');
+      showToast(data.message || 'Account updated!');
       await loadAccounts();
     }
 
     async function editJobComment(jobId, currentComment) {
       const newComment = prompt("Edit AI Comment Text:", currentComment);
-      if (newComment === null || newComment.trim() === "") return;
-      const res = await fetch(`/api/jobs/${jobId}`, {
+      if (!newComment || !newComment.trim()) return;
+      await fetch(`/api/jobs/${jobId}`, {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ comment: newComment })
       });
-      const data = await res.json();
-      showToast(data.message || 'Updated comment!', 'success');
+      lastJobsJson = "";
       loadJobs();
     }
 
     async function deleteJobLog(jobId) {
-      const res = await fetch(`/api/jobs/${jobId}`, { method: 'DELETE' });
-      const data = await res.json();
-      showToast(data.message || 'Deleted job log!', 'success');
+      await fetch(`/api/jobs/${jobId}`, { method: 'DELETE' });
+      lastJobsJson = "";
       loadJobs();
+    }
+
+    async function clearAllJobs() {
+      await fetch('/api/jobs', { method: 'DELETE' });
+      lastJobsJson = "";
+      loadJobs();
+      showToast('Feed purged clean!');
     }
 
     async function deployAgent(swarmMode = false) {
       const btn = document.getElementById('deployBtn');
       btn.disabled = true;
-      btn.innerHTML = `⏳ Executing Playwright Agent...`;
+      btn.innerText = '🚀 Launching Browser Task...';
       try {
         const res = await fetch(swarmMode ? '/api/dispatch-swarm' : '/api/dispatch', {
           method: 'POST',
@@ -256,52 +246,58 @@
           })
         });
         const data = await res.json();
-        showToast(data.message || (swarmMode ? 'Swarm dispatched!' : 'Support agent dispatched!'), 'success');
+        showToast(data.message || 'Dispatched!');
+        lastJobsJson = "";
         await loadJobs();
       } finally {
         btn.disabled = false;
-        btn.innerHTML = `<span>🚀 Like, Comment & Capture Proof</span>`;
+        btn.innerText = '🚀 Like, Comment & Capture Proof';
       }
     }
 
     async function loadJobs() {
       const res = await fetch('/api/jobs');
       const jobs = await res.json();
+      const rawJson = JSON.stringify(jobs);
+      if (rawJson === lastJobsJson) return; // Prevent DOM/image re-download spam when nothing changed
+      lastJobsJson = rawJson;
+
       const container = document.getElementById('jobsContainer');
       if (!jobs || !jobs.length) {
-        container.innerHTML = `<div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-10 text-center text-slate-500 text-sm">No deployment records found. Click <b>Like, Comment & Capture Proof</b> to launch.</div>`;
+        container.innerHTML = `<div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-10 text-center text-slate-500 text-sm">Clean slate ready — click <b>Like, Comment & Capture Proof</b> to launch.</div>`;
         return;
       }
       container.innerHTML = jobs.map(j => {
         const safeComment = (j.comment || '').replace(/[`'"]/g, "");
         const logsHtml = (j.logs || []).map(l => `<div>${l}</div>`).join('');
+        const isDone = (j.status || '').includes('Completed');
         return `
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3 animate-fade-in transition hover:border-slate-700">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
               <span class="font-mono text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">${j.agent_id}</span>
-              <span class="text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">👤 ${j.account_name || j.agent_id}</span>
+              <span class="text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">👤 ${j.account_name}</span>
             </div>
             <div class="flex items-center gap-2">
-              <button onclick="editJobComment('${j.id}', '${safeComment}')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-700 transition cursor-pointer">✏️ Edit</button>
-              <button onclick="deleteJobLog('${j.id}')" class="text-[11px] bg-red-500/10 hover:bg-red-500/20 text-red-300 px-2.5 py-1 rounded-lg border border-red-500/30 transition cursor-pointer">🗑️ Delete</button>
-              <span class="text-xs font-mono px-2.5 py-1 rounded-full ${(j.status || '').includes('Completed') ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">${j.status || 'Done'}</span>
+              <button onclick="editJobComment('${j.id}', '${safeComment}')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-700 cursor-pointer">✏️ Edit</button>
+              <button onclick="deleteJobLog('${j.id}')" class="text-[11px] bg-red-500/10 hover:bg-red-500/20 text-red-300 px-2.5 py-1 rounded-lg border border-red-500/30 cursor-pointer">🗑️ Delete</button>
+              <span class="text-xs font-mono px-2.5 py-1 rounded-full ${isDone ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300 animate-pulse'}">${j.status}</span>
             </div>
           </div>
           <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-3.5">
             <div class="text-[11px] font-mono uppercase text-slate-400 mb-1">💬 AI Generated Comment Record</div>
             <div class="text-sm text-emerald-300 font-medium">"${j.comment || ''}"</div>
           </div>
-          <div class="bg-black/70 border border-slate-800 rounded-xl p-3 font-mono text-xs text-slate-300 space-y-1 max-h-40 overflow-y-auto">
+          <div class="bg-black/70 border border-slate-800 rounded-xl p-3 font-mono text-xs text-slate-300 space-y-1 max-h-44 overflow-y-auto">
             ${logsHtml}
           </div>
           ${j.screenshot ? `
-            <div class="animate-fade-in">
+            <div>
               <div class="text-[11px] font-mono uppercase text-slate-400 mb-1.5 flex items-center justify-between">
                 <span>📸 Verification Proof</span>
                 <a href="${j.screenshot}" target="_blank" class="text-indigo-400 hover:underline">Fullscreen ↗</a>
               </div>
-              <img src="${j.screenshot}?t=${Date.now()}" class="rounded-xl border border-slate-700 w-full max-h-96 object-cover object-top shadow-lg" />
+              <img src="${j.screenshot}" class="rounded-xl border border-slate-700 w-full max-h-96 object-cover object-top shadow-lg" />
             </div>
           ` : ''}
         </div>
@@ -310,7 +306,7 @@
 
     loadAccounts();
     loadJobs();
-    setInterval(loadJobs, 3000);
+    setInterval(loadJobs, 1500);
   </script>
 </body>
 </html>
