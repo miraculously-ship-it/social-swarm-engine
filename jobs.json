@@ -1,5 +1,18 @@
 [
   {
+    "id": "job_1792979156825",
+    "timestamp": 1792979156825,
+    "agent_id": "undefined",
+    "account_handle": "unassigned",
+    "post_url": "https://www.facebook.com/share/v/1J2cL1NRLX/",
+    "context": "",
+    "action_type": "comment",
+    "comment": "",
+    "status": "Completed (Comment via @unassigned - Safe Demo)",
+    "screenshot": "/screenshots/job_1792979156825_undefined_comment.png",
+    "completed_at": 1792979159577
+  },
+  {
     "id": "job_1792976705777",
     "timestamp": 1792976705777,
     "agent_id": "fb_agent_alpha",

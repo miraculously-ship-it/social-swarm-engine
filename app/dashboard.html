@@ -1,543 +1,316 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Supervisor Control Center v4.5 — Social Swarm Engine</title>
+  <meta charset="UTF-8">
+  <title>Social Media Support Agent — Supervisor Suite v4.5</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <style>
-    :root {
-      --bg-primary: #050811;
-      --bg-panel: rgba(13, 20, 36, 0.84);
-      --border-panel: rgba(16, 185, 129, 0.35);
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    body.theme-cyberpunk {
-      --bg-primary: #050811;
-      --bg-panel: rgba(13, 20, 36, 0.84);
-      --border-panel: rgba(16, 185, 129, 0.35);
-      background-image: radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.14) 0px, transparent 48%), radial-gradient(at 100% 0%, rgba(56, 189, 248, 0.14) 0px, transparent 48%);
-    }
-    body.theme-obsidian {
-      --bg-primary: #09090b;
-      --bg-panel: rgba(24, 24, 27, 0.9);
-      --border-panel: rgba(99, 102, 241, 0.35);
-      background-image: radial-gradient(at 50% 0%, rgba(99, 102, 241, 0.14) 0px, transparent 55%);
-    }
-    body.theme-vhs {
-      --bg-primary: #07050a;
-      --bg-panel: rgba(22, 14, 30, 0.88);
-      --border-panel: rgba(236, 72, 153, 0.4);
-      background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 3px), radial-gradient(at 0% 0%, rgba(236, 72, 153, 0.16) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.16) 0px, transparent 50%);
-    }
-    body { background-color: var(--bg-primary); color: #e2e8f0; font-family: ui-sans-serif, system-ui, sans-serif; }
-    .cyber-panel { background: var(--bg-panel); backdrop-filter: blur(14px); border: 1px solid var(--border-panel); box-shadow: 0 18px 45px rgba(0,0,0,0.45); }
-    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-    .custom-scroll::-webkit-scrollbar-track { background: #030712; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 99px; }
+    .animate-fade-in { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   </style>
 </head>
-<body class="theme-cyberpunk min-h-screen pb-20">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans pb-12">
+  
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
-  <header class="sticky top-0 z-40 border-b border-slate-800/90 bg-slate-950/90 backdrop-blur-xl">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center gap-3.5">
-        <div class="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-          <i class="fa-solid fa-cubes-stacked text-xl"></i>
+  <div class="max-w-7xl mx-auto p-6">
+    <div class="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-5 mb-6 gap-4">
+      <div class="animate-fade-in">
+        <div class="flex items-center gap-3">
+          <span class="h-3 w-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></span>
+          <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+            Social Media Support Agent 
+            <span class="text-xs font-mono bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 px-2.5 py-1 rounded-full">PRO v4.5</span>
+          </h1>
         </div>
-        <div>
-          <div class="flex items-center gap-2.5">
-            <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-white">SOCIAL SWARM ENGINE</h1>
-            <span class="text-[11px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Supervisor v4.5</span>
+        <p class="text-slate-400 text-sm mt-1">Autonomous Multi-Account Control Center + Regenerate AI Engine</p>
+      </div>
+
+      <div class="flex bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
+        <button id="tabDeployBtn" onclick="switchTab('deploy')" class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition active:scale-95">🚀 Deploy & Feed</button>
+        <button id="tabAccountsBtn" onclick="switchTab('accounts')" class="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition active:scale-95 flex items-center gap-2"><span>👥 Agent Roster</span><span id="rosterBadge" class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full text-[11px] font-mono">1/3 Armed</span></button>
+      </div>
+    </div>
+
+    <!-- TAB 1 -->
+    <div id="tabDeploy" class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
+      <div class="lg:col-span-5 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl h-fit space-y-4">
+        <h2 class="text-lg font-semibold text-white">⚡ Dispatch Support Agent</h2>
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-xs font-medium text-slate-400">Select Agent & Linked Account</label>
+              <button onclick="switchTab('accounts')" class="text-[11px] text-indigo-400 hover:underline">Manage Accounts →</button>
+            </div>
+            <select id="agent_id" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-sm text-white font-medium focus:outline-none focus:border-indigo-500"></select>
           </div>
-          <p class="text-xs text-slate-400">Live Status Terminal, Like & Comment Automation, Account Mapping</p>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">Target Facebook Post / Reel URL</label>
+            <input id="post_url" type="text" value="https://www.facebook.com/reel/2062417224438860/" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-indigo-500" />
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-xs font-medium text-slate-400">Post Context / Direction for AI</label>
+              <button onclick="previewComment()" class="text-[11px] bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20 px-2.5 py-1 rounded-lg border border-indigo-500/30 transition">✨ Preview AI Comment</button>
+            </div>
+            <textarea id="post_text" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-indigo-500">its just a local breaking news make it sound alerting</textarea>
+            
+            <!-- PREVIEW BOX WITH REGENERATE BUTTON -->
+            <div id="previewBox" class="hidden mt-2 bg-slate-950 border border-emerald-500/30 rounded-xl p-3 text-xs text-emerald-300 font-medium space-y-2 animate-fade-in">
+              <div id="previewText"></div>
+              <div class="flex justify-end border-t border-slate-800/80 pt-2">
+                <button onclick="previewComment()" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-md border border-slate-700 transition flex items-center gap-1">🔄 Regenerate Variation</button>
+              </div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">Agent Persona</label>
+              <select id="persona" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                <option value="Alert Local Community Watcher">Community Watcher</option>
+                <option value="Helpful Brand Support Specialist">Support Specialist</option>
+                <option value="Insightful News Commentator">News Commentator</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">Reply Tone</label>
+              <select id="tone" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                <option value="Urgent, alerting, and authentic">Urgent & Alerting</option>
+                <option value="Warm, authentic, and helpful">Warm & Helpful</option>
+                <option value="Direct, sharp, and professional">Sharp & Direct</option>
+              </select>
+            </div>
+          </div>
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+            <div class="text-[11px] font-mono uppercase text-indigo-400 font-semibold">🛡️ Supervisor Guardrails</div>
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2 text-xs text-slate-200 cursor-pointer"><input id="do_like" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded" /><span>👍 Auto-Like Post</span></label>
+              <label class="flex items-center gap-2 text-xs text-slate-200 cursor-pointer"><input id="do_comment" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded" /><span>💬 Auto-Submit Comment</span></label>
+            </div>
+            <label class="flex items-center gap-2 text-xs text-emerald-300 cursor-pointer pt-2 border-t border-slate-800"><input id="auto_failover" type="checkbox" checked class="accent-emerald-500 w-4 h-4 rounded" /><span>⚡ <b>Auto-Failover Demo Shield</b></span></label>
+          </div>
+          <div class="space-y-2.5 pt-1">
+            <button id="deployBtn" onclick="deployAgent(false)" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 text-white font-semibold py-3.5 rounded-xl shadow-xl transition active:scale-95 flex items-center justify-center gap-2"><span>🚀 Like, Comment & Capture Proof</span></button>
+            <button onclick="deployAgent(true)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold py-3 rounded-xl transition active:scale-95">🐝 Swarm Mode: Dispatch All 3 Agents</button>
+          </div>
         </div>
       </div>
 
-      <div class="flex flex-wrap items-center gap-2.5">
-        <div class="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-1 text-xs">
-          <button onclick="setTheme('theme-cyberpunk')" id="btn-theme-cyberpunk" class="px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-300 font-medium">Cyberpunk</button>
-          <button onclick="setTheme('theme-obsidian')" id="btn-theme-obsidian" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-white">Obsidian</button>
-          <button onclick="setTheme('theme-vhs')" id="btn-theme-vhs" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-white">VHS Noir</button>
+      <div class="lg:col-span-7 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-white">📡 Live Agent Execution Feed & CRUD Logs</h2>
+          <span class="text-xs font-mono text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full flex items-center gap-2">
+            <span class="h-2 w-2 rounded-full bg-emerald-400"></span> Live Feed Active
+          </span>
         </div>
-
-        <label class="flex items-center gap-2 text-xs bg-slate-900/95 border border-emerald-500/35 px-3 py-2 rounded-lg cursor-pointer">
-          <input type="checkbox" id="global-safe-mode" checked class="accent-emerald-500 w-3.5 h-3.5" />
-          <span class="text-emerald-300 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Auto-Failover Shield</span>
-        </label>
-
-        <button onclick="refreshAll()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-lg border border-slate-700">
-          <i class="fa-solid fa-rotate mr-1"></i>Sync
-        </button>
+        <div id="jobsContainer" class="space-y-4">
+          <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-10 text-center text-slate-500 text-sm">Ready for deployment.</div>
+        </div>
       </div>
     </div>
-  </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 mt-6 space-y-6">
-
-    <!-- Telemetry Strip -->
-    <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="cyber-panel rounded-xl p-4 flex items-center justify-between">
-        <div>
-          <div class="text-[11px] uppercase tracking-wider text-slate-400">Active Nodes</div>
-          <div class="text-2xl font-extrabold text-white mt-0.5" id="stat-active-nodes">3 / 3</div>
-        </div>
-        <i class="fa-solid fa-user-astronaut text-emerald-400 text-xl"></i>
-      </div>
-      <div class="cyber-panel rounded-xl p-4 flex items-center justify-between">
-        <div>
-          <div class="text-[11px] uppercase tracking-wider text-slate-400">Workspace Queue</div>
-          <div class="text-2xl font-extrabold text-sky-400 mt-0.5" id="stat-workspace-rows">0 Rows</div>
-        </div>
-        <i class="fa-solid fa-layer-group text-sky-400 text-xl"></i>
-      </div>
-      <div class="cyber-panel rounded-xl p-4 flex items-center justify-between">
-        <div>
-          <div class="text-[11px] uppercase tracking-wider text-slate-400">Dispatched Jobs</div>
-          <div class="text-2xl font-extrabold text-white mt-0.5" id="stat-total-jobs">0</div>
-        </div>
-        <i class="fa-solid fa-paper-plane text-indigo-400 text-xl"></i>
-      </div>
-      <div class="cyber-panel rounded-xl p-4 flex items-center justify-between">
-        <div>
-          <div class="text-[11px] uppercase tracking-wider text-slate-400">Status Terminal</div>
-          <div class="text-sm font-mono font-bold text-emerald-400 mt-1">Streaming Active</div>
-        </div>
-        <i class="fa-solid fa-terminal text-amber-400 text-xl"></i>
-      </div>
-    </section>
-
-    <!-- Roster & Account Mapping Vault -->
-    <section class="cyber-panel rounded-2xl p-5">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <h2 class="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
-            <i class="fa-solid fa-network-wired text-emerald-400"></i> Bot Node to Account Mapping & Cookie Vault
-          </h2>
-          <p class="text-xs text-slate-400">Assign handles and manage cookies for each bot node.</p>
-        </div>
-      </div>
-      <div id="accounts-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-    </section>
-
-    <!-- Bulk Workspace -->
-    <section class="cyber-panel rounded-2xl p-6 space-y-5">
-      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
-        <div>
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i> Bulk Target Workspace (Like & Comment Automation)
-          </h2>
-          <p class="text-xs text-slate-400">Generate rows and execute independent <strong>Like</strong> or <strong>Comment</strong> actions.</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="insertSampleUrls()" class="text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 px-3 py-2 rounded-lg border border-slate-700">Load Sample URLs</button>
-          <button onclick="clearWorkspaceRows()" class="text-xs bg-rose-950/50 text-rose-300 px-3 py-2 rounded-lg border border-rose-800/50">Reset Workspace</button>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div class="lg:col-span-3">
-          <textarea id="bulk-url-textarea" rows="3" placeholder="Paste target social post URLs here (one per line)..." class="w-full bg-slate-950/95 border border-slate-800 rounded-xl p-3.5 text-xs sm:text-sm font-mono text-slate-200"></textarea>
-        </div>
-        <div class="flex flex-col justify-stretch">
-          <button onclick="generateWorkspaceRows()" class="h-full min-h-[56px] bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm rounded-xl px-5 py-3 transition flex items-center justify-center gap-2 cursor-pointer">
-            <i class="fa-solid fa-plus-circle"></i> Generate Workspace Rows
-          </button>
-        </div>
-      </div>
-
-      <div id="workspace-cards-container" class="space-y-4">
-        <div id="workspace-empty-banner" class="text-center py-12 border border-dashed border-slate-800 rounded-xl text-slate-500 text-sm">
-          <i class="fa-solid fa-inbox text-2xl mb-2 block text-slate-600"></i>
-          Clean slate active — paste target URLs above and click <strong>Generate Workspace Rows</strong>.
-        </div>
-      </div>
-    </section>
-
-    <!-- LIVE STATUS LOG TERMINAL -->
-    <section class="cyber-panel rounded-2xl p-6 space-y-3">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h2 class="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
-          <i class="fa-solid fa-terminal text-emerald-400"></i> Live Status Log Terminal
-        </h2>
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span class="text-xs font-mono text-slate-400">Stream Live</span>
-          <button onclick="clearTerminalLog()" class="text-[11px] bg-slate-900 hover:bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700 ml-2">Clear Terminal</button>
-        </div>
-      </div>
-      <div id="status-terminal-box" class="w-full h-44 bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-400 overflow-y-auto custom-scroll space-y-1">
-        <div>[SYSTEM] Supervisor Control Center v4.5 initialized. Ready for automation tasks...</div>
-      </div>
-    </section>
-
-    <!-- Execution Logs & Visual Proof Table -->
-    <section class="cyber-panel rounded-2xl p-6 space-y-4">
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-list-check text-sky-400"></i> Execution Logs & Account Audit Trail
-          </h2>
-          <p class="text-xs text-slate-400">Verifies which bot node and account executed the action, complete with screenshot proof.</p>
-        </div>
-        <button onclick="clearAllJobLogs()" class="text-xs bg-rose-950/60 text-rose-300 px-3 py-1.5 rounded-lg border border-rose-800/60">Purge All Logs</button>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-slate-800 text-[11px] uppercase text-slate-400">
-              <th class="py-3 px-3">Job ID / Time</th>
-              <th class="py-3 px-3">Bot Node & Account</th>
-              <th class="py-3 px-3">Target URL</th>
-              <th class="py-3 px-3">Action & Content</th>
-              <th class="py-3 px-3">Status</th>
-              <th class="py-3 px-3 text-right">Visual Proof</th>
-            </tr>
-          </thead>
-          <tbody id="jobs-table-tbody" class="divide-y divide-slate-800/70 text-xs"></tbody>
-        </table>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Cookie & Account Mapping Modal -->
-  <div id="cookie-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="cyber-panel rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-700">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-sm font-bold text-white">Configure Node: <span id="cookie-agent-id" class="text-emerald-400 font-mono"></span></h3>
-        <button onclick="closeCookieModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs text-slate-400 mb-1">Assigned Social Account Handle</label>
-          <input type="text" id="modal-account-handle" placeholder="e.g. miracle.abrham.alpha" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-white" />
-        </div>
-        <div>
-          <label class="block text-xs text-slate-400 mb-1">Cookies JSON Array (Add / Edit / Clear)</label>
-          <textarea id="cookie-json-input" rows="5" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-emerald-300" placeholder='[{"name":"c_user","value":"1000...","domain":".facebook.com","path":"/"}]'></textarea>
-        </div>
-      </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeCookieModal()" class="text-xs bg-slate-800 text-slate-300 px-4 py-2 rounded-lg">Cancel</button>
-        <button onclick="saveCookieModal()" class="text-xs bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-lg">Save Configuration</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Proof Lightbox -->
-  <div id="proof-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="cyber-panel rounded-2xl max-w-4xl w-full p-5 space-y-3 border border-slate-700">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="text-sm font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-camera-retro text-sky-400"></i> Visual Proof Screenshot <span id="proof-title" class="text-xs font-mono text-slate-400"></span>
-        </div>
-        <button onclick="closeProofModal()" class="text-slate-400 hover:text-white text-base"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="max-h-[75vh] overflow-y-auto rounded-xl border border-slate-800 bg-slate-950 p-2">
-        <img id="proof-img" src="" alt="Proof Screenshot" class="w-full rounded-lg" />
+    <!-- TAB 2 -->
+    <div id="tabAccounts" class="hidden space-y-6 animate-fade-in">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+        <h2 class="text-lg font-semibold text-white">👥 Agent-to-Account Roster & Cookie Vault</h2>
+        <p class="text-xs text-slate-400 mt-1 mb-6">Paste your Cookie-Editor JSON array below. The Account Name and Facebook UID are automatically extracted from your <code class="text-emerald-300">c_user</code> cookie by default.</p>
+        <div id="accountsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
       </div>
     </div>
   </div>
 
   <script>
-    let cachedAccounts = [];
-    let cachedJobs = [];
-    let rowSequence = 0;
-    let currentCookieAgent = null;
-
-    function setTheme(t) { document.body.className = t + ' min-h-screen pb-20'; }
-    function updateWorkspaceCounter() {
-      const cards = document.querySelectorAll('.workspace-row-card');
-      document.getElementById('stat-workspace-rows').textContent = `${cards.length} Rows`;
-      document.getElementById('workspace-empty-banner').style.display = cards.length > 0 ? 'none' : 'block';
+    let cachedAccounts = {};
+    function showToast(message, type = 'success') {
+      const safeMsg = message || 'Operation completed successfully!';
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto border ${type === 'success' ? 'border-emerald-500/40 bg-emerald-950/90 text-emerald-200' : 'border-indigo-500/40 bg-indigo-950/90 text-indigo-200'} backdrop-blur-md px-4 py-3 rounded-xl shadow-2xl text-xs font-medium animate-fade-in flex items-center gap-2.5`;
+      toast.innerHTML = `<span>${type === 'success' ? '✅' : '✨'}</span> <span>${safeMsg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3500);
     }
 
-    function logToTerminal(text, type = 'info') {
-      const term = document.getElementById('status-terminal-box');
-      const div = document.createElement('div');
-      const timeStr = new Date().toLocaleTimeString();
-      let colorClass = 'text-emerald-400';
-      if (type === 'error') colorClass = 'text-rose-400';
-      if (type === 'warn') colorClass = 'text-amber-400';
-      if (type === 'action') colorClass = 'text-sky-400';
-      div.className = colorClass;
-      div.textContent = `[${timeStr}] ${text}`;
-      term.appendChild(div);
-      term.scrollTop = term.scrollHeight;
+    function switchTab(tab) {
+      const isDeploy = tab === 'deploy';
+      document.getElementById('tabDeploy').classList.toggle('hidden', !isDeploy);
+      document.getElementById('tabAccounts').classList.toggle('hidden', isDeploy);
+      document.getElementById('tabDeployBtn').className = isDeploy ? 'px-5 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition active:scale-95' : 'px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition active:scale-95';
+      document.getElementById('tabAccountsBtn').className = !isDeploy ? 'px-5 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition active:scale-95 flex items-center gap-2' : 'px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition active:scale-95 flex items-center gap-2';
+      if (!isDeploy) loadAccounts();
     }
 
-    function clearTerminalLog() {
-      document.getElementById('status-terminal-box').innerHTML = '<div>[SYSTEM] Terminal log cleared.</div>';
+    async function previewComment() {
+      const box = document.getElementById('previewBox');
+      const textEl = document.getElementById('previewText');
+      box.classList.remove('hidden');
+      textEl.innerText = '⏳ Generating new AI variation...';
+      const res = await fetch('/api/preview', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          agent_id: document.getElementById('agent_id').value,
+          post_url: document.getElementById('post_url').value,
+          post_text: document.getElementById('post_text').value,
+          persona: document.getElementById('persona').value,
+          tone: document.getElementById('tone').value
+        })
+      });
+      const data = await res.json();
+      textEl.innerText = '💬 Preview: "' + (data.comment || 'Ready') + '"';
+      showToast('AI Comment variation ready!', 'info');
     }
 
-    async function fetchAccounts() {
+    async function loadAccounts() {
       const res = await fetch('/api/accounts');
       cachedAccounts = await res.json();
-      document.getElementById('stat-active-nodes').textContent = `${cachedAccounts.filter(a => a.cookies_loaded).length} / ${cachedAccounts.length}`;
-
-      document.getElementById('accounts-container').innerHTML = cachedAccounts.map(acc => `
-        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between gap-2 mb-2">
-              <span class="font-mono text-xs font-bold text-emerald-400">${acc.id}</span>
-              <span class="text-[10px] px-2 py-0.5 rounded-full ${acc.cookies_loaded ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'}">
-                ${acc.cookies_loaded ? '● Active Session' : '○ No Session'}
-              </span>
-            </div>
-            <div class="text-sm font-bold text-white">${acc.name}</div>
-            <div class="text-xs font-mono text-sky-400 mt-0.5"><i class="fa-solid fa-at mr-1"></i>@${acc.account_handle || 'unassigned'}</div>
-            <p class="text-xs text-slate-400 mt-1">${acc.persona}</p>
-          </div>
-          <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-xs">
-            <span class="text-slate-500"><i class="fa-brands fa-facebook text-blue-400 mr-1"></i>${acc.platform}</span>
-            <button onclick="openCookieModal('${acc.id}')" class="text-sky-400 hover:text-sky-300 font-medium">
-              <i class="fa-solid fa-link mr-1"></i>Assign Account & Cookies
-            </button>
-          </div>
-        </div>
-      `).join('');
-
-      document.querySelectorAll('.agent-selector').forEach(sel => {
-        const currentVal = sel.value;
-        sel.innerHTML = cachedAccounts.map(a => `<option value="${a.id}">${a.id} (@${a.account_handle})</option>`).join('');
-        if (currentVal) sel.value = currentVal;
-      });
-    }
-
-    function openCookieModal(agentId) {
-      const acc = cachedAccounts.find(a => a.id === agentId);
-      if (!acc) return;
-      currentCookieAgent = agentId;
-      document.getElementById('cookie-agent-id').textContent = agentId;
-      document.getElementById('modal-account-handle').value = acc.account_handle || '';
-      document.getElementById('cookie-json-input').value = JSON.stringify(acc.cookies || [], null, 2);
-      document.getElementById('cookie-modal').classList.remove('hidden');
-    }
-
-    function closeCookieModal() {
-      currentCookieAgent = null;
-      document.getElementById('cookie-modal').classList.add('hidden');
-    }
-
-    async function saveCookieModal() {
-      if (!currentCookieAgent) return;
-      const handleVal = document.getElementById('modal-account-handle').value.trim();
-      const val = document.getElementById('cookie-json-input').value.trim();
-      let cookies = [];
-      try {
-        cookies = val ? JSON.parse(val) : [];
-        if (!Array.isArray(cookies)) cookies = [cookies];
-      } catch (e) {
-        alert('Invalid JSON cookie array format.');
-        return;
-      }
-      await fetch(`/api/accounts/${currentCookieAgent}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ account_handle: handleVal, cookies })
-      });
-      logToTerminal(`Updated configuration and cookies for node '${currentCookieAgent}' (@${handleVal})`, 'warn');
-      closeCookieModal();
-      await fetchAccounts();
-    }
-
-    function insertSampleUrls() {
-      document.getElementById('bulk-url-textarea').value = [
-        'https://www.facebook.com/groups/indiehackers/posts/88192014',
-        'https://www.facebook.com/groups/aioperators/posts/55920144'
-      ].join('\n');
-      logToTerminal('Loaded sample post URLs into bulk workspace.', 'info');
-    }
-
-    function clearWorkspaceRows() {
-      document.querySelectorAll('.workspace-row-card').forEach(el => el.remove());
-      updateWorkspaceCounter();
-      logToTerminal('Workspace rows cleared.', 'info');
-    }
-
-    function generateWorkspaceRows() {
-      const input = document.getElementById('bulk-url-textarea');
-      const urls = input.value.split('\n').map(u => u.trim()).filter(Boolean);
-      if (!urls.length) return;
-
-      const container = document.getElementById('workspace-cards-container');
-
-      urls.forEach(url => {
-        rowSequence++;
-        const rowId = `ws_row_${rowSequence}`;
-        const safeUrl = url.replace(/'/g, "\\'");
-        const agentOptions = cachedAccounts.map(a => `<option value="${a.id}">${a.id} (@${a.account_handle})</option>`).join('');
-
-        const card = document.createElement('div');
-        card.id = rowId;
-        card.dataset.url = url;
-        card.className = 'workspace-row-card bg-slate-950/95 border border-slate-800 rounded-xl p-4 space-y-3';
-        card.innerHTML = `
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">#${rowSequence}</span>
-              <span class="text-xs font-mono text-sky-400 break-all">${url}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <select id="${rowId}_agent" class="agent-selector bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white">
-                ${agentOptions}
-              </select>
-              <button onclick="document.getElementById('${rowId}').remove(); updateWorkspaceCounter();" class="text-slate-500 hover:text-rose-400 px-2"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[11px] uppercase tracking-wider text-slate-400 mb-1">Context / Directives</label>
-              <textarea id="${rowId}_context" rows="2" placeholder="Post context..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200"></textarea>
+      const select = document.getElementById('agent_id');
+      const currentVal = select.value;
+      const entries = Object.values(cachedAccounts);
+      document.getElementById('rosterBadge').innerText = `${entries.filter(a => (a.cookie_count || 0) > 0).length}/${entries.length} Armed`;
+      select.innerHTML = entries.map(a => `<option value="${a.agent_id}">${a.agent_id} ➔ ${a.account_name} (${a.cookie_count > 0 ? '🟢 ' + a.cookie_count + ' cookies' : '⚪ Sandbox Ready'})</option>`).join('');
+      if (currentVal) select.value = currentVal;
+      document.getElementById('accountsGrid').innerHTML = entries.map(a => {
+        const cookieJsonStr = (a.cookies && a.cookies.length > 0) ? JSON.stringify(a.cookies, null, 2) : '';
+        return `
+        <div class="bg-slate-950 border ${a.cookie_count > 0 ? 'border-emerald-500/40' : 'border-slate-800'} rounded-2xl p-5 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-md">${a.agent_id}</span>
+              <span class="text-xs font-mono px-2.5 py-0.5 rounded-full ${a.cookie_count > 0 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}">${a.cookie_count > 0 ? '🟢 ' + a.cookie_count + ' Cookies' : '⚪ Unlinked'}</span>
             </div>
             <div>
-              <div class="flex items-center justify-between mb-1">
-                <label class="block text-[11px] uppercase tracking-wider text-slate-400">AI Comment Preview</label>
-                <span id="${rowId}_model_badge" class="text-[10px] font-mono text-emerald-400"></span>
+              <div class="flex justify-between items-center mb-1">
+                <label class="text-[11px] uppercase font-mono text-slate-500">Account Name (Auto-Fetched)</label>
+                <span class="text-[10px] font-mono text-emerald-400">From Cookie</span>
               </div>
-              <textarea id="${rowId}_comment" rows="2" placeholder="AI comment..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-emerald-300"></textarea>
+              <input id="name_${a.agent_id}" type="text" value="${a.account_name || ''}" placeholder="Auto-filled from c_user cookie" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-sm font-semibold text-white" />
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs font-mono bg-slate-900/70 p-3 rounded-xl border border-slate-800">
+              <div><span class="text-slate-500 text-[10px]">USER ID (c_user)</span><span class="text-emerald-300 block truncate">${a.fb_uid || 'Unlinked'}</span></div>
+              <div><span class="text-slate-500 text-[10px]">STATUS</span><span class="text-slate-300 block truncate">${a.health || 'Ready'}</span></div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-mono text-slate-400 mb-1">Cookie-Editor JSON (Persisted):</label>
+              <textarea id="cookies_${a.agent_id}" rows="4" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs font-mono text-emerald-300" placeholder='Paste Cookie-Editor JSON array here...'>${cookieJsonStr}</textarea>
             </div>
           </div>
+          <button onclick="saveAgentAccount('${a.agent_id}')" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-semibold py-3 rounded-xl transition cursor-pointer">💾 Save Account & Auto-Link Cookie</button>
+        </div>
+      `}).join('');
+    }
 
-          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-900">
-            <span id="${rowId}_status" class="text-[11px] font-mono text-slate-500">Ready</span>
-            <div class="flex items-center gap-2">
-              <button onclick="synthesizeRowPreview('${rowId}', '${safeUrl}')" class="text-xs bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 px-3 py-1.5 rounded-lg">
-                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Preview AI
-              </button>
-              <button onclick="dispatchAction('${rowId}', '${safeUrl}', 'like')" class="text-xs bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-lg">
-                <i class="fa-solid fa-thumbs-up mr-1"></i>Like Automation
-              </button>
-              <button onclick="dispatchAction('${rowId}', '${safeUrl}', 'comment')" class="text-xs bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1.5 rounded-lg">
-                <i class="fa-solid fa-comment mr-1"></i>Comment Automation
-              </button>
-            </div>
-          </div>
-        `;
-        container.prepend(card);
+    async function saveAgentAccount(agentId) {
+      const cookiesVal = document.getElementById(`cookies_${agentId}`).value;
+      const nameVal = document.getElementById(`name_${agentId}`).value;
+      const res = await fetch('/api/accounts', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ agent_id: agentId, account_name: nameVal, cookies_raw: cookiesVal })
       });
-
-      input.value = '';
-      updateWorkspaceCounter();
-      logToTerminal(`Generated ${urls.length} workspace rows successfully.`, 'info');
+      const data = await res.json();
+      showToast(data.message || data.detail || 'Account saved!', data.ok === false ? 'info' : 'success');
+      await loadAccounts();
     }
 
-    async function synthesizeRowPreview(rowId, postUrl) {
-      const commentBox = document.getElementById(`${rowId}_comment`);
-      const contextBox = document.getElementById(`${rowId}_context`);
-      const agentSelect = document.getElementById(`${rowId}_agent`);
-      const badge = document.getElementById(`${rowId}_model_badge`);
-      const statusEl = document.getElementById(`${rowId}_status`);
-
-      statusEl.textContent = 'Synthesizing...';
-      logToTerminal(`Requesting AI comment preview for ${postUrl} via OpenRouter...`, 'action');
-      try {
-        const res = await fetch('/api/preview', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ post_url: postUrl, context: contextBox.value, agent_id: agentSelect.value })
-        });
-        const data = await res.json();
-        commentBox.value = data.comment || '';
-        badge.textContent = data.model_used || '';
-        statusEl.textContent = 'Ready';
-        logToTerminal(`Successfully generated AI comment preview (${data.model_used})`, 'info');
-      } catch (e) {
-        statusEl.textContent = 'Preview error';
-        logToTerminal(`Failed to generate AI comment preview: ${e}`, 'error');
-      }
+    async function editJobComment(jobId, currentComment) {
+      const newComment = prompt("Edit AI Comment Text:", currentComment);
+      if (newComment === null || newComment.trim() === "") return;
+      const res = await fetch(`/api/jobs/${jobId}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ comment: newComment })
+      });
+      const data = await res.json();
+      showToast(data.message || 'Updated comment!', 'success');
+      loadJobs();
     }
 
-    async function dispatchAction(rowId, postUrl, actionType) {
-      const commentBox = document.getElementById(`${rowId}_comment`);
-      const contextBox = document.getElementById(`${rowId}_context`);
-      const agentSelect = document.getElementById(`${rowId}_agent`);
-      const statusEl = document.getElementById(`${rowId}_status`);
+    async function deleteJobLog(jobId) {
+      const res = await fetch(`/api/jobs/${jobId}`, { method: 'DELETE' });
+      const data = await res.json();
+      showToast(data.message || 'Deleted job log!', 'success');
+      loadJobs();
+    }
 
-      if (actionType === 'comment' && !commentBox.value.trim()) {
-        await synthesizeRowPreview(rowId, postUrl);
-      }
-
-      statusEl.textContent = `Running ${actionType}...`;
-      logToTerminal(`Dispatched [${actionType.toUpperCase()}] task via node '${agentSelect.value}' for target: ${postUrl}`, 'action');
-
+    async function deployAgent(swarmMode = false) {
+      const btn = document.getElementById('deployBtn');
+      btn.disabled = true;
+      btn.innerHTML = `⏳ Executing Playwright Agent...`;
       try {
-        const res = await fetch('/api/dispatch', {
+        const res = await fetch(swarmMode ? '/api/dispatch-swarm' : '/api/dispatch', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
-            post_url: postUrl,
-            context: contextBox.value,
-            action_type: actionType,
-            comment: commentBox.value.trim(),
-            agent_id: agentSelect.value,
-            safe_mode: document.getElementById('global-safe-mode').checked
+            agent_id: document.getElementById('agent_id').value,
+            post_url: document.getElementById('post_url').value,
+            post_text: document.getElementById('post_text').value,
+            persona: document.getElementById('persona').value,
+            tone: document.getElementById('tone').value,
+            do_like: document.getElementById('do_like').checked,
+            do_comment: document.getElementById('do_comment').checked,
+            auto_failover: document.getElementById('auto_failover').checked
           })
         });
-        const job = await res.json();
-        statusEl.textContent = job.status || 'Completed';
-        logToTerminal(`Job ${job.id} completed: ${job.status}`, 'info');
-        await fetchJobs();
-      } catch (e) {
-        statusEl.textContent = 'Failed';
-        logToTerminal(`Job dispatch failed: ${e}`, 'error');
+        const data = await res.json();
+        showToast(data.message || (swarmMode ? 'Swarm dispatched!' : 'Support agent dispatched!'), 'success');
+        await loadJobs();
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span>🚀 Like, Comment & Capture Proof</span>`;
       }
     }
 
-    async function fetchJobs() {
+    async function loadJobs() {
       const res = await fetch('/api/jobs');
-      cachedJobs = await res.json();
-      document.getElementById('stat-total-jobs').textContent = cachedJobs.length;
-      renderJobsTable();
-    }
-
-    function renderJobsTable() {
-      const tbody = document.getElementById('jobs-table-tbody');
-      if (!cachedJobs.length) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-slate-500">No logs recorded yet.</td></tr>`;
+      const jobs = await res.json();
+      const container = document.getElementById('jobsContainer');
+      if (!jobs || !jobs.length) {
+        container.innerHTML = `<div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-10 text-center text-slate-500 text-sm">No deployment records found. Click <b>Like, Comment & Capture Proof</b> to launch.</div>`;
         return;
       }
-      tbody.innerHTML = cachedJobs.map(j => `
-        <tr class="hover:bg-slate-900/60">
-          <td class="py-3 px-3 font-mono">
-            <div>${j.id}</div>
-            <div class="text-[10px] text-slate-500">${j.timestamp ? new Date(j.timestamp).toLocaleTimeString() : ''}</div>
-          </td>
-          <td class="py-3 px-3 font-mono">
-            <div class="text-emerald-400 font-bold">${j.agent_id}</div>
-            <div class="text-xs text-sky-400">@${j.account_handle || 'unassigned'}</div>
-          </td>
-          <td class="py-3 px-3 max-w-[200px] truncate font-mono text-sky-400">${j.post_url}</td>
-          <td class="py-3 px-3 max-w-md text-slate-200">
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-slate-900 text-sky-300 border border-slate-700 mr-1">${j.action_type || 'comment'}</span>
-            ${j.comment || ''}
-          </td>
-          <td class="py-3 px-3"><span class="px-2.5 py-1 rounded-full text-[11px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">${j.status || 'Done'}</span></td>
-          <td class="py-3 px-3 text-right space-x-1 whitespace-nowrap">
-            ${j.screenshot ? `<button onclick="openProofModal('${j.screenshot}', '${j.id}')" class="bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 px-2.5 py-1 rounded-lg"><i class="fa-solid fa-image mr-1"></i>Proof</button>` : ''}
-            <button onclick="deleteJob('${j.id}')" class="bg-rose-500/15 text-rose-300 px-2 py-1 rounded-lg"><i class="fa-solid fa-trash"></i></button>
-          </td>
-        </tr>
-      `).join('');
+      container.innerHTML = jobs.map(j => {
+        const safeComment = (j.comment || '').replace(/[`'"]/g, "");
+        const logsHtml = (j.logs || []).map(l => `<div>${l}</div>`).join('');
+        return `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3 animate-fade-in transition hover:border-slate-700">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">${j.agent_id}</span>
+              <span class="text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">👤 ${j.account_name || j.agent_id}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="editJobComment('${j.id}', '${safeComment}')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-700 transition cursor-pointer">✏️ Edit</button>
+              <button onclick="deleteJobLog('${j.id}')" class="text-[11px] bg-red-500/10 hover:bg-red-500/20 text-red-300 px-2.5 py-1 rounded-lg border border-red-500/30 transition cursor-pointer">🗑️ Delete</button>
+              <span class="text-xs font-mono px-2.5 py-1 rounded-full ${(j.status || '').includes('Completed') ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">${j.status || 'Done'}</span>
+            </div>
+          </div>
+          <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-3.5">
+            <div class="text-[11px] font-mono uppercase text-slate-400 mb-1">💬 AI Generated Comment Record</div>
+            <div class="text-sm text-emerald-300 font-medium">"${j.comment || ''}"</div>
+          </div>
+          <div class="bg-black/70 border border-slate-800 rounded-xl p-3 font-mono text-xs text-slate-300 space-y-1 max-h-40 overflow-y-auto">
+            ${logsHtml}
+          </div>
+          ${j.screenshot ? `
+            <div class="animate-fade-in">
+              <div class="text-[11px] font-mono uppercase text-slate-400 mb-1.5 flex items-center justify-between">
+                <span>📸 Verification Proof</span>
+                <a href="${j.screenshot}" target="_blank" class="text-indigo-400 hover:underline">Fullscreen ↗</a>
+              </div>
+              <img src="${j.screenshot}?t=${Date.now()}" class="rounded-xl border border-slate-700 w-full max-h-96 object-cover object-top shadow-lg" />
+            </div>
+          ` : ''}
+        </div>
+      `}).join('');
     }
 
-    function openProofModal(url, id) {
-      document.getElementById('proof-img').src = url;
-      document.getElementById('proof-title').textContent = `(${id})`;
-      document.getElementById('proof-modal').classList.remove('hidden');
-      logToTerminal(`Opened visual proof screenshot for job ${id}`, 'info');
-    }
-    function closeProofModal() { document.getElementById('proof-modal').classList.add('hidden'); }
-
-    async function deleteJob(id) { await fetch(`/api/jobs/${id}`, { method: 'DELETE' }); logToTerminal(`Deleted job log ${id}`, 'warn'); await fetchJobs(); }
-    async function clearAllJobLogs() { await fetch('/api/jobs', { method: 'DELETE' }); logToTerminal('Purged all execution logs.', 'warn'); await fetchJobs(); }
-
-    async function refreshAll() { await Promise.all([fetchAccounts(), fetchJobs()]); logToTerminal('Synced telemetry and accounts data.', 'info'); }
-    refreshAll();
-    setInterval(fetchJobs, 5000);
+    loadAccounts();
+    loadJobs();
+    setInterval(loadJobs, 3000);
   </script>
 </body>
 </html>
