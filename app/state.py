@@ -76,7 +76,6 @@ def update_account(agent_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
                 acc["cookies_loaded"] = len(updates["cookies"]) > 0
                 acc["status"] = "Active" if acc["cookies_loaded"] else "Standby"
                 
-                # Auto-detect Facebook c_user cookie to set handle if not provided
                 for cookie in updates["cookies"]:
                     if cookie.get("name") == "c_user" and cookie.get("value"):
                         detected_id = cookie.get("value")
@@ -113,7 +112,7 @@ def update_job(job_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
 
 def delete_job(job_id: str) -> bool:
     jobs = get_jobs()
-    new_jobs = [j for j in jobs if j.get("id"] != job_id]
+    new_jobs = [j for j in jobs if j.get("id") != job_id]
     if len(new_jobs) == len(jobs):
         return False
     _write_json(JOBS_FILE, new_jobs)
