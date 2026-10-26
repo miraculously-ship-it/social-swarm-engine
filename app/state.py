@@ -6,38 +6,32 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 ACCOUNTS_FILE = ROOT_DIR / "accounts.json"
 JOBS_FILE = ROOT_DIR / "jobs.json"
 
-DEFAULT_ACCOUNTS = [
-    {
-        "id": "fb_agent_alpha",
-        "name": "Alpha Node",
-        "account_handle": "unassigned",
-        "platform": "Facebook",
-        "persona": "Tech-savvy industry expert and community builder",
-        "status": "Standby",
-        "cookies_loaded": False,
-        "cookies": []
+DEFAULT_ACCOUNTS = {
+    "fb_agent_alpha": {
+        "agent_id": "fb_agent_alpha",
+        "account_name": "Alpha Supervisor",
+        "fb_uid": "Unlinked",
+        "cookies": [],
+        "cookie_count": 0,
+        "health": "Ready"
     },
-    {
-        "id": "fb_agent_beta",
-        "name": "Beta Node",
-        "account_handle": "unassigned",
-        "platform": "Facebook",
-        "persona": "Engaging community builder",
-        "status": "Standby",
-        "cookies_loaded": False,
-        "cookies": []
+    "fb_agent_beta": {
+        "agent_id": "fb_agent_beta",
+        "account_name": "Beta Community",
+        "fb_uid": "Unlinked",
+        "cookies": [],
+        "cookie_count": 0,
+        "health": "Ready"
     },
-    {
-        "id": "fb_agent_gamma",
-        "name": "Gamma Node",
-        "account_handle": "unassigned",
-        "platform": "Facebook",
-        "persona": "Market analyst",
-        "status": "Standby",
-        "cookies_loaded": False,
-        "cookies": []
+    "fb_agent_gamma": {
+        "agent_id": "fb_agent_gamma",
+        "account_name": "Gamma Analyst",
+        "fb_uid": "Unlinked",
+        "cookies": [],
+        "cookie_count": 0,
+        "health": "Ready"
     }
-]
+}
 
 def _read_json(path: Path, default: Any) -> Any:
     if not path.exists():
@@ -45,7 +39,15 @@ def _read_json(path: Path, default: Any) -> Any:
         return default
     try:
         with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+            if isinstance(data, list):
+                converted = DEFAULT_ACCOUNTS.copy()
+                for item in data:
+                    aid = item.get("agent_id")
+                    if aid in converted:
+                        converted[aid].update(item)
+                return converted
+            return data
     except Exception:
         return default
 
@@ -53,72 +55,52 @@ def _write_json(path: Path, data: Any) -> None:
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
-def get_accounts() -> List[Dict[str, Any]]:
+def get_accounts() -> Dict[str, Any]:
     accounts = _read_json(ACCOUNTS_FILE, DEFAULT_ACCOUNTS)
-    for acc in accounts:
+    for aid, acc in accounts.items():
         cookies = acc.get("cookies", [])
-        acc["cookies_loaded"] = len(cookies) > 0
-        acc["status"] = "Active" if acc["cookies_loaded"] else "Standby"
+        acc["cookie_count"] = len(cookies)
+        for c in cookies:
+            if c.get("name") == "c_user":
+                acc["fb_uid"] = c.get("value")
+                break
+        if not acc.get("fb_uid"):
+            acc["fb_uid"] = "Unlinked"
+        if not acc.get("account_name"):
+            acc["account_name"] = aid
     return accounts
 
-def get_account_by_id(agent_id: str) -> Dict[str, Any]:
-    for acc in get_accounts():
-        if acc.get("id") == agent_id:
-            return acc
-    return DEFAULT_ACCOUNTS[0]
+def update_account_cookies(agent_id: str, account_name: str, cookies_raw: str) -> dict:
+    accounts = get_accounts()
+    if agent_id not in accounts:
+        accounts[agent_id] = {"agent_id": agent_id, "account_name": agent_id, "fb_uid": "Unlinked", "cookies": [], "cookie_count": 0, "health": "Ready"}
+    
+    parsed_cookies = []
+    if cookies_raw.strip():
+        try:
+            parsed_cookies = json.loads(cookies_raw)
+            if not isinstance(parsed_cookies, list):
+                parsed_cookies = [parsed_cookies]
+        except Exception as e:
+            raise ValueError(f"Invalid Cookie JSON format: {e}")
 
-def update_account(agent_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
-    accounts = _read_json(ACCOUNTS_FILE, DEFAULT_ACCOUNTS)
-    for acc in accounts:
-        if acc.get("id") == agent_id:
-            if "cookies" in updates and isinstance(updates["cookies"], list):
-                acc["cookies"] = updates["cookies"]
-                acc["cookies_loaded"] = len(updates["cookies"]) > 0
-                acc["status"] = "Active" if acc["cookies_loaded"] else "Standby"
-                
-                for cookie in updates["cookies"]:
-                    if cookie.get("name") == "c_user" and cookie.get("value"):
-                        detected_id = cookie.get("value")
-                        if not acc.get("account_handle") or acc.get("account_handle") == "unassigned":
-                            acc["account_handle"] = f"fb_user_{detected_id}"
-                        break
+    fb_uid = "Unlinked"
+    for c in parsed_cookies:
+        if c.get("name") == "c_user":
+            fb_uid = c.get("value")
+            break
 
-            if "account_handle" in updates and updates["account_handle"]:
-                handle_val = updates["account_handle"].strip()
-                if handle_val:
-                    acc["account_handle"] = handle_val
+    accounts[agent_id]["cookies"] = parsed_cookies
+    accounts[agent_id]["cookie_count"] = len(parsed_cookies)
+    accounts[agent_id]["fb_uid"] = fb_uid
+    
+    # Automatically fetch and derive account name from the cookie (c_user) by default
+    if fb_uid != "Unlinked":
+        accounts[agent_id]["account_name"] = f"FB User {fb_uid}"
+    else:
+        accounts[agent_id]["account_name"] = account_name.strip() or f"Agent {agent_id}"
 
-            _write_json(ACCOUNTS_FILE, accounts)
-            return get_account_by_id(agent_id)
-    raise ValueError(f"Agent '{agent_id}' not found")
+    accounts[agent_id]["health"] = "Active Session Armed" if len(parsed_cookies) > 0 else "Sandbox Ready"
 
-def get_jobs() -> List[Dict[str, Any]]:
-    return _read_json(JOBS_FILE, [])
-
-def add_job(job: Dict[str, Any]) -> Dict[str, Any]:
-    jobs = get_jobs()
-    jobs.insert(0, job)
-    _write_json(JOBS_FILE, jobs)
-    return job
-
-def update_job(job_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
-    jobs = get_jobs()
-    for job in jobs:
-        if job.get("id") == job_id:
-            job.update(updates)
-            _write_json(JOBS_FILE, jobs)
-            return job
-    return {}
-
-def delete_job(job_id: str) -> bool:
-    jobs = get_jobs()
-    new_jobs = [j for j in jobs if j.get("id") != job_id]
-    if len(new_jobs) == len(jobs):
-        return False
-    _write_json(JOBS_FILE, new_jobs)
-    return True
-
-def clear_all_jobs() -> int:
-    jobs = get_jobs()
-    _write_json(JOBS_FILE, [])
-    return len(jobs)
+    _write_json(ACCOUNTS_FILE, accounts)
+    return accounts[agent_id]
