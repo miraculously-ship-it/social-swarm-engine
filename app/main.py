@@ -1,4 +1,6 @@
 import asyncio
+import sys
+import subprocess
 import time
 from datetime import datetime
 from pathlib import Path
@@ -34,6 +36,18 @@ app.mount("/screenshots", StaticFiles(directory=str(SCREENSHOTS_DIR)), name="scr
 
 for existing_job in get_jobs():
     upsert_archive(existing_job)
+
+@app.on_event("startup")
+async def ensure_chromium_installed():
+    """Ensures Chromium binary exists when Render boots the container."""
+    try:
+        from playwright.async_api import async_playwright
+        async with async_playwright() as p:
+            exec_path = Path(p.chromium.executable_path)
+            if not exec_path.exists():
+                subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"], check=False)
+    except Exception:
+        pass
 
 class AccountSavePayload(BaseModel):
     agent_id: str

@@ -1,3 +1,4 @@
+import sys
 import html
 import subprocess
 from pathlib import Path
@@ -86,12 +87,14 @@ async def execute_automation_job(
                     await page.goto(post_url, wait_until="domcontentloaded", timeout=16000)
                     await page.wait_for_timeout(2000)
 
+                    # Language-agnostic login wall detection (detects password inputs & login redirects in ANY language)
                     is_login_url = "/login" in page.url or "login.php" in page.url
-                    password_fields = await page.locator('input[type="password"]').count()
-                    
-                    if is_login_url or password_fields > 0:
+                    password_fields = await page.locator('input[type="password"], input[name="pass"]').count()
+                    login_form = await page.locator('form[action*="login"]').count()
+
+                    if is_login_url or password_fields > 0 or login_form > 0:
                         live_blocked = True
-                        append_job_log(job_id, "[!] Facebook login wall detected (Cookies expired or IP blocked).")
+                        append_job_log(job_id, "[!] Facebook login wall detected (Cookies expired or cloud IP blocked).")
                     else:
                         try:
                             detected_owner = await page.evaluate("""() => {
@@ -99,6 +102,9 @@ async def execute_automation_job(
                                     const d = window.require && window.require("CurrentUserInitialData");
                                     if (d && d.NAME) return d.NAME;
                                 } catch (e) {}
+                                const html = document.documentElement.innerHTML;
+                                const m = html.match(/"CurrentUserInitialData"\s*,\s*\[\]\s*,\s*\{[^}]*?"NAME"\s*:\s*"([^"]+)"/);
+                                if (m && m[1]) return JSON.parse('"' + m[1] + '"');
                                 return null;
                             }""")
                             if detected_owner and is_valid_owner_name(detected_owner):
@@ -185,14 +191,13 @@ async def execute_automation_job(
                     screenshot=f"/screenshots/{screenshot_name}"
                 )
                 await browser.close()
-                break # Exit loop successfully
+                break
 
         except Exception as err:
             err_str = str(err)
             if attempt == 0 and ("Executable doesn't exist" in err_str or "playwright" in err_str.lower()):
-                append_job_log(job_id, "[*] Render cache missing Chromium. Auto-installing binary...")
-                subprocess.run(["python", "-m", "playwright", "install", "chromium"], check=False)
-                continue # Retry browser launch
-            
+                append_job_log(job_id, "[*] Chromium binary missing from cache. Auto-installing Playwright Chromium now...", status="Installing Browser...")
+                subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"], check=False)
+                continue
             append_job_log(job_id, f"[!] Execution error: {err_str[:90]}", status="Completed (Safe Fallback)")
             break

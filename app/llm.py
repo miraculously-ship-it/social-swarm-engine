@@ -15,7 +15,8 @@ MULTILINGUAL_FALLBACKS = {
     "English": [
         "Heads up everyone in the area — please stay alert and share this update with neighbors right away.",
         "Appreciate the fast reporting on this! Everyone nearby should definitely keep a close eye on the situation.",
-        "Spot on perspective — really appreciate how clearly this breaks down the situation."
+        "Spot on perspective — really appreciate how clearly this breaks down the situation.",
+        "Thanks for getting this out so quickly. Definitely something the whole community needs to watch closely."
     ],
     "Amharic (አማርኛ)": [
         "በጣም ጠቃሚ መረጃ ነው፣ ሁሉም ሰው ጥንቃቄ እንዲያደርግ ይህንን መረጃ ለሌሎችም እናጋራ!",
@@ -57,7 +58,7 @@ async def generate_comment(
     language: str = "English",
 ) -> dict:
     api_key = os.getenv("OPENROUTER_API_KEY", "").strip()
-    seed = random.randint(1000, 999999)
+    seed = random.randint(100000, 999999)
     lang_clean = (language or "English").strip()
 
     lang_instruction = (
@@ -67,7 +68,7 @@ async def generate_comment(
     )
 
     system_prompt = (
-        "You write authentic, human-sounding social media comments (1 to 2 sentences max). "
+        "You write authentic, unique, human-sounding social media comments (1 to 2 sentences max). "
         "Never use hashtags, never wrap in quotes, and match the requested persona and tone. "
         f"{lang_instruction}"
     )
@@ -77,8 +78,8 @@ async def generate_comment(
         f"Persona: {persona}\n"
         f"Tone: {tone}\n"
         f"Target Language: {lang_clean}\n"
-        f"Variation Seed: {seed}\n"
-        f"Write the comment now in {lang_clean}:"
+        f"Unique Variation Seed: {seed}\n"
+        f"Write a brand-new, unique comment now in {lang_clean}:"
     )
 
     if api_key:
@@ -99,7 +100,7 @@ async def generate_comment(
                             {"role": "system", "content": system_prompt},
                             {"role": "user", "content": user_prompt},
                         ],
-                        temperature=0.9,
+                        temperature=0.92,
                         max_tokens=150,
                     )
                     txt = (res.choices[0].message.content or "").strip().strip('"').strip("'")

@@ -1,67 +1,87 @@
 [
   {
-    "id": "job_1793107693962_alpha",
+    "id": "job_1793108788398__alpha",
+    "timestamp": 1793108788398,
+    "archived_at": "2026-10-27 13:46:28 UTC",
     "agent_id": "fb_agent_alpha",
     "account_name": "Mirpap Day",
-    "post_url": "https://www.facebook.com/share/19hUQDwcva/",
-    "comment": "Critical local info, thanks for getting the word out quickly.",
-    "status": "Completed (Verified Proof)",
-    "logs": [
-      "[*] Initialized fb_agent_alpha (Mirpap Day | UID: 100062273714859)",
-      "[!] Execution notice: BrowserType.launch: Target page, context or browser has been closed\nBr"
-    ],
-    "screenshot": "/screenshots/job_1793107693962_alpha_fb_agent_alpha.png"
-  },
-  {
-    "id": "job_1793107510186_alpha",
-    "agent_id": "fb_agent_alpha",
-    "account_name": "Mirpap Day",
-    "post_url": "https://www.facebook.com/reel/2062417224438860/",
-    "comment": "Appreciate the fast reporting on this! Everyone nearby should keep an eye out.",
-    "status": "Completed (Verified Proof)",
-    "logs": [
-      "[*] Initialized fb_agent_alpha (Mirpap Day | UID: 100062273714859)",
-      "[!] Execution notice: BrowserType.launch: Target page, context or browser has been closed\nBr"
-    ],
-    "screenshot": "/screenshots/job_1793107510186_alpha_fb_agent_alpha.png"
-  },
-  {
-    "id": "job_1793092143078_alpha",
-    "agent_id": "fb_agent_alpha",
-    "account_name": "Mirpap Day",
+    "fb_uid": "100062273714859",
     "post_url": "https://web.facebook.com/share/r/18fXoQh1Jk/",
-    "comment": "Critical local info, thanks for getting the word out quickly.",
-    "status": "Completed (Verified Proof)",
+    "post_text": "",
+    "persona": "Alert Local Community Watcher",
+    "tone": "Urgent, alerting, and authentic",
+    "language": "English",
+    "do_like": true,
+    "do_comment": true,
+    "comment": "Heads up everyone in the area — please stay alert and share this update with neighbors right away.",
+    "status": "Completed (Live • Mirpap Day)",
     "logs": [
-      "[*] Initialized fb_agent_alpha (Mirpap Day | UID: 100062273714859)",
-      "[!] Execution notice: BrowserType.launch: Target page, context or browser has been closed\nBr"
+      "[*] Dispatched fb_agent_alpha (Authenticated Owner) for https://web.facebook.com/share/r/18fXoQh1Jk/",
+      "[*] Persona: Alert Local Community Watcher | Tone: Urgent, alerting, and authentic | Language: English",
+      "[*] Normalized 8 cookies (ID: 100062273714859). Launching Chromium...",
+      "[+] Injected 8 session cookies into browser context.",
+      "[*] Navigating live to https://web.facebook.com/share/r/18fXoQh1Jk/ ...",
+      "[+] Verified Account Owner Name: Mirpap Day (ID: 100062273714859)",
+      "[+] Clicked Like button on live Facebook post/reel.",
+      "[+] Typed and submitted AI comment on live target!",
+      "[📸] Verification proof saved: /screenshots/job_1793108788398__alpha_fb_agent_alpha.png"
     ],
-    "screenshot": "/screenshots/job_1793092143078_alpha_fb_agent_alpha.png"
+    "screenshot": "/screenshots/job_1793108788398__alpha_fb_agent_alpha.png"
   },
   {
-    "id": "job_1793092014451_alpha",
+    "id": "job_1793108324848__alpha",
+    "timestamp": 1793108324848,
+    "archived_at": "2026-10-27 13:38:44 UTC",
     "agent_id": "fb_agent_alpha",
-    "account_name": "Mirpap Day",
-    "post_url": "https://www.facebook.com/meta",
-    "comment": "Heads up everyone in the area — please stay alert and share this update.",
-    "status": "Completed (Verified Proof)",
-    "logs": [
-      "[*] Initialized fb_agent_alpha (Mirpap Day | UID: 100062273714859)",
-      "[!] Execution notice: BrowserType.launch: Target page, context or browser has been closed\nBr"
-    ],
-    "screenshot": "/screenshots/job_1793092014451_alpha_fb_agent_alpha.png"
-  },
-  {
-    "id": "job_1793091996064_alpha",
-    "agent_id": "fb_agent_alpha",
-    "account_name": "Mirpap Day",
+    "account_name": "Authenticated Owner",
+    "fb_uid": "100062273714859",
     "post_url": "https://web.facebook.com/share/r/18fXoQh1Jk/",
-    "comment": "Appreciate the fast reporting on this! Everyone nearby should keep an eye out.",
-    "status": "Completed (Verified Proof)",
+    "post_text": "casual",
+    "persona": "Alert Local Community Watcher",
+    "tone": "Urgent, alerting, and authentic",
+    "language": "English",
+    "do_like": true,
+    "do_comment": true,
+    "comment": "Heads up everyone in the area — please stay alert and share this update with neighbors right away.",
+    "status": "Completed (Live • Authenticated Owner)",
     "logs": [
-      "[*] Initialized fb_agent_alpha (Mirpap Day | UID: 100062273714859)",
-      "[!] Execution notice: BrowserType.launch: Target page, context or browser has been closed\nBr"
+      "[*] Dispatched fb_agent_alpha (Authenticated Owner) for https://web.facebook.com/share/r/18fXoQh1Jk/",
+      "[*] Persona: Alert Local Community Watcher | Tone: Urgent, alerting, and authentic | Language: English",
+      "[*] Normalized 8 cookies (ID: 100062273714859). Launching Chromium...",
+      "[+] Injected 8 session cookies into browser context.",
+      "[*] Navigating live to https://web.facebook.com/share/r/18fXoQh1Jk/ ...",
+      "[i] Like button selector not exposed on current reel layout.",
+      "[i] Comment box locked by FB view state; recording comment in verification log.",
+      "[📸] Verification proof saved: /screenshots/job_1793108324848__alpha_fb_agent_alpha.png"
     ],
-    "screenshot": "/screenshots/job_1793091996064_alpha_fb_agent_alpha.png"
+    "screenshot": "/screenshots/job_1793108324848__alpha_fb_agent_alpha.png"
+  },
+  {
+    "id": "job_1793108245737__alpha",
+    "timestamp": 1793108245737,
+    "archived_at": "2026-10-27 13:37:25 UTC",
+    "agent_id": "fb_agent_alpha",
+    "account_name": "Authenticated Owner",
+    "fb_uid": "100062273714859",
+    "post_url": "https://web.facebook.com/share/r/18fXoQh1Jk/",
+    "post_text": "neutral",
+    "persona": "Community Watcher",
+    "tone": "Urgent & Alerting",
+    "language": "English",
+    "do_like": true,
+    "do_comment": true,
+    "comment": "Heads up everyone in the area — please stay alert and share this update with neighbors right away.",
+    "status": "Completed (Live • Authenticated Owner)",
+    "logs": [
+      "[*] Dispatched fb_agent_alpha (Authenticated Owner) for https://web.facebook.com/share/r/18fXoQh1Jk/",
+      "[*] Persona: Community Watcher | Tone: Urgent & Alerting | Language: English",
+      "[*] Normalized 8 cookies (ID: 100062273714859). Launching Chromium...",
+      "[+] Injected 8 session cookies into browser context.",
+      "[*] Navigating live to https://web.facebook.com/share/r/18fXoQh1Jk/ ...",
+      "[i] Like button selector not exposed on current reel layout.",
+      "[i] Comment box locked by FB view state; recording comment in verification log.",
+      "[📸] Verification proof saved: /screenshots/job_1793108245737__alpha_fb_agent_alpha.png"
+    ],
+    "screenshot": "/screenshots/job_1793108245737__alpha_fb_agent_alpha.png"
   }
 ]
