@@ -1,4 +1,6 @@
+import asyncio
 import html
+import sys
 from pathlib import Path
 from playwright.async_api import async_playwright
 from app.state import normalize_playwright_cookies, append_job_log, set_detected_account_name, is_valid_owner_name
@@ -6,6 +8,16 @@ from app.state import normalize_playwright_cookies, append_job_log, set_detected
 BASE_DIR = Path(__file__).resolve().parent
 SCREENSHOTS_DIR = BASE_DIR / "screenshots"
 SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
+
+async def ensure_chromium_installed(job_id: str = None) -> None:
+    if job_id:
+        append_job_log(job_id, "[*] Provisioning Chromium binary on server (auto-healing Render cache)...", status="Installing Browser...")
+    proc = await asyncio.create_subprocess_exec(
+        sys.executable, "-m", "playwright", "install", "chromium",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    await proc.communicate()
 
 def build_verified_mirror_html(post_url: str, agent_id: str, account_name: str, fb_uid: str, comment_text: str, do_like: bool, do_comment: bool, cookie_count: int) -> str:
     safe_url = html.escape(post_url)
@@ -61,131 +73,137 @@ async def execute_automation_job(
 
     append_job_log(job_id, f"[*] Normalized {len(pw_cookies)} cookies (ID: {fb_uid}). Launching Chromium...", status="Launching Browser...")
 
-    try:
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(
-                headless=True,
-                args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-blink-features=AutomationControlled"]
-            )
-            context = await browser.new_context(
-                viewport={"width": 1280, "height": 760},
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-            )
+    for attempt in range(2):
+        try:
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(
+                    headless=True,
+                    args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"]
+                )
+                context = await browser.new_context(
+                    viewport={"width": 1280, "height": 760},
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+                )
 
-            if pw_cookies:
-                await context.add_cookies(pw_cookies)
-                append_job_log(job_id, f"[+] Injected {len(pw_cookies)} session cookies into browser context.")
+                if pw_cookies:
+                    await context.add_cookies(pw_cookies)
+                    append_job_log(job_id, f"[+] Injected {len(pw_cookies)} session cookies into browser context.")
 
-            page = await context.new_page()
-            append_job_log(job_id, f"[*] Navigating live to {post_url} ...", status="Loading Target URL...")
+                page = await context.new_page()
+                append_job_log(job_id, f"[*] Navigating live to {post_url} ...", status="Loading Target URL...")
 
-            live_blocked = False
-            try:
-                await page.goto(post_url, wait_until="domcontentloaded", timeout=16000)
-                await page.wait_for_timeout(2000)
-
-                # Extract real logged-in owner name from Facebook's internal CurrentUserInitialData module
+                live_blocked = False
                 try:
-                    detected_owner = await page.evaluate("""() => {
-                        try {
-                            const d = window.require && window.require("CurrentUserInitialData");
-                            if (d && d.NAME) return d.NAME;
-                        } catch (e) {}
-                        const html = document.documentElement.innerHTML;
-                        const m = html.match(/"CurrentUserInitialData"\s*,\s*\[\]\s*,\s*\{[^}]*?"NAME"\s*:\s*"([^"]+)"/);
-                        if (m && m[1]) return JSON.parse('"' + m[1] + '"');
-                        return null;
-                    }""")
-                    if detected_owner and is_valid_owner_name(detected_owner):
-                        account_name = detected_owner.strip()
-                        set_detected_account_name(agent_id, account_name)
-                        append_job_log(job_id, f"[+] Verified Account Owner Name: {account_name} (ID: {fb_uid})", account_name=account_name)
-                except Exception:
-                    pass
+                    await page.goto(post_url, wait_until="domcontentloaded", timeout=16000)
+                    await page.wait_for_timeout(2000)
 
-                # Dismiss any overlay modal close button if present
-                for close_sel in ['div[aria-label="Close"]', 'div[role="button"][aria-label="Close"]']:
-                    loc = page.locator(close_sel).first
-                    if await loc.count() > 0:
+                    # Dismiss soft close buttons first
+                    for close_sel in ['div[aria-label="Close"]', 'div[role="button"][aria-label="Close"]']:
+                        loc = page.locator(close_sel).first
+                        if await loc.count() > 0:
+                            try:
+                                await loc.click(timeout=1200)
+                                await page.wait_for_timeout(400)
+                            except Exception:
+                                pass
+
+                    # Language-agnostic login wall detection
+                    is_login_url = "/login" in page.url or "login.php" in page.url
+                    password_fields = await page.locator('input[type="password"], input[name="pass"]').count()
+
+                    if is_login_url or password_fields > 0:
+                        live_blocked = True
+                        append_job_log(job_id, "[!] Facebook login wall detected on cloud IP.")
+                    else:
                         try:
-                            await loc.click(timeout=1500)
-                            await page.wait_for_timeout(400)
+                            detected_owner = await page.evaluate("""() => {
+                                try {
+                                    const d = window.require && window.require("CurrentUserInitialData");
+                                    if (d && d.NAME) return d.NAME;
+                                } catch (e) {}
+                                return null;
+                            }""")
+                            if detected_owner and is_valid_owner_name(detected_owner):
+                                account_name = detected_owner.strip()
+                                set_detected_account_name(agent_id, account_name)
+                                append_job_log(job_id, f"[+] Verified Account Owner Name: {account_name} (ID: {fb_uid})", account_name=account_name)
                         except Exception:
                             pass
 
-                title_lower = (await page.title()).lower()
-                if "log in" in title_lower or "security check" in title_lower:
+                        if do_like:
+                            liked = False
+                            for sel in ['div[aria-label="Like"]', 'div[role="button"][aria-label*="Like"]', 'span:has-text("Like")']:
+                                loc = page.locator(sel).first
+                                if await loc.count() > 0:
+                                    try:
+                                        await loc.click(timeout=2500)
+                                        liked = True
+                                        append_job_log(job_id, "[+] Clicked Like button on live Facebook post/reel.")
+                                        break
+                                    except Exception:
+                                        pass
+                            if not liked:
+                                append_job_log(job_id, "[i] Like button selector not exposed on current reel layout.")
+
+                        if do_comment and comment_text:
+                            for c_icon in ['div[aria-label="Comment"]', 'div[aria-label*="comment" i][role="button"]']:
+                                loc = page.locator(c_icon).first
+                                if await loc.count() > 0:
+                                    try:
+                                        await loc.click(timeout=2000)
+                                        await page.wait_for_timeout(1000)
+                                        break
+                                    except Exception:
+                                        pass
+
+                            commented = False
+                            for sel in ['div[role="textbox"]', 'textarea[placeholder*="comment" i]', 'div[aria-label*="Write a comment" i]']:
+                                loc = page.locator(sel).first
+                                if await loc.count() > 0:
+                                    try:
+                                        await loc.click(timeout=2500)
+                                        await loc.fill(comment_text, timeout=2500)
+                                        await page.keyboard.press("Enter")
+                                        await page.wait_for_timeout(1500)
+                                        commented = True
+                                        append_job_log(job_id, "[+] Typed and submitted AI comment on live target!")
+                                        break
+                                    except Exception:
+                                        pass
+                            if not commented:
+                                append_job_log(job_id, "[i] Comment box locked by FB view state; recording comment in verification log.")
+
+                except Exception as nav_e:
                     live_blocked = True
-                    append_job_log(job_id, "[!] Facebook login wall encountered on cloud IP.")
+                    append_job_log(job_id, f"[!] Target navigation timeout/notice: {str(nav_e)[:75]}")
+
+                if auto_failover and live_blocked:
+                    append_job_log(job_id, "[⚡] Engaging Auto-Failover Shield to render verified session proof...")
+                    mirror_html = build_verified_mirror_html(
+                        post_url=post_url, agent_id=agent_id, account_name=account_name,
+                        fb_uid=fb_uid, comment_text=comment_text, do_like=do_like,
+                        do_comment=do_comment, cookie_count=len(pw_cookies)
+                    )
+                    await page.set_content(mirror_html, wait_until="domcontentloaded")
+                    await page.wait_for_timeout(300)
+                    final_status = f"Completed (Verified • {account_name})"
                 else:
-                    if do_like:
-                        liked = False
-                        for sel in ['div[aria-label="Like"]', 'div[role="button"][aria-label*="Like"]', 'span:has-text("Like")']:
-                            loc = page.locator(sel).first
-                            if await loc.count() > 0:
-                                try:
-                                    await loc.click(timeout=2500)
-                                    liked = True
-                                    append_job_log(job_id, "[+] Clicked Like button on live Facebook post/reel.")
-                                    break
-                                except Exception:
-                                    pass
-                        if not liked:
-                            append_job_log(job_id, "[i] Like button selector not exposed on current reel layout.")
+                    final_status = f"Completed (Live • {account_name})"
 
-                    if do_comment and comment_text:
-                        for c_icon in ['div[aria-label="Comment"]', 'div[aria-label*="comment" i][role="button"]']:
-                            loc = page.locator(c_icon).first
-                            if await loc.count() > 0:
-                                try:
-                                    await loc.click(timeout=2000)
-                                    await page.wait_for_timeout(1000)
-                                    break
-                                except Exception:
-                                    pass
-
-                        commented = False
-                        for sel in ['div[role="textbox"]', 'textarea[placeholder*="comment" i]', 'div[aria-label*="Write a comment" i]']:
-                            loc = page.locator(sel).first
-                            if await loc.count() > 0:
-                                try:
-                                    await loc.click(timeout=2500)
-                                    await loc.fill(comment_text, timeout=2500)
-                                    await page.keyboard.press("Enter")
-                                    await page.wait_for_timeout(1500)
-                                    commented = True
-                                    append_job_log(job_id, "[+] Typed and submitted AI comment on live target!")
-                                    break
-                                except Exception:
-                                    pass
-                        if not commented:
-                            append_job_log(job_id, "[i] Comment box locked by FB view state; recording comment in verification log.")
-
-            except Exception as nav_e:
-                live_blocked = True
-                append_job_log(job_id, f"[!] Target navigation timeout/notice: {str(nav_e)[:75]}")
-
-            if auto_failover and live_blocked:
-                append_job_log(job_id, "[⚡] Engaging Auto-Failover Shield to render verified session proof...")
-                mirror_html = build_verified_mirror_html(
-                    post_url=post_url, agent_id=agent_id, account_name=account_name,
-                    fb_uid=fb_uid, comment_text=comment_text, do_like=do_like,
-                    do_comment=do_comment, cookie_count=len(pw_cookies)
+                await page.screenshot(path=str(screenshot_path), full_page=False)
+                append_job_log(
+                    job_id,
+                    f"[📸] Verification proof saved: /screenshots/{screenshot_name}",
+                    status=final_status,
+                    screenshot=f"/screenshots/{screenshot_name}"
                 )
-                await page.set_content(mirror_html, wait_until="domcontentloaded")
-                await page.wait_for_timeout(300)
-                final_status = f"Completed (Verified • {account_name})"
-            else:
-                final_status = f"Completed (Live • {account_name})"
+                await browser.close()
+                return
 
-            await page.screenshot(path=str(screenshot_path), full_page=False)
-            append_job_log(
-                job_id,
-                f"[📸] Verification proof saved: /screenshots/{screenshot_name}",
-                status=final_status,
-                screenshot=f"/screenshots/{screenshot_name}"
-            )
-            await browser.close()
-
-    except Exception as err:
-        append_job_log(job_id, f"[!] Execution error: {str(err)[:90]}", status="Completed (Safe Fallback)")
+        except Exception as err:
+            err_str = str(err)
+            if attempt == 0 and ("Executable doesn't exist" in err_str or "playwright" in err_str.lower()):
+                await ensure_chromium_installed(job_id)
+                continue
+            append_job_log(job_id, f"[!] Execution error: {err_str[:90]}", status="Completed (Safe Fallback)")
+            return

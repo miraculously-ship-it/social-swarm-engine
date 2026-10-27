@@ -3,10 +3,10 @@ services:
     name: social-swarm-engine
     runtime: python
     plan: free
-    buildCommand: pip install -r requirements.txt && PLAYWRIGHT_BROWSERS_PATH=/opt/render/project/src/.pw-browsers python -m playwright install --with-deps chromium
-    startCommand: PLAYWRIGHT_BROWSERS_PATH=/opt/render/project/src/.pw-browsers uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: pip install -r requirements.txt && PLAYWRIGHT_BROWSERS_PATH=./.pw-browsers python -m playwright install --with-deps chromium
+    startCommand: PLAYWRIGHT_BROWSERS_PATH=./.pw-browsers uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.8
       - key: PLAYWRIGHT_BROWSERS_PATH
-        value: /opt/render/project/src/.pw-browsers
+        value: ./.pw-browsers

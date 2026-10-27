@@ -1,16 +1,16 @@
 [phases.setup]
-nixPkgs = ["python311", "playwright-driver", "chromium", "glib", "nss", "nspr", "atk", "at-spi2-atk", "cups", "dbus", "libdrm", "libxkbcommon", "libxcomposite", "libxdamage", "libxfixes", "libxrandr", "mesa", "pango", "cairo", "alsa-lib"]
+nixPkgs = ["python311", "chromium", "glib", "nss", "nspr", "atk", "at-spi2-atk", "cups", "dbus", "libdrm", "libxkbcommon", "libxcomposite", "libxdamage", "libxfixes", "libxrandr", "mesa", "pango", "cairo", "alsa-lib"]
 
 [variables]
-PLAYWRIGHT_BROWSERS_PATH = "/opt/venv/pw-browsers"
+PLAYWRIGHT_BROWSERS_PATH = "/app/.pw-browsers"
 
 [phases.install]
 cmds = [
   "python -m venv /opt/venv",
   "/opt/venv/bin/pip install --upgrade pip",
   "/opt/venv/bin/pip install -r requirements.txt",
-  "PLAYWRIGHT_BROWSERS_PATH=/opt/venv/pw-browsers /opt/venv/bin/playwright install chromium"
+  "PLAYWRIGHT_BROWSERS_PATH=/app/.pw-browsers /opt/venv/bin/python -m playwright install chromium"
 ]
 
 [start]
-cmd = "PLAYWRIGHT_BROWSERS_PATH=/opt/venv/pw-browsers /opt/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+cmd = "PLAYWRIGHT_BROWSERS_PATH=/app/.pw-browsers /opt/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"

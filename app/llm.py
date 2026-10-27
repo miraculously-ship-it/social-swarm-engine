@@ -15,8 +15,8 @@ MULTILINGUAL_FALLBACKS = {
     "English": [
         "Heads up everyone in the area — please stay alert and share this update with neighbors right away.",
         "Appreciate the fast reporting on this! Everyone nearby should definitely keep a close eye on the situation.",
-        "Spot on perspective — really appreciate how clearly this breaks down the situation.",
-        "Thanks for getting this out so quickly. Definitely something the whole community needs to watch closely."
+        "Spot on perspective — really appreciate how clearly this breaks down what is happening right now.",
+        "Thanks for putting this on the radar so quickly, definitely something the whole community needs to see."
     ],
     "Amharic (አማርኛ)": [
         "በጣም ጠቃሚ መረጃ ነው፣ ሁሉም ሰው ጥንቃቄ እንዲያደርግ ይህንን መረጃ ለሌሎችም እናጋራ!",
@@ -25,8 +25,7 @@ MULTILINGUAL_FALLBACKS = {
     ],
     "Afaan Oromo": [
         "Odeeffannoo baay'ee barbaachisaa dha, namni hundi of eeggannoo akka godhuuf waliif haa qoodnu!",
-        "Odeeffannoo ariifachiisaa kanaaf galatoomaa! Warri naannoo sana jirtan xiyyeeffannoon hordofaa.",
-        "Yaada gaarii fi ifa ta'e dha, galatoomaa!"
+        "Odeeffannoo ariifachiisaa kanaaf galatoomaa! Warri naannoo sana jirtan xiyyeeffannoon hordofaa."
     ],
     "Tigrinya (ትግርኛ)": [
         "ብጣዕሚ ጠቓሚ ሓበሬታ እዩ፣ ኩሉ ሰብ ጥንቃቐ ምእንቲ ክገብር ነዚ ሓበሬታ ንኻልኦት ንካፈሎ!",
@@ -36,13 +35,13 @@ MULTILINGUAL_FALLBACKS = {
         "معلومة مهمة جداً، يرجى من الجميع الانتباه ومشاركة هذا التحديث فوراً.",
         "شكراً على التغطية السريعة! يجب على الجميع في المنطقة توخي الحذر والمتابعة عن كثب."
     ],
-    "Spanish (Español)": [
-        "¡Atención a todos en la zona! Por favor manténganse alerta y compartan esta actualización de inmediato.",
-        "¡Gracias por informar tan rápido! Todos cerca deberían seguir de cerca esta situación."
-    ],
     "French (Français)": [
         "Info très importante, restez vigilants dans le secteur et partagez cette mise à jour autour de vous !",
         "Merci pour la rapidité de l'information ! Tout le monde à proximité devrait suivre ça de près."
+    ],
+    "Spanish (Español)": [
+        "¡Atención a todos en la zona! Por favor manténganse alerta y compartan esta actualización de inmediato.",
+        "¡Gracias por informar tan rápido! Todos cerca deberían seguir de cerca esta situación."
     ],
     "Swahili (Kiswahili)": [
         "Taarifa muhimu sana hii, tafadhali kila mtu awe makini na tuambizane haraka!",
@@ -68,8 +67,9 @@ async def generate_comment(
     )
 
     system_prompt = (
-        "You write authentic, unique, human-sounding social media comments (1 to 2 sentences max). "
+        "You write authentic, human-sounding social media comments (1 to 2 sentences max). "
         "Never use hashtags, never wrap in quotes, and match the requested persona and tone. "
+        "Every comment must be completely unique and fresh. "
         f"{lang_instruction}"
     )
     user_prompt = (
@@ -79,7 +79,7 @@ async def generate_comment(
         f"Tone: {tone}\n"
         f"Target Language: {lang_clean}\n"
         f"Unique Variation Seed: {seed}\n"
-        f"Write a brand-new, unique comment now in {lang_clean}:"
+        f"Write a brand-new comment now in {lang_clean}:"
     )
 
     if api_key:

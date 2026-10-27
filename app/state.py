@@ -18,9 +18,36 @@ BAD_NAMES = {
 }
 
 DEFAULT_ACCOUNTS = {
-    "fb_agent_alpha": {"agent_id": "fb_agent_alpha", "account_name": "Unlinked Account", "fb_uid": "Unlinked", "cookie_count": 0, "health": "Sandbox Ready", "cookies": []},
-    "fb_agent_beta": {"agent_id": "fb_agent_beta", "account_name": "Unlinked Account", "fb_uid": "Unlinked", "cookie_count": 0, "health": "Sandbox Ready", "cookies": []},
-    "fb_agent_gamma": {"agent_id": "fb_agent_gamma", "account_name": "Unlinked Account", "fb_uid": "Unlinked", "cookie_count": 0, "health": "Sandbox Ready", "cookies": []}
+    "fb_agent_alpha": {
+        "agent_id": "fb_agent_alpha",
+        "account_name": "Mirpap Day",
+        "fb_uid": "100062273714859",
+        "persona": "Alert Local Community Watcher",
+        "tone": "Urgent, alerting, and authentic",
+        "cookie_count": 0,
+        "health": "Active Session Armed",
+        "cookies": []
+    },
+    "fb_agent_beta": {
+        "agent_id": "fb_agent_beta",
+        "account_name": "Unlinked Account",
+        "fb_uid": "Unlinked",
+        "persona": "Helpful Brand Support Specialist",
+        "tone": "Warm, authentic, and helpful",
+        "cookie_count": 0,
+        "health": "Sandbox Ready",
+        "cookies": []
+    },
+    "fb_agent_gamma": {
+        "agent_id": "fb_agent_gamma",
+        "account_name": "Unlinked Account",
+        "fb_uid": "Unlinked",
+        "persona": "Insightful News Commentator",
+        "tone": "Direct, sharp, and professional",
+        "cookie_count": 0,
+        "health": "Sandbox Ready",
+        "cookies": []
+    }
 }
 
 def _read_json(path: Path, default: Any) -> Any:
@@ -119,16 +146,24 @@ def fetch_owner_name_from_fb(cookies: List[Dict[str, Any]], fb_uid: str) -> str:
 
 def get_accounts() -> Dict[str, Any]:
     raw = _read_json(ACCOUNTS_FILE, DEFAULT_ACCOUNTS)
-    accounts = raw if isinstance(raw, dict) else DEFAULT_ACCOUNTS.copy()
+    if isinstance(raw, list):
+        accounts = {item.get("agent_id") or item.get("id"): item for item in raw if isinstance(item, dict)}
+    elif isinstance(raw, dict) and len(raw) > 0:
+        accounts = raw
+    else:
+        accounts = DEFAULT_ACCOUNTS.copy()
+
     result = {}
-    for aid, default_acc in DEFAULT_ACCOUNTS.items():
-        src = accounts.get(aid, {})
+    for aid, src in accounts.items():
+        if not aid or not isinstance(src, dict):
+            continue
+        default_meta = DEFAULT_ACCOUNTS.get(aid, {})
         cookies = src.get("cookies", []) if isinstance(src.get("cookies"), list) else []
         fb_uid = extract_uid_from_cookies(cookies)
         saved_name = re.sub(r"\(\d+\)", "", str(src.get("account_name") or "")).strip()
 
         if fb_uid != "Unlinked":
-            if is_valid_owner_name(saved_name):
+            if is_valid_owner_name(saved_name) and saved_name != "Authenticated Owner":
                 owner_name = saved_name
             else:
                 owner_name = fetch_owner_name_from_fb(cookies, fb_uid)
@@ -137,10 +172,15 @@ def get_accounts() -> Dict[str, Any]:
             owner_name = "Unlinked Account"
             health = "Sandbox Ready"
 
+        persona = str(src.get("persona") or default_meta.get("persona") or "Alert Local Community Watcher").strip()
+        tone = str(src.get("tone") or default_meta.get("tone") or "Urgent, alerting, and authentic").strip()
+
         result[aid] = {
             "agent_id": aid,
             "account_name": owner_name,
             "fb_uid": fb_uid,
+            "persona": persona,
+            "tone": tone,
             "cookie_count": len(cookies),
             "health": health,
             "cookies": cookies,
@@ -157,33 +197,68 @@ def set_detected_account_name(agent_id: str, detected_name: str) -> None:
         accounts[agent_id]["account_name"] = clean
         _write_json(ACCOUNTS_FILE, accounts)
 
-def update_account_cookies(agent_id: str, account_name: str, cookies_raw: str) -> Dict[str, Any]:
+def save_or_create_account(
+    agent_id: str,
+    persona: str = "",
+    tone: str = "",
+    cookies_raw: str = None,
+) -> Dict[str, Any]:
+    clean_id = re.sub(r"[^a-zA-Z0-9_-]", "_", (agent_id or "").strip())
+    if not clean_id:
+        raise ValueError("Agent ID cannot be empty.")
+
     accounts = get_accounts()
-    raw_str = (cookies_raw or "").strip()
-    if raw_str:
-        parsed = json.loads(raw_str)
-        if isinstance(parsed, dict):
-            parsed = [parsed]
-        if not isinstance(parsed, list):
-            raise ValueError("Cookies JSON must be a list of objects.")
+    existing = accounts.get(clean_id, {})
+
+    if cookies_raw is not None:
+        raw_str = cookies_raw.strip()
+        if raw_str:
+            parsed = json.loads(raw_str)
+            if isinstance(parsed, dict):
+                parsed = [parsed]
+            if not isinstance(parsed, list):
+                raise ValueError("Cookies JSON must be a JSON array of cookie objects.")
+        else:
+            parsed = []
     else:
-        parsed = []
+        parsed = existing.get("cookies", [])
 
     fb_uid = extract_uid_from_cookies(parsed)
-    owner_name = fetch_owner_name_from_fb(parsed, fb_uid) if fb_uid != "Unlinked" else "Unlinked Account"
+    if fb_uid != "Unlinked":
+        prev_name = existing.get("account_name", "")
+        if existing.get("fb_uid") == fb_uid and is_valid_owner_name(prev_name) and prev_name != "Authenticated Owner":
+            owner_name = prev_name
+        else:
+            owner_name = fetch_owner_name_from_fb(parsed, fb_uid)
+    else:
+        owner_name = "Unlinked Account"
 
-    accounts[agent_id] = {
-        "agent_id": agent_id,
+    final_persona = (persona or existing.get("persona") or "Alert Local Community Watcher").strip()
+    final_tone = (tone or existing.get("tone") or "Urgent, alerting, and authentic").strip()
+
+    accounts[clean_id] = {
+        "agent_id": clean_id,
         "account_name": owner_name,
         "fb_uid": fb_uid,
+        "persona": final_persona,
+        "tone": final_tone,
         "cookie_count": len(parsed),
         "health": "Active Session Armed" if len(parsed) > 0 else "Sandbox Ready",
         "cookies": parsed,
     }
     _write_json(ACCOUNTS_FILE, accounts)
-    return accounts[agent_id]
+    return accounts[clean_id]
 
-# --- PERMANENT ARCHIVE VAULT ---
+def delete_account(agent_id: str) -> bool:
+    accounts = get_accounts()
+    if agent_id not in accounts:
+        return False
+    if len(accounts) <= 1:
+        raise ValueError("Cannot delete the last remaining agent node.")
+    del accounts[agent_id]
+    _write_json(ACCOUNTS_FILE, accounts)
+    return True
+
 def get_archives() -> List[Dict[str, Any]]:
     archives = _read_json(ARCHIVES_FILE, [])
     return [a for a in archives if isinstance(a, dict) and a.get("id")]
@@ -232,7 +307,6 @@ def delete_archive(job_id: str) -> bool:
     save_archives(new_arch)
     return len(new_arch) < len(archives)
 
-# --- LIVE FEED JOBS ---
 def get_jobs() -> List[Dict[str, Any]]:
     jobs = _read_json(JOBS_FILE, [])
     return [j for j in jobs if isinstance(j, dict) and j.get("agent_id")]
@@ -277,7 +351,6 @@ def update_job(job_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
     if updated_job:
         upsert_archive(updated_job)
     else:
-        # Also allow editing comment directly in archive if live feed was purged
         archives = get_archives()
         for a in archives:
             if a.get("id") == job_id:
