@@ -1,5 +1,7 @@
 import json
 import re
+import time
+from datetime import datetime
 import httpx
 from pathlib import Path
 from typing import Dict, Any, List
@@ -7,6 +9,7 @@ from typing import Dict, Any, List
 ROOT_DIR = Path(__file__).resolve().parent.parent
 ACCOUNTS_FILE = ROOT_DIR / "accounts.json"
 JOBS_FILE = ROOT_DIR / "jobs.json"
+ARCHIVES_FILE = ROOT_DIR / "archives.json"
 
 BAD_NAMES = {
     "facebook", "see owner profile", "your profile", "profile",
@@ -79,7 +82,6 @@ def extract_uid_from_cookies(cookies: List[Dict[str, Any]]) -> str:
     return "Unlinked"
 
 def fetch_owner_name_from_fb(cookies: List[Dict[str, Any]], fb_uid: str) -> str:
-    """Fetches the real account owner full name from Facebook CurrentUserInitialData using cookies."""
     if fb_uid == "Unlinked" or not cookies:
         return "Unlinked Account"
     jar = {c["name"]: str(c["value"]) for c in cookies if isinstance(c, dict) and c.get("name") and c.get("value")}
@@ -87,8 +89,6 @@ def fetch_owner_name_from_fb(cookies: List[Dict[str, Any]], fb_uid: str) -> str:
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
     }
     patterns = [
         r'"CurrentUserInitialData"\s*,\s*\[\]\s*,\s*\{[^}]*?"NAME"\s*:\s*"([^"]+)"',
@@ -183,6 +183,56 @@ def update_account_cookies(agent_id: str, account_name: str, cookies_raw: str) -
     _write_json(ACCOUNTS_FILE, accounts)
     return accounts[agent_id]
 
+# --- PERMANENT ARCHIVE VAULT ---
+def get_archives() -> List[Dict[str, Any]]:
+    archives = _read_json(ARCHIVES_FILE, [])
+    return [a for a in archives if isinstance(a, dict) and a.get("id")]
+
+def save_archives(archives: List[Dict[str, Any]]) -> None:
+    _write_json(ARCHIVES_FILE, archives)
+
+def upsert_archive(job: Dict[str, Any]) -> None:
+    if not isinstance(job, dict) or not job.get("id"):
+        return
+    archives = get_archives()
+    now_str = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    archive_entry = {
+        "id": job["id"],
+        "timestamp": job.get("timestamp") or int(time.time() * 1000),
+        "archived_at": job.get("archived_at") or now_str,
+        "agent_id": job.get("agent_id", "fb_agent_alpha"),
+        "account_name": job.get("account_name", "Authenticated Owner"),
+        "fb_uid": job.get("fb_uid", "Unlinked"),
+        "post_url": job.get("post_url", ""),
+        "post_text": job.get("post_text", ""),
+        "persona": job.get("persona", ""),
+        "tone": job.get("tone", ""),
+        "language": job.get("language", "English"),
+        "do_like": job.get("do_like", True),
+        "do_comment": job.get("do_comment", True),
+        "comment": job.get("comment", ""),
+        "status": job.get("status", "Completed"),
+        "screenshot": job.get("screenshot"),
+        "logs": job.get("logs", []),
+    }
+    replaced = False
+    for idx, existing in enumerate(archives):
+        if existing.get("id") == job["id"]:
+            archive_entry["archived_at"] = existing.get("archived_at") or now_str
+            archives[idx] = archive_entry
+            replaced = True
+            break
+    if not replaced:
+        archives.insert(0, archive_entry)
+    save_archives(archives)
+
+def delete_archive(job_id: str) -> bool:
+    archives = get_archives()
+    new_arch = [a for a in archives if a.get("id") != job_id]
+    save_archives(new_arch)
+    return len(new_arch) < len(archives)
+
+# --- LIVE FEED JOBS ---
 def get_jobs() -> List[Dict[str, Any]]:
     jobs = _read_json(JOBS_FILE, [])
     return [j for j in jobs if isinstance(j, dict) and j.get("agent_id")]
@@ -194,10 +244,12 @@ def add_job(job: Dict[str, Any]) -> Dict[str, Any]:
     jobs = get_jobs()
     jobs.insert(0, job)
     save_jobs(jobs)
+    upsert_archive(job)
     return job
 
 def append_job_log(job_id: str, line: str, status: str = None, screenshot: str = None, account_name: str = None) -> None:
     jobs = get_jobs()
+    target_job = None
     for j in jobs:
         if j.get("id") == job_id:
             j.setdefault("logs", []).append(line)
@@ -207,17 +259,32 @@ def append_job_log(job_id: str, line: str, status: str = None, screenshot: str =
                 j["screenshot"] = screenshot
             if account_name:
                 j["account_name"] = account_name
+            target_job = j
             break
     save_jobs(jobs)
+    if target_job:
+        upsert_archive(target_job)
 
 def update_job(job_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
     jobs = get_jobs()
+    updated_job = {}
     for j in jobs:
         if j.get("id") == job_id:
             j.update(updates)
-            save_jobs(jobs)
-            return j
-    return {}
+            updated_job = j
+            break
+    save_jobs(jobs)
+    if updated_job:
+        upsert_archive(updated_job)
+    else:
+        # Also allow editing comment directly in archive if live feed was purged
+        archives = get_archives()
+        for a in archives:
+            if a.get("id") == job_id:
+                a.update(updates)
+                save_archives(archives)
+                return a
+    return updated_job
 
 def delete_job(job_id: str) -> bool:
     jobs = get_jobs()
