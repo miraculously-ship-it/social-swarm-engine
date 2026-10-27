@@ -3,8 +3,6 @@
     "agent_id": "fb_agent_alpha",
     "account_name": "Mirpap Day",
     "fb_uid": "100062273714859",
-    "persona": "Alert Local Community Watcher",
-    "tone": "Urgent, alerting, and authentic",
     "cookie_count": 8,
     "health": "Active Session Armed",
     "cookies": [
@@ -94,8 +92,6 @@
     "agent_id": "fb_agent_beta",
     "account_name": "Unlinked Account",
     "fb_uid": "Unlinked",
-    "persona": "Helpful Brand Support Specialist",
-    "tone": "Warm, authentic, and helpful",
     "cookie_count": 0,
     "health": "Sandbox Ready",
     "cookies": []
@@ -104,8 +100,6 @@
     "agent_id": "fb_agent_gamma",
     "account_name": "Unlinked Account",
     "fb_uid": "Unlinked",
-    "persona": "Insightful News Commentator",
-    "tone": "Direct, sharp, and professional",
     "cookie_count": 0,
     "health": "Sandbox Ready",
     "cookies": []
