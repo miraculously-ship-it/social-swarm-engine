@@ -1,8 +1,13 @@
 [phases.setup]
-nixPkgs = ["python311", "playwright-driver", "chromium"]
+nixPkgs = ["python311", "playwright-driver", "chromium", "glib", "nss", "nspr", "atk", "at-spi2-atk", "cups", "dbus", "libdrm", "libxkbcommon", "libxcomposite", "libxdamage", "libxfixes", "libxrandr", "mesa", "pango", "cairo", "alsa-lib"]
 
 [phases.install]
-cmds = ["pip install -r requirements.txt", "playwright install chromium"]
+cmds = [
+  "python -m venv /opt/venv",
+  "/opt/venv/bin/pip install --upgrade pip",
+  "/opt/venv/bin/pip install -r requirements.txt",
+  "/opt/venv/bin/playwright install chromium"
+]
 
 [start]
-cmd = "python3 -m playwright install chromium && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}"
+cmd = "/opt/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
