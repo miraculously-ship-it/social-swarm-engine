@@ -84,38 +84,40 @@ async def execute_automation_job(
                 await page.goto(post_url, wait_until="domcontentloaded", timeout=16000)
                 await page.wait_for_timeout(2000)
 
-                try:
-                    detected_owner = await page.evaluate("""() => {
-                        try {
-                            const d = window.require && window.require("CurrentUserInitialData");
-                            if (d && d.NAME) return d.NAME;
-                        } catch (e) {}
-                        const html = document.documentElement.innerHTML;
-                        const m = html.match(/"CurrentUserInitialData"\s*,\s*\[\]\s*,\s*\{[^}]*?"NAME"\s*:\s*"([^"]+)"/);
-                        if (m && m[1]) return JSON.parse('"' + m[1] + '"');
-                        return null;
-                    }""")
-                    if detected_owner and is_valid_owner_name(detected_owner):
-                        account_name = detected_owner.strip()
-                        set_detected_account_name(agent_id, account_name)
-                        append_job_log(job_id, f"[+] Verified Account Owner Name: {account_name} (ID: {fb_uid})", account_name=account_name)
-                except Exception:
-                    pass
-
-                for close_sel in ['div[aria-label="Close"]', 'div[role="button"][aria-label="Close"]']:
-                    loc = page.locator(close_sel).first
-                    if await loc.count() > 0:
-                        try:
-                            await loc.click(timeout=1500)
-                            await page.wait_for_timeout(400)
-                        except Exception:
-                            pass
-
-                title_lower = (await page.title()).lower()
-                if "log in" in title_lower or "security check" in title_lower:
+                # Robust Language-Agnostic Login Wall Detection
+                is_login_url = "/login" in page.url or "login.php" in page.url
+                password_fields = await page.locator('input[type="password"]').count()
+                
+                if is_login_url or password_fields > 0:
                     live_blocked = True
-                    append_job_log(job_id, "[!] Facebook login wall encountered on cloud IP.")
+                    append_job_log(job_id, "[!] Facebook login wall detected (Cookies expired or IP blocked).")
                 else:
+                    # Attempt Owner Extraction if logged in
+                    try:
+                        detected_owner = await page.evaluate("""() => {
+                            try {
+                                const d = window.require && window.require("CurrentUserInitialData");
+                                if (d && d.NAME) return d.NAME;
+                            } catch (e) {}
+                            return null;
+                        }""")
+                        if detected_owner and is_valid_owner_name(detected_owner):
+                            account_name = detected_owner.strip()
+                            set_detected_account_name(agent_id, account_name)
+                            append_job_log(job_id, f"[+] Verified Account Owner Name: {account_name} (ID: {fb_uid})", account_name=account_name)
+                    except Exception:
+                        pass
+
+                    # Dismiss close buttons
+                    for close_sel in ['div[aria-label="Close"]', 'div[role="button"][aria-label="Close"]']:
+                        loc = page.locator(close_sel).first
+                        if await loc.count() > 0:
+                            try:
+                                await loc.click(timeout=1500)
+                                await page.wait_for_timeout(400)
+                            except Exception:
+                                pass
+
                     if do_like:
                         liked = False
                         for sel in ['div[aria-label="Like"]', 'div[role="button"][aria-label*="Like"]', 'span:has-text("Like")']:
