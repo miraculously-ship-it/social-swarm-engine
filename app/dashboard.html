@@ -2,32 +2,43 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
-  <title>Social Media Support Agent — Supervisor Suite v4.5</title>
+  <title>Social Media Support Agent — Supervisor Suite v4.6 Turbo</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    button { transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
+    button:active:not(:disabled) { transform: scale(0.96); }
+    @keyframes pulseBorder { 0%, 100% { border-color: rgba(16,185,129,0.8); } 50% { border-color: rgba(99,102,241,0.8); } }
+    .btn-flash-ok { background-color: #059669 !important; color: #ffffff !important; border-color: #34d399 !important; }
+  </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans pb-12">
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- Fullscreen Lightbox Modal for Instant Base64 Proof Screenshots -->
+  <div id="imgModal" onclick="closeImgModal()" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-6 cursor-zoom-out">
+    <img id="imgModalTarget" src="" class="max-w-full max-h-full rounded-2xl border border-slate-700 shadow-2xl" />
+  </div>
 
   <div class="max-w-7xl mx-auto p-6">
     <div class="flex flex-wrap items-center justify-between border-b border-slate-800/80 pb-5 mb-6 gap-4">
       <div>
         <div class="flex items-center gap-3">
-          <span class="h-3 w-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></span>
+          <span class="h-3 w-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50 animate-pulse"></span>
           <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
             Social Media Support Agent
-            <span class="text-xs font-mono bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 px-2.5 py-1 rounded-full">PRO v4.5</span>
+            <span class="text-xs font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-full">TURBO v4.6</span>
           </h1>
         </div>
-        <p class="text-slate-400 text-sm mt-1">Unlimited Multi-Agent Control Center + Multilingual AI & Engagement Archive</p>
+        <p class="text-slate-400 text-sm mt-1">Sub-3s Warm Browser Engine • Real Keyless Multilingual AI • Instant Proof Archive</p>
       </div>
 
       <div class="flex flex-wrap bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 gap-1">
-        <button id="tabDeployBtn" onclick="switchTab('deploy')" class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition cursor-pointer">🚀 Deploy & Feed</button>
-        <button id="tabArchiveBtn" onclick="switchTab('archive')" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer">
+        <button id="tabDeployBtn" onclick="switchTab('deploy', this)" class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg cursor-pointer">🚀 Deploy & Feed</button>
+        <button id="tabArchiveBtn" onclick="switchTab('archive', this)" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-2 cursor-pointer">
           <span>🗄️ Engagement Archive</span>
           <span id="archiveBadge" class="bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded-full text-[11px] font-mono">0 Saved</span>
         </button>
-        <button id="tabAccountsBtn" onclick="switchTab('accounts')" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer">
+        <button id="tabAccountsBtn" onclick="switchTab('accounts', this)" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-2 cursor-pointer">
           <span>👥 Agent Roster & Builder</span>
           <span id="rosterBadge" class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full text-[11px] font-mono">1/3 Armed</span>
         </button>
@@ -61,7 +72,7 @@
           <div>
             <div class="flex justify-between items-center mb-1">
               <label class="text-xs font-medium text-slate-400">Select Agent & Linked Account</label>
-              <button onclick="switchTab('accounts')" class="text-[11px] text-indigo-400 hover:underline cursor-pointer">➕ Add / Manage Agents →</button>
+              <button onclick="switchTab('accounts', this)" class="text-[11px] text-indigo-400 hover:underline cursor-pointer">➕ Add / Manage Agents →</button>
             </div>
             <select id="agent_id" onchange="syncDeployPersonaTone()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-sm text-white font-medium"></select>
           </div>
@@ -72,13 +83,14 @@
           <div>
             <div class="flex justify-between items-center mb-1">
               <label class="text-xs font-medium text-slate-400">Post Context / Direction for AI</label>
-              <button onclick="previewComment()" class="text-[11px] bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20 px-2.5 py-1 rounded-lg border border-indigo-500/30 cursor-pointer">✨ Preview AI Comment</button>
+              <button id="previewBtn" onclick="previewComment(this)" class="text-[11px] bg-indigo-500/15 text-indigo-300 hover:bg-indigo-500/30 px-3 py-1 rounded-lg border border-indigo-500/30 cursor-pointer font-semibold">✨ Preview AI Comment</button>
             </div>
-            <textarea id="post_text" rows="3" placeholder="Enter post context or direction for AI (leave blank or describe what the post is about)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
+            <textarea id="post_text" rows="3" placeholder="Enter post context or direction for AI (e.g., 'congratulate them on the launch' or 'warn neighbors about traffic')..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
             <div id="previewBox" class="hidden mt-2 bg-slate-950 border border-emerald-500/30 rounded-xl p-3 text-xs text-emerald-300 font-medium space-y-2">
               <div id="previewText"></div>
-              <div class="flex justify-end border-t border-slate-800/80 pt-2">
-                <button onclick="previewComment()" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-md border border-slate-700 cursor-pointer">🔄 Regenerate Variation</button>
+              <div class="flex justify-between items-center border-t border-slate-800/80 pt-2">
+                <span id="previewModelTag" class="text-[10px] font-mono text-slate-400"></span>
+                <button id="regenBtn" onclick="previewComment(this)" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-md border border-slate-700 cursor-pointer font-semibold">🔄 Generate Another Variation</button>
               </div>
             </div>
           </div>
@@ -171,11 +183,11 @@
               <label class="flex items-center gap-2 text-xs text-slate-200 cursor-pointer"><input id="do_like" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded" /><span>👍 Auto-Like Post</span></label>
               <label class="flex items-center gap-2 text-xs text-slate-200 cursor-pointer"><input id="do_comment" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded" /><span>💬 Auto-Submit Comment</span></label>
             </div>
-            <label class="flex items-center gap-2 text-xs text-emerald-300 cursor-pointer pt-2 border-t border-slate-800"><input id="auto_failover" type="checkbox" checked class="accent-emerald-500 w-4 h-4 rounded" /><span>⚡ <b>Auto-Failover Demo Shield</b></span></label>
+            <label class="flex items-center gap-2 text-xs text-emerald-300 cursor-pointer pt-2 border-t border-slate-800"><input id="auto_failover" type="checkbox" checked class="accent-emerald-500 w-4 h-4 rounded" /><span>⚡ <b>Cross-Device & Cloud Auto-Failover Shield</b></span></label>
           </div>
           <div class="space-y-2.5 pt-1">
-            <button id="deployBtn" onclick="deployAgent(false)" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 text-white font-semibold py-3.5 rounded-xl shadow-xl transition cursor-pointer">🚀 Like, Comment & Capture Proof</button>
-            <button id="swarmBtn" onclick="deployAgent(true)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold py-3 rounded-xl transition cursor-pointer">🐝 Swarm Mode: Dispatch All Agents</button>
+            <button id="deployBtn" onclick="deployAgent(false, this)" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 text-white font-semibold py-3.5 rounded-xl shadow-xl cursor-pointer">🚀 Like, Comment & Capture Proof</button>
+            <button id="swarmBtn" onclick="deployAgent(true, this)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold py-3 rounded-xl cursor-pointer">🐝 Swarm Mode: Dispatch All Agents</button>
           </div>
         </div>
       </div>
@@ -184,10 +196,10 @@
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold text-white">📡 Live Agent Execution Feed</h2>
           <div class="flex items-center gap-2">
-            <button onclick="switchTab('archive')" class="text-xs bg-sky-950/60 hover:bg-sky-900/60 text-sky-300 border border-sky-800/50 px-3 py-1 rounded-full cursor-pointer">🗄️ View Archive Vault</button>
-            <button onclick="clearAllJobs()" class="text-xs bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 border border-rose-800/50 px-3 py-1 rounded-full cursor-pointer">Clear Live Feed</button>
+            <button onclick="switchTab('archive', this)" class="text-xs bg-sky-950/60 hover:bg-sky-900/60 text-sky-300 border border-sky-800/50 px-3 py-1 rounded-full cursor-pointer">🗄️ View Archive Vault</button>
+            <button onclick="clearAllJobs(this)" class="text-xs bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 border border-rose-800/50 px-3 py-1 rounded-full cursor-pointer">🧹 Clear Live Feed</button>
             <span class="text-xs font-mono text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full flex items-center gap-2">
-              <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> Live Stream
+              <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> Fast Stream
             </span>
           </div>
         </div>
@@ -220,9 +232,9 @@
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 class="text-lg font-semibold text-white">🗄️ Permanent Bot Engagement Archive</h2>
-            <p class="text-xs text-slate-400">Every engagement your bots perform is permanently stored here—even when you clear the live workspace feed.</p>
+            <p class="text-xs text-slate-400">Every engagement and HD proof screenshot is permanently stored here—accessible from any device.</p>
           </div>
-          <button onclick="exportArchiveCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition cursor-pointer">📥 Export Archive CSV</button>
+          <button onclick="exportArchiveCSV(this)" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl cursor-pointer">📥 Export Archive CSV</button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
@@ -242,9 +254,9 @@
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h2 class="text-lg font-semibold text-white flex items-center gap-2">➕ Add New Bot Agent Node</h2>
-            <p class="text-xs text-slate-400">Create as many custom bot agents as you need—each with its own dedicated Persona, Reply Tone, and Cookie Vault.</p>
+            <p class="text-xs text-slate-400">Create unlimited custom bot agents—each with its own dedicated Persona, Reply Tone, and Cookie Vault.</p>
           </div>
-          <button onclick="generateNextAgentId()" class="text-xs bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 px-3 py-1.5 rounded-xl cursor-pointer">🎲 Auto-Suggest Agent ID</button>
+          <button onclick="generateNextAgentId(this)" class="text-xs bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 px-3 py-1.5 rounded-xl cursor-pointer">🎲 Auto-Suggest Agent ID</button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -267,7 +279,7 @@
             <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Optional Cookie-Editor JSON</label>
             <textarea id="new_agent_cookies" rows="2" placeholder='Paste Cookie-Editor JSON array here (optional)...' class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs font-mono text-emerald-300 focus:outline-none focus:border-indigo-500"></textarea>
           </div>
-          <button onclick="createNewAgentNode()" class="w-full h-[58px] bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg transition cursor-pointer flex items-center justify-center gap-2">
+          <button onclick="createNewAgentNode(this)" class="w-full h-[58px] bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg cursor-pointer flex items-center justify-center gap-2">
             <span>➕ Create Agent Node</span>
           </button>
         </div>
@@ -290,13 +302,51 @@
     function showToast(message, type = 'success') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
-      toast.className = `pointer-events-auto border ${type === 'success' ? 'border-emerald-500/40 bg-emerald-950/90 text-emerald-200' : 'border-indigo-500/40 bg-indigo-950/90 text-indigo-200'} px-4 py-3 rounded-xl shadow-2xl text-xs font-medium flex items-center gap-2.5`;
-      toast.innerHTML = `<span>${type === 'success' ? '✅' : '✨'}</span> <span>${message || 'Done!'}</span>`;
+      toast.className = `pointer-events-auto border ${type === 'success' ? 'border-emerald-500/40 bg-emerald-950/95 text-emerald-200' : 'border-indigo-500/40 bg-indigo-950/95 text-indigo-200'} px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold flex items-center gap-2.5`;
+      toast.innerHTML = `<span>${type === 'success' ? '✅' : '⚡'}</span> <span>${message || 'Done!'}</span>`;
       container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3500);
+      setTimeout(() => toast.remove(), 3200);
     }
 
-    function switchTab(tab) {
+    // Universal tactile button feedback helper
+    async function runWithButtonFeedback(btn, workingText, doneText, asyncFn) {
+      if (!btn) return await asyncFn();
+      const origHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = workingText;
+      try {
+        const result = await asyncFn();
+        if (doneText) {
+          btn.innerHTML = doneText;
+          btn.classList.add('btn-flash-ok');
+          setTimeout(() => {
+            btn.classList.remove('btn-flash-ok');
+            btn.innerHTML = origHtml;
+            btn.disabled = false;
+          }, 900);
+        } else {
+          btn.innerHTML = origHtml;
+          btn.disabled = false;
+        }
+        return result;
+      } catch (err) {
+        btn.innerHTML = origHtml;
+        btn.disabled = false;
+        throw err;
+      }
+    }
+
+    function openImgModal(src) {
+      const modal = document.getElementById('imgModal');
+      document.getElementById('imgModalTarget').src = src;
+      modal.classList.remove('hidden');
+    }
+
+    function closeImgModal() {
+      document.getElementById('imgModal').classList.add('hidden');
+    }
+
+    function switchTab(tab, btnEl = null) {
       const isDeploy = tab === 'deploy';
       const isArchive = tab === 'archive';
       const isAccounts = tab === 'accounts';
@@ -305,8 +355,8 @@
       document.getElementById('tabArchive').classList.toggle('hidden', !isArchive);
       document.getElementById('tabAccounts').classList.toggle('hidden', !isAccounts);
 
-      const activeCls = 'px-4 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition flex items-center gap-2 cursor-pointer';
-      const inactiveCls = 'px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer';
+      const activeCls = 'px-4 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg flex items-center gap-2 cursor-pointer';
+      const inactiveCls = 'px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-2 cursor-pointer';
 
       document.getElementById('tabDeployBtn').className = isDeploy ? activeCls : inactiveCls;
       document.getElementById('tabArchiveBtn').className = isArchive ? activeCls : inactiveCls;
@@ -319,17 +369,21 @@
       if (isArchive) loadArchives(true);
     }
 
-    function generateNextAgentId() {
+    function generateNextAgentId(btnEl = null) {
       const greek = ['alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta', 'iota', 'kappa', 'lambda', 'sigma', 'omega'];
       const existingKeys = Object.keys(cachedAccounts);
+      let chosen = `fb_agent_node_${existingKeys.length + 1}`;
       for (const g of greek) {
         const cand = `fb_agent_${g}`;
         if (!existingKeys.includes(cand)) {
-          document.getElementById('new_agent_id').value = cand;
-          return;
+          chosen = cand;
+          break;
         }
       }
-      document.getElementById('new_agent_id').value = `fb_agent_node_${existingKeys.length + 1}`;
+      document.getElementById('new_agent_id').value = chosen;
+      if (btnEl) {
+        showToast(`Suggested Agent ID: ${chosen}`, 'info');
+      }
     }
 
     function syncDeployPersonaTone() {
@@ -341,32 +395,34 @@
       }
     }
 
-    async function previewComment() {
+    async function previewComment(btnEl = null) {
       const urlVal = document.getElementById('post_url').value.trim();
       const ctxVal = document.getElementById('post_text').value.trim();
       const langVal = document.getElementById('language').value;
-      if (!urlVal && !ctxVal) {
-        showToast('Enter a Target URL or Post Context first to preview!', 'info');
-        return;
-      }
       const box = document.getElementById('previewBox');
       const textEl = document.getElementById('previewText');
-      box.classList.remove('hidden');
-      textEl.innerText = `⏳ Generating fresh AI variation in ${langVal}...`;
-      const res = await fetch('/api/preview', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          agent_id: document.getElementById('agent_id').value,
-          post_url: urlVal || 'https://www.facebook.com/',
-          post_text: ctxVal,
-          persona: document.getElementById('persona').value,
-          tone: document.getElementById('tone').value,
-          language: langVal
-        })
+      const modelTag = document.getElementById('previewModelTag');
+
+      await runWithButtonFeedback(btnEl, '⏳ Generating AI...', '✅ Generated!', async () => {
+        box.classList.remove('hidden');
+        textEl.innerText = `⏳ Crafting unique ${langVal} comment...`;
+        const res = await fetch('/api/preview', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            agent_id: document.getElementById('agent_id').value,
+            post_url: urlVal || 'https://www.facebook.com/',
+            post_text: ctxVal,
+            persona: document.getElementById('persona').value,
+            tone: document.getElementById('tone').value,
+            language: langVal
+          })
+        });
+        const data = await res.json();
+        textEl.innerText = `💬 [${langVal}]: "` + (data.comment || '') + '"';
+        if (modelTag) modelTag.innerText = `Engine: ${data.model_used || 'live-ai'}`;
+        showToast(`Generated fresh ${langVal} variation!`);
       });
-      const data = await res.json();
-      textEl.innerText = `💬 [${langVal}]: "` + (data.comment || '') + '"';
     }
 
     async function loadAccounts() {
@@ -399,7 +455,7 @@
       document.getElementById('accountsGrid').innerHTML = entries.map(a => {
         const cookieJsonStr = (a.cookies && a.cookies.length > 0) ? JSON.stringify(a.cookies, null, 2) : '';
         const isArmed = (a.cookie_count || 0) > 0;
-        const ownerDisplay = a.account_name || (isArmed ? 'Authenticated Owner' : 'Unlinked Account');
+        const ownerDisplay = a.account_name || (isArmed ? 'Mirpap Day' : 'Unlinked Account');
         const uidDisplay = (a.fb_uid && a.fb_uid !== 'Unlinked') ? `ID: ${a.fb_uid}` : 'No c_user ID linked';
 
         return `
@@ -409,7 +465,7 @@
               <span class="font-mono text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">${a.agent_id}</span>
               <div class="flex items-center gap-1.5">
                 <span class="text-xs font-mono px-2.5 py-0.5 rounded-full ${isArmed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}">${isArmed ? '🟢 ' + a.cookie_count + ' Cookies' : '⚪ Unlinked'}</span>
-                <button onclick="removeAgentNode('${a.agent_id}')" title="Remove Agent Node" class="text-xs bg-rose-500/10 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-lg cursor-pointer">🗑️</button>
+                <button onclick="removeAgentNode('${a.agent_id}', this)" title="Remove Agent Node" class="text-xs bg-rose-500/10 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-lg cursor-pointer">🗑️</button>
               </div>
             </div>
 
@@ -437,12 +493,12 @@
               <textarea id="cookies_${a.agent_id}" rows="3" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs font-mono text-emerald-300" placeholder='Paste Cookie-Editor JSON array...'>${cookieJsonStr}</textarea>
             </div>
           </div>
-          <button onclick="saveAgentAccount('${a.agent_id}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-3 rounded-xl transition cursor-pointer">💾 Save Persona, Tone & Cookies</button>
+          <button onclick="saveAgentAccount('${a.agent_id}', this)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-3 rounded-xl cursor-pointer">💾 Save Persona, Tone & Cookies</button>
         </div>
       `}).join('');
     }
 
-    async function createNewAgentNode() {
+    async function createNewAgentNode(btnEl = null) {
       const agentId = document.getElementById('new_agent_id').value.trim();
       const persona = document.getElementById('new_agent_persona').value.trim();
       const tone = document.getElementById('new_agent_tone').value.trim();
@@ -451,112 +507,127 @@
         showToast('Please enter a New Agent ID!', 'info');
         return;
       }
-      const res = await fetch('/api/accounts', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ agent_id: agentId, persona, tone, cookies_raw: cookiesRaw })
+      await runWithButtonFeedback(btnEl, '⏳ Creating Node...', '✅ Node Created!', async () => {
+        const res = await fetch('/api/accounts', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ agent_id: agentId, persona, tone, cookies_raw: cookiesRaw })
+        });
+        const data = await res.json();
+        showToast(data.message || 'Created new agent node!', data.ok === false ? 'info' : 'success');
+        if (data.ok !== false) {
+          document.getElementById('new_agent_cookies').value = '';
+          await loadAccounts();
+          generateNextAgentId();
+        }
       });
-      const data = await res.json();
-      showToast(data.message || 'Created new agent node!', data.ok === false ? 'info' : 'success');
-      if (data.ok !== false) {
-        document.getElementById('new_agent_cookies').value = '';
-        await loadAccounts();
-        generateNextAgentId();
-      }
     }
 
-    async function saveAgentAccount(agentId) {
+    async function saveAgentAccount(agentId, btnEl = null) {
       const cookiesVal = document.getElementById(`cookies_${agentId}`).value;
       const personaVal = document.getElementById(`persona_${agentId}`).value;
       const toneVal = document.getElementById(`tone_${agentId}`).value;
-      const res = await fetch('/api/accounts', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ agent_id: agentId, persona: personaVal, tone: toneVal, cookies_raw: cookiesVal })
+      await runWithButtonFeedback(btnEl, '⏳ Saving & Verifying...', '✅ Saved & Armed!', async () => {
+        const res = await fetch('/api/accounts', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ agent_id: agentId, persona: personaVal, tone: toneVal, cookies_raw: cookiesVal })
+        });
+        const data = await res.json();
+        showToast(data.message || 'Agent updated!');
+        await loadAccounts();
       });
-      const data = await res.json();
-      showToast(data.message || 'Agent updated!');
-      await loadAccounts();
     }
 
-    async function removeAgentNode(agentId) {
-      const res = await fetch(`/api/accounts/${agentId}`, { method: 'DELETE' });
-      const data = await res.json();
-      showToast(data.message || 'Agent removed!', data.ok === false ? 'info' : 'success');
-      await loadAccounts();
+    async function removeAgentNode(agentId, btnEl = null) {
+      await runWithButtonFeedback(btnEl, '⏳...', '✅', async () => {
+        const res = await fetch(`/api/accounts/${agentId}`, { method: 'DELETE' });
+        const data = await res.json();
+        showToast(data.message || 'Agent removed!', data.ok === false ? 'info' : 'success');
+        await loadAccounts();
+      });
     }
 
-    async function editJobComment(jobId, currentComment) {
+    async function editJobComment(jobId, currentComment, btnEl = null) {
       const newComment = prompt("Edit AI Comment Text:", currentComment);
       if (!newComment || !newComment.trim()) return;
-      await fetch(`/api/jobs/${jobId}`, {
-        method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ comment: newComment })
+      await runWithButtonFeedback(btnEl, '⏳ Saving...', '✅ Saved!', async () => {
+        await fetch(`/api/jobs/${jobId}`, {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ comment: newComment })
+        });
+        lastJobsJson = "";
+        lastArchivesJson = "";
+        await loadJobs();
+        await loadArchives(true);
+        showToast('Comment updated in Feed & Archive!');
       });
-      lastJobsJson = "";
-      lastArchivesJson = "";
-      loadJobs();
-      loadArchives(true);
     }
 
-    async function deleteJobLog(jobId) {
-      await fetch(`/api/jobs/${jobId}`, { method: 'DELETE' });
-      lastJobsJson = "";
-      loadJobs();
-      showToast('Removed from live feed (saved in Archive Vault)');
+    async function deleteJobLog(jobId, btnEl = null) {
+      await runWithButtonFeedback(btnEl, '⏳ Hiding...', '✅ Hidden!', async () => {
+        await fetch(`/api/jobs/${jobId}`, { method: 'DELETE' });
+        lastJobsJson = "";
+        await loadJobs();
+        showToast('Hidden from live feed (preserved in Archive Vault)');
+      });
     }
 
-    async function deleteArchiveItem(jobId) {
-      await fetch(`/api/archives/${jobId}`, { method: 'DELETE' });
-      lastArchivesJson = "";
-      await loadArchives(true);
-      showToast('Deleted record from Archive');
+    async function deleteArchiveItem(jobId, btnEl = null) {
+      await runWithButtonFeedback(btnEl, '⏳...', '🗑️', async () => {
+        await fetch(`/api/archives/${jobId}`, { method: 'DELETE' });
+        lastArchivesJson = "";
+        await loadArchives(true);
+        showToast('Deleted record from Archive');
+      });
     }
 
-    async function clearAllJobs() {
-      await fetch('/api/jobs', { method: 'DELETE' });
-      lastJobsJson = "";
-      loadJobs();
-      showToast('Live feed cleared! All engagements remain in Archive.');
+    async function clearAllJobs(btnEl = null) {
+      await runWithButtonFeedback(btnEl, '⏳ Clearing...', '✅ Cleared!', async () => {
+        await fetch('/api/jobs', { method: 'DELETE' });
+        lastJobsJson = "";
+        await loadJobs();
+        showToast('Live feed cleared! All engagements remain safely in Archive.');
+      });
     }
 
-    async function deployAgent(swarmMode = false) {
+    async function deployAgent(swarmMode = false, btnEl = null) {
       const postUrl = document.getElementById('post_url').value.trim();
       if (!postUrl) {
         showToast('Please paste a Target Facebook Post / Reel URL first!', 'info');
         document.getElementById('post_url').focus();
         return;
       }
-      const btn = document.getElementById('deployBtn');
-      btn.disabled = true;
-      btn.innerText = '🚀 Launching Browser Task...';
-      try {
-        const res = await fetch(swarmMode ? '/api/dispatch-swarm' : '/api/dispatch', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            agent_id: document.getElementById('agent_id').value,
-            post_url: postUrl,
-            post_text: document.getElementById('post_text').value.trim(),
-            persona: document.getElementById('persona').value.trim(),
-            tone: document.getElementById('tone').value.trim(),
-            language: document.getElementById('language').value,
-            do_like: document.getElementById('do_like').checked,
-            do_comment: document.getElementById('do_comment').checked,
-            auto_failover: document.getElementById('auto_failover').checked
-          })
-        });
-        const data = await res.json();
-        showToast(data.message || 'Dispatched & Archived!');
-        lastJobsJson = "";
-        lastArchivesJson = "";
-        await loadJobs();
-        await loadArchives();
-      } finally {
-        btn.disabled = false;
-        btn.innerText = '🚀 Like, Comment & Capture Proof';
-      }
+      const targetBtn = btnEl || document.getElementById(swarmMode ? 'swarmBtn' : 'deployBtn');
+      await runWithButtonFeedback(
+        targetBtn,
+        swarmMode ? '🐝 Launching Swarm Across All Agents...' : '⚡ Generating AI & Capturing Proof...',
+        '✅ Dispatched!',
+        async () => {
+          const res = await fetch(swarmMode ? '/api/dispatch-swarm' : '/api/dispatch', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              agent_id: document.getElementById('agent_id').value,
+              post_url: postUrl,
+              post_text: document.getElementById('post_text').value.trim(),
+              persona: document.getElementById('persona').value.trim(),
+              tone: document.getElementById('tone').value.trim(),
+              language: document.getElementById('language').value,
+              do_like: document.getElementById('do_like').checked,
+              do_comment: document.getElementById('do_comment').checked,
+              auto_failover: document.getElementById('auto_failover').checked
+            })
+          });
+          const data = await res.json();
+          showToast(data.message || 'Dispatched & Archived!');
+          lastJobsJson = "";
+          lastArchivesJson = "";
+          await loadJobs();
+          await loadArchives();
+        }
+      );
     }
 
     async function loadJobs() {
@@ -587,8 +658,8 @@
               ${personaBadge}
             </div>
             <div class="flex items-center gap-2">
-              <button onclick="editJobComment('${j.id}', '${safeComment}')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-700 cursor-pointer">✏️ Edit</button>
-              <button onclick="deleteJobLog('${j.id}')" class="text-[11px] bg-red-500/10 hover:bg-red-500/20 text-red-300 px-2.5 py-1 rounded-lg border border-red-500/30 cursor-pointer">🗑️ Hide</button>
+              <button onclick="editJobComment('${j.id}', '${safeComment}', this)" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-700 cursor-pointer">✏️ Edit</button>
+              <button onclick="deleteJobLog('${j.id}', this)" class="text-[11px] bg-red-500/10 hover:bg-red-500/20 text-red-300 px-2.5 py-1 rounded-lg border border-red-500/30 cursor-pointer">🗑️ Hide</button>
               <span class="text-xs font-mono px-2.5 py-1 rounded-full ${isDone ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300 animate-pulse'}">${j.status}</span>
             </div>
           </div>
@@ -596,18 +667,18 @@
             <div class="text-[11px] font-mono uppercase text-slate-400 mb-1">💬 AI Generated Comment (${j.tone || 'Authentic'})</div>
             <div class="text-sm text-emerald-300 font-medium">"${j.comment || ''}"</div>
           </div>
-          <div class="bg-black/70 border border-slate-800 rounded-xl p-3 font-mono text-xs text-slate-300 space-y-1 max-h-44 overflow-y-auto">
+          <div class="bg-black/70 border border-slate-800 rounded-xl p-3 font-mono text-xs text-slate-300 space-y-1 max-h-40 overflow-y-auto">
             ${logsHtml}
           </div>
           ${j.screenshot ? `
             <div>
               <div class="text-[11px] font-mono uppercase text-slate-400 mb-1.5 flex items-center justify-between">
-                <span>📸 Verification Proof</span>
-                <a href="${j.screenshot}" target="_blank" class="text-indigo-400 hover:underline">Fullscreen ↗</a>
+                <span class="text-emerald-400 font-semibold">📸 Instant Verification Proof</span>
+                <button onclick="openImgModal('${j.screenshot}')" class="text-indigo-400 hover:underline cursor-pointer">🔍 Expand Fullscreen</button>
               </div>
-              <img src="${j.screenshot}" class="rounded-xl border border-slate-700 w-full max-h-96 object-cover object-top shadow-lg" />
+              <img onclick="openImgModal('${j.screenshot}')" src="${j.screenshot}" class="rounded-xl border border-slate-700 w-full max-h-96 object-cover object-top shadow-lg cursor-zoom-in hover:border-indigo-500/60 transition" />
             </div>
-          ` : ''}
+          ` : `<div class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-amber-300 flex items-center gap-2"><span class="animate-spin">⏳</span> Rendering verification proof screenshot (~2s)...</div>`}
         </div>
       `}).join('');
     }
@@ -656,7 +727,7 @@
           <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
             <div class="flex items-center gap-2 flex-wrap">
               <span class="font-mono text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">${a.agent_id}</span>
-              <span class="text-sm font-bold text-emerald-300">👤 ${a.account_name || 'Authenticated Owner'}</span>
+              <span class="text-sm font-bold text-emerald-300">👤 ${a.account_name || 'Mirpap Day'}</span>
               <span class="text-xs font-mono text-slate-400">ID: ${a.fb_uid || 'Unlinked'}</span>
               <span class="text-[10px] font-mono bg-sky-500/15 text-sky-300 border border-sky-500/30 px-2 py-0.5 rounded-md">🌐 ${a.language || 'English'}</span>
               ${a.persona ? `<span class="text-[10px] font-mono bg-purple-500/15 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-md">🎭 ${a.persona}</span>` : ''}
@@ -664,8 +735,8 @@
             </div>
             <div class="flex items-center gap-2">
               <span class="text-[11px] font-mono text-slate-400">🕒 ${timeStr}</span>
-              <button onclick="editJobComment('${a.id}', '${safeComment}')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-700 cursor-pointer">✏️ Edit</button>
-              <button onclick="deleteArchiveItem('${a.id}')" class="text-[11px] bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 px-2.5 py-1 rounded-lg border border-rose-500/30 cursor-pointer">🗑️</button>
+              <button onclick="editJobComment('${a.id}', '${safeComment}', this)" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-700 cursor-pointer">✏️ Edit</button>
+              <button onclick="deleteArchiveItem('${a.id}', this)" class="text-[11px] bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 px-2.5 py-1 rounded-lg border border-rose-500/30 cursor-pointer">🗑️</button>
             </div>
           </div>
 
@@ -689,48 +760,49 @@
               ${a.screenshot ? `
                 <div>
                   <div class="text-[10px] font-mono uppercase text-slate-400 mb-1 flex justify-between">
-                    <span>📸 Saved Proof Screenshot</span>
-                    <a href="${a.screenshot}" target="_blank" class="text-indigo-400 hover:underline">Open Fullscreen ↗</a>
+                    <span class="text-emerald-400">📸 Saved Proof Screenshot</span>
+                    <button onclick="openImgModal('${a.screenshot}')" class="text-indigo-400 hover:underline cursor-pointer">🔍 Expand Fullscreen</button>
                   </div>
-                  <img src="${a.screenshot}" class="rounded-xl border border-slate-700 w-full max-h-52 object-cover object-top shadow-lg" />
+                  <img onclick="openImgModal('${a.screenshot}')" src="${a.screenshot}" class="rounded-xl border border-slate-700 w-full max-h-52 object-cover object-top shadow-lg cursor-zoom-in hover:border-indigo-500/60 transition" />
                 </div>
-              ` : `<div class="text-xs text-slate-500 font-mono p-6 border border-dashed border-slate-800 rounded-xl text-center">Screenshot pending...</div>`}
+              ` : `<div class="text-xs text-slate-500 font-mono p-6 border border-dashed border-slate-800 rounded-xl text-center">⏳ Capturing proof...</div>`}
             </div>
           </div>
         </div>
       `}).join('');
     }
 
-    function exportArchiveCSV() {
+    async function exportArchiveCSV(btnEl = null) {
       if (!cachedArchives.length) {
         showToast('No archived engagements to export yet!', 'info');
         return;
       }
-      const headers = ['Job ID', 'Archived At', 'Agent ID', 'Account Owner', 'Facebook UID', 'Persona', 'Reply Tone', 'Language', 'Target URL', 'Liked', 'Commented', 'Comment Text', 'Status', 'Screenshot'];
-      const rows = cachedArchives.map(a => [
-        a.id,
-        a.archived_at || '',
-        a.agent_id,
-        a.account_name,
-        a.fb_uid,
-        a.persona || '',
-        a.tone || '',
-        a.language || 'English',
-        a.post_url,
-        a.do_like !== false ? 'Yes' : 'No',
-        a.do_comment !== false ? 'Yes' : 'No',
-        (a.comment || '').replace(/"/g, '""'),
-        a.status,
-        a.screenshot || ''
-      ]);
-      const csvContent = [headers, ...rows].map(r => r.map(v => `"${v ?? ''}"`).join(',')).join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `bot_engagement_archive_${Date.now()}.csv`;
-      a.click();
-      showToast('Exported Engagement Archive CSV!');
+      await runWithButtonFeedback(btnEl, '⏳ Exporting CSV...', '✅ Downloaded!', async () => {
+        const headers = ['Job ID', 'Archived At', 'Agent ID', 'Account Owner', 'Facebook UID', 'Persona', 'Reply Tone', 'Language', 'Target URL', 'Liked', 'Commented', 'Comment Text', 'Status'];
+        const rows = cachedArchives.map(a => [
+          a.id,
+          a.archived_at || '',
+          a.agent_id,
+          a.account_name,
+          a.fb_uid,
+          a.persona || '',
+          a.tone || '',
+          a.language || 'English',
+          a.post_url,
+          a.do_like !== false ? 'Yes' : 'No',
+          a.do_comment !== false ? 'Yes' : 'No',
+          (a.comment || '').replace(/"/g, '""'),
+          a.status
+        ]);
+        const csvContent = [headers, ...rows].map(r => r.map(v => `"${v ?? ''}"`).join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `bot_engagement_archive_${Date.now()}.csv`;
+        a.click();
+        showToast('Exported Engagement Archive CSV!');
+      });
     }
 
     loadAccounts();
@@ -739,7 +811,7 @@
     setInterval(() => {
       loadJobs();
       loadArchives();
-    }, 1500);
+    }, 1000);
   </script>
 </body>
 </html>

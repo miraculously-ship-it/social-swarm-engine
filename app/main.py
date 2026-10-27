@@ -22,22 +22,22 @@ from app.state import (
     delete_archive,
 )
 from app.llm import generate_comment
-from app.worker import execute_automation_job, ensure_chromium_installed
+from app.worker import execute_automation_job, get_warm_browser
 
 BASE_DIR = Path(__file__).resolve().parent
 DASHBOARD_PATH = BASE_DIR / "dashboard.html"
 SCREENSHOTS_DIR = BASE_DIR / "screenshots"
 SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="Social Media Support Agent — Supervisor Suite v4.5", version="4.5.0")
+app = FastAPI(title="Social Media Support Agent — Supervisor Suite v4.6 Turbo", version="4.6.0")
 app.mount("/screenshots", StaticFiles(directory=str(SCREENSHOTS_DIR)), name="screenshots")
 
 @app.on_event("startup")
 async def startup_event():
     for existing_job in get_jobs():
         upsert_archive(existing_job)
-    # Background check to ensure Chromium is ready on Render startup
-    asyncio.create_task(ensure_chromium_installed())
+    # Pre-warm Chromium in background so first click is instant
+    asyncio.create_task(get_warm_browser())
 
 class AccountSavePayload(BaseModel):
     agent_id: str
@@ -171,7 +171,7 @@ async def _queue_agent_job(agent_id: str, payload: DispatchPayload, use_agent_ow
         "status": "Starting Agent...",
         "logs": [
             f"[*] Dispatched {agent_id} ({acc.get('account_name')}) for {payload.post_url}",
-            f"[*] Persona: {chosen_persona} | Tone: {chosen_tone} | Language: {chosen_lang}"
+            f"[*] AI Engine ({ai_res.get('model_used')}) generated fresh [{chosen_lang}] comment"
         ],
         "screenshot": None,
     }
@@ -189,6 +189,8 @@ async def _queue_agent_job(agent_id: str, payload: DispatchPayload, use_agent_ow
             do_like=payload.do_like,
             do_comment=payload.do_comment,
             auto_failover=payload.auto_failover,
+            persona=chosen_persona,
+            language=chosen_lang,
         )
     )
     return job_record
