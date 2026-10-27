@@ -18,46 +18,16 @@
             <span class="text-xs font-mono bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 px-2.5 py-1 rounded-full">PRO v4.5</span>
           </h1>
         </div>
-        <p class="text-slate-400 text-sm mt-1">Unlimited Multi-Agent Control Center + Multilingual AI & Engagement Archive</p>
+        <p class="text-slate-400 text-sm mt-1">Autonomous Multi-Account Control Center + Regenerate AI Engine</p>
       </div>
 
-      <div class="flex flex-wrap bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 gap-1">
-        <button id="tabDeployBtn" onclick="switchTab('deploy')" class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition cursor-pointer">🚀 Deploy & Feed</button>
-        <button id="tabArchiveBtn" onclick="switchTab('archive')" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer">
-          <span>🗄️ Engagement Archive</span>
-          <span id="archiveBadge" class="bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded-full text-[11px] font-mono">0 Saved</span>
-        </button>
-        <button id="tabAccountsBtn" onclick="switchTab('accounts')" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer">
-          <span>👥 Agent Roster & Builder</span>
-          <span id="rosterBadge" class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full text-[11px] font-mono">1/3 Armed</span>
-        </button>
+      <div class="flex bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
+        <button id="tabDeployBtn" onclick="switchTab('deploy')" class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition cursor-pointer">🚀 Deploy & Feed</button>
+        <button id="tabAccountsBtn" onclick="switchTab('accounts')" class="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer"><span>👥 Agent Roster</span><span id="rosterBadge" class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full text-[11px] font-mono">1/3 Armed</span></button>
       </div>
     </div>
 
-    <datalist id="personaOptions">
-      <option value="Alert Local Community Watcher"></option>
-      <option value="Helpful Brand Support Specialist"></option>
-      <option value="Insightful News Commentator"></option>
-      <option value="Enthusiastic Early Adopter & Fan"></option>
-      <option value="Pragmatic Tech Founder & Systems Architect"></option>
-      <option value="Curious Market & Policy Analyst"></option>
-      <option value="Empathetic Neighborhood Advocate"></option>
-      <option value="Skeptical Fact-Checker & Researcher"></option>
-      <option value="High-Energy Hype & Growth Creator"></option>
-    </datalist>
-
-    <datalist id="toneOptions">
-      <option value="Urgent, alerting, and authentic"></option>
-      <option value="Warm, authentic, and helpful"></option>
-      <option value="Direct, sharp, and professional"></option>
-      <option value="Casual, friendly, and conversational"></option>
-      <option value="Analytical, thoughtful, and objective"></option>
-      <option value="Excited, supportive, and celebratory"></option>
-      <option value="Witty, concise, and engaging"></option>
-      <option value="Empathetic, calm, and reassuring"></option>
-    </datalist>
-
-    <!-- TAB 1: DEPLOY & LIVE FEED -->
+    <!-- TAB 1 -->
     <div id="tabDeploy" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <div class="lg:col-span-5 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl h-fit space-y-4">
         <h2 class="text-lg font-semibold text-white">⚡ Dispatch Support Agent</h2>
@@ -65,9 +35,9 @@
           <div>
             <div class="flex justify-between items-center mb-1">
               <label class="text-xs font-medium text-slate-400">Select Agent & Linked Account</label>
-              <button onclick="switchTab('accounts')" class="text-[11px] text-indigo-400 hover:underline cursor-pointer">➕ Add / Manage Agents →</button>
+              <button onclick="switchTab('accounts')" class="text-[11px] text-indigo-400 hover:underline cursor-pointer">Manage Accounts →</button>
             </div>
-            <select id="agent_id" onchange="syncDeployPersonaTone()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-sm text-white font-medium"></select>
+            <select id="agent_id" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-sm text-white font-medium"></select>
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-400 mb-1">Target Facebook Post / Reel URL</label>
@@ -86,92 +56,24 @@
               </div>
             </div>
           </div>
-
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">🌐 Comment Language (55+ World & Regional Languages)</label>
-            <select id="language" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-emerald-300 font-medium focus:outline-none focus:border-indigo-500">
-              <optgroup label="✨ Smart & Global">
-                <option value="English" selected>🇬🇧 English</option>
-                <option value="Auto-Detect (Match Context Language)">🧠 Auto-Detect (Match Context Language)</option>
-              </optgroup>
-              <optgroup label="🌍 Horn of Africa & African Languages">
-                <option value="Amharic (አማርኛ)">🇪🇹 Amharic (አማርኛ)</option>
-                <option value="Afaan Oromo">🇪🇹 Afaan Oromo</option>
-                <option value="Tigrinya (ትግርኛ)">🇪🇹🇪🇷 Tigrinya (ትግርኛ)</option>
-                <option value="Somali (Soomaali)">🇸🇴 Somali (Soomaali)</option>
-                <option value="Swahili (Kiswahili)">🇰🇪🇹🇿 Swahili (Kiswahili)</option>
-                <option value="Hausa">🇳🇬 Hausa</option>
-                <option value="Yoruba (Yorùbá)">🇳🇬 Yoruba (Yorùbá)</option>
-                <option value="Igbo">🇳🇬 Igbo</option>
-                <option value="Zulu (isiZulu)">🇿🇦 Zulu (isiZulu)</option>
-                <option value="Xhosa (isiXhosa)">🇿🇦 Xhosa (isiXhosa)</option>
-                <option value="Afrikaans">🇿🇦 Afrikaans</option>
-                <option value="Kinyarwanda">🇷🇼 Kinyarwanda</option>
-                <option value="Luganda">🇺🇬 Luganda</option>
-                <option value="Wolof">🇸🇳 Wolof</option>
-                <option value="Shona">🇿🇼 Shona</option>
-              </optgroup>
-              <optgroup label="🌙 Middle East & North Africa">
-                <option value="Arabic (العربية)">🇸🇦🇪🇬 Arabic (العربية)</option>
-                <option value="Turkish (Türkçe)">🇹🇷 Turkish (Türkçe)</option>
-                <option value="Persian / Farsi (فارسی)">🇮🇷 Persian / Farsi (فارسی)</option>
-                <option value="Hebrew (עברית)">🇮🇱 Hebrew (עברית)</option>
-                <option value="Kurdish (Kurdî)">☀️ Kurdish (Kurdî)</option>
-              </optgroup>
-              <optgroup label="🇪🇺 European & Americas">
-                <option value="Spanish (Español)">🇪🇸🇲🇽 Spanish (Español)</option>
-                <option value="French (Français)">🇫🇷 French (Français)</option>
-                <option value="Portuguese (Português)">🇧🇷🇵🇹 Portuguese (Português)</option>
-                <option value="German (Deutsch)">🇩🇪 German (Deutsch)</option>
-                <option value="Italian (Italiano)">🇮🇹 Italian (Italiano)</option>
-                <option value="Russian (Русский)">🇷🇺 Russian (Русский)</option>
-                <option value="Dutch (Nederlands)">🇳🇱 Dutch (Nederlands)</option>
-                <option value="Polish (Polski)">🇵🇱 Polish (Polski)</option>
-                <option value="Ukrainian (Українська)">🇺🇦 Ukrainian (Українська)</option>
-                <option value="Greek (Ελληνικά)">🇬🇷 Greek (Ελληνικά)</option>
-                <option value="Swedish (Svenska)">🇸🇪 Swedish (Svenska)</option>
-                <option value="Norwegian (Norsk)">🇳🇴 Norwegian (Norsk)</option>
-                <option value="Danish (Dansk)">🇩🇰 Danish (Dansk)</option>
-                <option value="Finnish (Suomi)">🇫🇮 Finnish (Suomi)</option>
-                <option value="Czech (Čeština)">🇨🇿 Czech (Čeština)</option>
-                <option value="Romanian (Română)">🇷🇴 Romanian (Română)</option>
-                <option value="Hungarian (Magyar)">🇭🇺 Hungarian (Magyar)</option>
-                <option value="Serbian (Српски)">🇷🇸 Serbian (Српски)</option>
-                <option value="Croatian (Hrvatski)">🇭🇷 Croatian (Hrvatski)</option>
-                <option value="Bulgarian (Български)">🇧🇬 Bulgarian (Български)</option>
-              </optgroup>
-              <optgroup label="🌏 Asian & Pacific Languages">
-                <option value="Chinese Simplified (简体中文)">🇨🇳 Chinese Simplified (简体中文)</option>
-                <option value="Chinese Traditional (繁體中文)">🇹🇼🇭🇰 Chinese Traditional (繁體中文)</option>
-                <option value="Japanese (日本語)">🇯🇵 Japanese (日本語)</option>
-                <option value="Korean (한국어)">🇰🇷 Korean (한국어)</option>
-                <option value="Hindi (हिन्दी)">🇮🇳 Hindi (हिन्दी)</option>
-                <option value="Urdu (اردو)">🇵🇰 Urdu (اردو)</option>
-                <option value="Bengali (বাংলা)">🇧🇩🇮🇳 Bengali (বাংলা)</option>
-                <option value="Punjabi (ਪੰਜਾਬੀ)">🇮🇳🇵🇰 Punjabi (ਪੰਜਾਬੀ)</option>
-                <option value="Tamil (தமிழ்)">🇮🇳🇱🇰 Tamil (தமிழ்)</option>
-                <option value="Telugu (తెలుగు)">🇮🇳 Telugu (తెలుగు)</option>
-                <option value="Marathi (मराठी)">🇮🇳 Marathi (मराठी)</option>
-                <option value="Indonesian (Bahasa Indonesia)">🇮🇩 Indonesian (Bahasa Indonesia)</option>
-                <option value="Malay (Bahasa Melayu)">🇲🇾 Malay (Bahasa Melayu)</option>
-                <option value="Tagalog / Filipino">🇵🇭 Tagalog / Filipino</option>
-                <option value="Vietnamese (Tiếng Việt)">🇻🇳 Vietnamese (Tiếng Việt)</option>
-                <option value="Thai (ภาษาไทย)">🇹🇭 Thai (ภาษาไทย)</option>
-              </optgroup>
-            </select>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1">Agent Persona (Synced to Agent)</label>
-              <input id="persona" list="personaOptions" type="text" value="Alert Local Community Watcher" placeholder="Select or type custom persona..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500" />
+              <label class="block text-xs font-medium text-slate-400 mb-1">Agent Persona</label>
+              <select id="persona" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white">
+                <option value="Alert Local Community Watcher">Community Watcher</option>
+                <option value="Helpful Brand Support Specialist">Support Specialist</option>
+                <option value="Insightful News Commentator">News Commentator</option>
+              </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1">Reply Tone (Synced to Agent)</label>
-              <input id="tone" list="toneOptions" type="text" value="Urgent, alerting, and authentic" placeholder="Select or type custom tone..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500" />
+              <label class="block text-xs font-medium text-slate-400 mb-1">Reply Tone</label>
+              <select id="tone" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white">
+                <option value="Urgent, alerting, and authentic">Urgent & Alerting</option>
+                <option value="Warm, authentic, and helpful">Warm & Helpful</option>
+                <option value="Direct, sharp, and professional">Sharp & Direct</option>
+              </select>
             </div>
           </div>
-
           <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
             <div class="text-[11px] font-mono uppercase text-indigo-400 font-semibold">🛡️ Supervisor Guardrails</div>
             <div class="flex items-center justify-between">
@@ -182,17 +84,16 @@
           </div>
           <div class="space-y-2.5 pt-1">
             <button id="deployBtn" onclick="deployAgent(false)" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 text-white font-semibold py-3.5 rounded-xl shadow-xl transition cursor-pointer">🚀 Like, Comment & Capture Proof</button>
-            <button id="swarmBtn" onclick="deployAgent(true)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold py-3 rounded-xl transition cursor-pointer">🐝 Swarm Mode: Dispatch All Agents</button>
+            <button onclick="deployAgent(true)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold py-3 rounded-xl transition cursor-pointer">🐝 Swarm Mode: Dispatch All 3 Agents</button>
           </div>
         </div>
       </div>
 
       <div class="lg:col-span-7 space-y-4">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-white">📡 Live Agent Execution Feed</h2>
+          <h2 class="text-lg font-semibold text-white">📡 Live Agent Execution Feed & CRUD Logs</h2>
           <div class="flex items-center gap-2">
-            <button onclick="switchTab('archive')" class="text-xs bg-sky-950/60 hover:bg-sky-900/60 text-sky-300 border border-sky-800/50 px-3 py-1 rounded-full cursor-pointer">🗄️ View Archive Vault</button>
-            <button onclick="clearAllJobs()" class="text-xs bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 border border-rose-800/50 px-3 py-1 rounded-full cursor-pointer">Clear Live Feed</button>
+            <button onclick="clearAllJobs()" class="text-xs bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 border border-rose-800/50 px-3 py-1 rounded-full cursor-pointer">Purge Feed</button>
             <span class="text-xs font-mono text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full flex items-center gap-2">
               <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> Live Stream
             </span>
@@ -202,97 +103,19 @@
       </div>
     </div>
 
-    <!-- TAB 2: PERMANENT ENGAGEMENT ARCHIVE -->
-    <div id="tabArchive" class="hidden space-y-6">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
-          <div class="text-[11px] font-mono uppercase text-slate-400">Total Archived Engagements</div>
-          <div id="archStatTotal" class="text-2xl font-bold text-white mt-1">0</div>
-        </div>
-        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
-          <div class="text-[11px] font-mono uppercase text-slate-400">👍 Auto-Likes Executed</div>
-          <div id="archStatLikes" class="text-2xl font-bold text-indigo-400 mt-1">0</div>
-        </div>
-        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
-          <div class="text-[11px] font-mono uppercase text-slate-400">💬 AI Comments Posted</div>
-          <div id="archStatComments" class="text-2xl font-bold text-emerald-400 mt-1">0</div>
-        </div>
-        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
-          <div class="text-[11px] font-mono uppercase text-slate-400">🌐 Languages Used</div>
-          <div id="archStatLangs" class="text-2xl font-bold text-sky-400 mt-1">0</div>
-        </div>
-      </div>
-
-      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-2xl space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h2 class="text-lg font-semibold text-white">🗄️ Permanent Bot Engagement Archive</h2>
-            <p class="text-xs text-slate-400">Every engagement your bots perform is permanently stored here—even when you clear the live workspace feed.</p>
-          </div>
-          <button onclick="exportArchiveCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition cursor-pointer">📥 Export Archive CSV</button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
-          <input id="archiveSearch" oninput="renderArchives()" type="text" placeholder="🔍 Search by URL, comment text, account owner, persona, or language..." class="md:col-span-2 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500" />
-          <select id="archiveAgentFilter" onchange="renderArchives()" class="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
-            <option value="ALL">All Bot Agents</option>
-          </select>
-        </div>
-
-        <div id="archiveContainer" class="space-y-4 pt-2"></div>
-      </div>
-    </div>
-
-    <!-- TAB 3: UNLIMITED AGENT ROSTER & BUILDER -->
+    <!-- TAB 2 -->
     <div id="tabAccounts" class="hidden space-y-6">
-      <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 border border-indigo-500/30 rounded-2xl p-6 shadow-2xl space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h2 class="text-lg font-semibold text-white flex items-center gap-2">➕ Add New Bot Agent Node</h2>
-            <p class="text-xs text-slate-400">Create as many custom bot agents as you need—each with its own dedicated Persona, Reply Tone, and Cookie Vault.</p>
-          </div>
-          <button onclick="generateNextAgentId()" class="text-xs bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 px-3 py-1.5 rounded-xl cursor-pointer">🎲 Auto-Suggest Agent ID</button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">New Agent ID</label>
-            <input id="new_agent_id" type="text" placeholder="e.g. fb_agent_delta" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-emerald-300 focus:outline-none focus:border-indigo-500" />
-          </div>
-          <div>
-            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Agent Persona (Select or Type Custom)</label>
-            <input id="new_agent_persona" list="personaOptions" type="text" value="Enthusiastic Early Adopter & Fan" placeholder="Choose or type custom persona..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500" />
-          </div>
-          <div>
-            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Reply Tone (Select or Type Custom)</label>
-            <input id="new_agent_tone" list="toneOptions" type="text" value="Casual, friendly, and conversational" placeholder="Choose or type custom tone..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500" />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-          <div class="md:col-span-3">
-            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Optional Cookie-Editor JSON (Or leave blank for Sandbox Ready & add later)</label>
-            <textarea id="new_agent_cookies" rows="2" placeholder='Paste Cookie-Editor JSON array here (optional)...' class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs font-mono text-emerald-300 focus:outline-none focus:border-indigo-500"></textarea>
-          </div>
-          <button onclick="createNewAgentNode()" class="w-full h-[58px] bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg transition cursor-pointer flex items-center justify-center gap-2">
-            <span>➕ Create Agent Node</span>
-          </button>
-        </div>
-      </div>
-
       <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl">
-        <h2 class="text-lg font-semibold text-white">👥 Active Agent Roster & Cookie Vault</h2>
-        <p class="text-xs text-slate-400 mt-1 mb-6">Every agent below has its own customizable Persona, Reply Tone, and Cookie Vault. Account owner name and <code class="text-emerald-300">c_user</code> ID are auto-fetched from cookies.</p>
-        <div id="accountsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        <h2 class="text-lg font-semibold text-white">👥 Agent-to-Account Roster & Cookie Vault</h2>
+        <p class="text-xs text-slate-400 mt-1 mb-6">Paste your Cookie-Editor JSON array below. Account owner name and <code class="text-emerald-300">c_user</code> ID are automatically extracted from your cookie.</p>
+        <div id="accountsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
       </div>
     </div>
   </div>
 
   <script>
     let cachedAccounts = {};
-    let cachedArchives = [];
     let lastJobsJson = "";
-    let lastArchivesJson = "";
 
     function showToast(message, type = 'success') {
       const container = document.getElementById('toastContainer');
@@ -305,53 +128,16 @@
 
     function switchTab(tab) {
       const isDeploy = tab === 'deploy';
-      const isArchive = tab === 'archive';
-      const isAccounts = tab === 'accounts';
-
       document.getElementById('tabDeploy').classList.toggle('hidden', !isDeploy);
-      document.getElementById('tabArchive').classList.toggle('hidden', !isArchive);
-      document.getElementById('tabAccounts').classList.toggle('hidden', !isAccounts);
-
-      const activeCls = 'px-4 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition flex items-center gap-2 cursor-pointer';
-      const inactiveCls = 'px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer';
-
-      document.getElementById('tabDeployBtn').className = isDeploy ? activeCls : inactiveCls;
-      document.getElementById('tabArchiveBtn').className = isArchive ? activeCls : inactiveCls;
-      document.getElementById('tabAccountsBtn').className = isAccounts ? activeCls : inactiveCls;
-
-      if (isAccounts) {
-        loadAccounts();
-        generateNextAgentId();
-      }
-      if (isArchive) loadArchives(true);
-    }
-
-    function generateNextAgentId() {
-      const greek = ['alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta', 'iota', 'kappa', 'lambda', 'sigma', 'omega'];
-      const existingKeys = Object.keys(cachedAccounts);
-      for (const g of greek) {
-        const cand = `fb_agent_${g}`;
-        if (!existingKeys.includes(cand)) {
-          document.getElementById('new_agent_id').value = cand;
-          return;
-        }
-      }
-      document.getElementById('new_agent_id').value = `fb_agent_node_${existingKeys.length + 1}`;
-    }
-
-    function syncDeployPersonaTone() {
-      const selId = document.getElementById('agent_id').value;
-      const acc = cachedAccounts[selId];
-      if (acc) {
-        document.getElementById('persona').value = acc.persona || 'Alert Local Community Watcher';
-        document.getElementById('tone').value = acc.tone || 'Urgent, alerting, and authentic';
-      }
+      document.getElementById('tabAccounts').classList.toggle('hidden', isDeploy);
+      document.getElementById('tabDeployBtn').className = isDeploy ? 'px-5 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition cursor-pointer' : 'px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition cursor-pointer';
+      document.getElementById('tabAccountsBtn').className = !isDeploy ? 'px-5 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition flex items-center gap-2 cursor-pointer' : 'px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer';
+      if (!isDeploy) loadAccounts();
     }
 
     async function previewComment() {
       const urlVal = document.getElementById('post_url').value.trim();
       const ctxVal = document.getElementById('post_text').value.trim();
-      const langVal = document.getElementById('language').value;
       if (!urlVal && !ctxVal) {
         showToast('Enter a Target URL or Post Context first to preview!', 'info');
         return;
@@ -359,7 +145,7 @@
       const box = document.getElementById('previewBox');
       const textEl = document.getElementById('previewText');
       box.classList.remove('hidden');
-      textEl.innerText = `⏳ Generating AI variation in ${langVal}...`;
+      textEl.innerText = '⏳ Generating new AI variation...';
       const res = await fetch('/api/preview', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -368,12 +154,11 @@
           post_url: urlVal || 'https://www.facebook.com/',
           post_text: ctxVal,
           persona: document.getElementById('persona').value,
-          tone: document.getElementById('tone').value,
-          language: langVal
+          tone: document.getElementById('tone').value
         })
       });
       const data = await res.json();
-      textEl.innerText = `💬 [${langVal}]: "` + (data.comment || '') + '"';
+      textEl.innerText = '💬 Preview: "' + (data.comment || '') + '"';
     }
 
     async function loadAccounts() {
@@ -382,26 +167,12 @@
       const select = document.getElementById('agent_id');
       const currentVal = select.value;
       const entries = Object.values(cachedAccounts);
-
       document.getElementById('rosterBadge').innerText = `${entries.filter(a => (a.cookie_count || 0) > 0).length}/${entries.length} Armed`;
-      document.getElementById('swarmBtn').innerText = `🐝 Swarm Mode: Dispatch All ${entries.length} Agents (Per-Agent Persona & Tone)`;
-
       select.innerHTML = entries.map(a => {
         const idTag = a.fb_uid && a.fb_uid !== 'Unlinked' ? ` • ${a.fb_uid}` : '';
-        return `<option value="${a.agent_id}">${a.agent_id} ➔ ${a.account_name}${idTag} [${a.persona}] (${a.cookie_count > 0 ? '🟢 ' + a.cookie_count + ' cookies' : '⚪ Sandbox'})</option>`;
+        return `<option value="${a.agent_id}">${a.agent_id} ➔ ${a.account_name}${idTag} (${a.cookie_count > 0 ? '🟢 ' + a.cookie_count + ' cookies' : '⚪ Unlinked'})</option>`;
       }).join('');
-      if (currentVal && cachedAccounts[currentVal]) {
-        select.value = currentVal;
-      }
-      syncDeployPersonaTone();
-
-      const archFilter = document.getElementById('archiveAgentFilter');
-      if (archFilter) {
-        const curArchVal = archFilter.value;
-        archFilter.innerHTML = `<option value="ALL">All Bot Agents (${entries.length} Nodes)</option>` +
-          entries.map(a => `<option value="${a.agent_id}">${a.agent_id} (${a.account_name})</option>`).join('');
-        if (curArchVal) archFilter.value = curArchVal;
-      }
+      if (currentVal) select.value = currentVal;
 
       document.getElementById('accountsGrid').innerHTML = entries.map(a => {
         const cookieJsonStr = (a.cookies && a.cookies.length > 0) ? JSON.stringify(a.cookies, null, 2) : '';
@@ -413,13 +184,11 @@
         <div class="bg-slate-950 border ${isArmed ? 'border-emerald-500/40' : 'border-slate-800'} rounded-2xl p-5 flex flex-col justify-between space-y-4">
           <div class="space-y-3">
             <div class="flex items-center justify-between">
-              <span class="font-mono text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">${a.agent_id}</span>
-              <div class="flex items-center gap-1.5">
-                <span class="text-xs font-mono px-2.5 py-0.5 rounded-full ${isArmed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}">${isArmed ? '🟢 ' + a.cookie_count + ' Cookies' : '⚪ Unlinked'}</span>
-                <button onclick="removeAgentNode('${a.agent_id}')" title="Remove Agent Node" class="text-xs bg-rose-500/10 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-lg cursor-pointer">🗑️</button>
-              </div>
+              <span class="font-mono text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-md">${a.agent_id}</span>
+              <span class="text-xs font-mono px-2.5 py-0.5 rounded-full ${isArmed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}">${isArmed ? '🟢 ' + a.cookie_count + ' Cookies' : '⚪ Unlinked'}</span>
             </div>
 
+            <!-- ACCOUNT OWNER BOX: BIG OWNER NAME ON TOP, SMALL ID NUMBER UNDERNEATH -->
             <div>
               <label class="block text-[11px] uppercase font-mono text-slate-500 mb-1">Account Owner (Auto-Fetched from Cookie)</label>
               <div class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 flex flex-col justify-center">
@@ -428,80 +197,30 @@
               </div>
             </div>
 
-            <div class="space-y-2 pt-1">
-              <div>
-                <label class="block text-[10px] uppercase font-mono text-indigo-300 mb-1">🎭 Agent Persona</label>
-                <input id="persona_${a.agent_id}" list="personaOptions" type="text" value="${(a.persona || '').replace(/"/g, '"')}" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" />
-              </div>
-              <div>
-                <label class="block text-[10px] uppercase font-mono text-indigo-300 mb-1">🎙️ Reply Tone</label>
-                <input id="tone_${a.agent_id}" list="toneOptions" type="text" value="${(a.tone || '').replace(/"/g, '"')}" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" />
-              </div>
+            <div class="flex items-center justify-between text-xs font-mono bg-slate-900/70 px-3.5 py-2.5 rounded-xl border border-slate-800">
+              <span class="text-slate-500 text-[10px]">SESSION STATUS</span>
+              <span class="${isArmed ? 'text-emerald-300' : 'text-slate-400'} font-semibold">${a.health || 'Ready'}</span>
             </div>
 
             <div>
               <label class="block text-[11px] font-mono text-slate-400 mb-1">Cookie-Editor JSON:</label>
-              <textarea id="cookies_${a.agent_id}" rows="3" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs font-mono text-emerald-300" placeholder='Paste Cookie-Editor JSON array...'>${cookieJsonStr}</textarea>
+              <textarea id="cookies_${a.agent_id}" rows="4" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs font-mono text-emerald-300" placeholder='Paste Cookie-Editor JSON array...'>${cookieJsonStr}</textarea>
             </div>
           </div>
-          <button onclick="saveAgentAccount('${a.agent_id}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-3 rounded-xl transition cursor-pointer">💾 Save Persona, Tone & Cookies</button>
+          <button onclick="saveAgentAccount('${a.agent_id}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-3 rounded-xl transition cursor-pointer">💾 Save & Auto-Fetch Account from Cookie</button>
         </div>
       `}).join('');
     }
 
-    async function createNewAgentNode() {
-      const agentId = document.getElementById('new_agent_id').value.trim();
-      const persona = document.getElementById('new_agent_persona').value.trim();
-      const tone = document.getElementById('new_agent_tone').value.trim();
-      const cookiesRaw = document.getElementById('new_agent_cookies').value.trim();
-
-      if (!agentId) {
-        showToast('Please enter a New Agent ID!', 'info');
-        return;
-      }
-
-      const res = await fetch('/api/accounts', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          agent_id: agentId,
-          persona: persona || 'Alert Local Community Watcher',
-          tone: tone || 'Urgent, alerting, and authentic',
-          cookies_raw: cookiesRaw
-        })
-      });
-      const data = await res.json();
-      showToast(data.message || 'Created new agent node!', data.ok === false ? 'info' : 'success');
-      if (data.ok !== false) {
-        document.getElementById('new_agent_cookies').value = '';
-        await loadAccounts();
-        generateNextAgentId();
-      }
-    }
-
     async function saveAgentAccount(agentId) {
       const cookiesVal = document.getElementById(`cookies_${agentId}`).value;
-      const personaVal = document.getElementById(`persona_${agentId}`).value;
-      const toneVal = document.getElementById(`tone_${agentId}`).value;
       const res = await fetch('/api/accounts', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          agent_id: agentId,
-          persona: personaVal,
-          tone: toneVal,
-          cookies_raw: cookiesVal
-        })
+        body: JSON.stringify({ agent_id: agentId, account_name: "", cookies_raw: cookiesVal })
       });
       const data = await res.json();
-      showToast(data.message || 'Agent updated!');
-      await loadAccounts();
-    }
-
-    async function removeAgentNode(agentId) {
-      const res = await fetch(`/api/accounts/${agentId}`, { method: 'DELETE' });
-      const data = await res.json();
-      showToast(data.message || 'Agent removed!', data.ok === false ? 'info' : 'success');
+      showToast(data.message || 'Account updated!');
       await loadAccounts();
     }
 
@@ -514,30 +233,20 @@
         body: JSON.stringify({ comment: newComment })
       });
       lastJobsJson = "";
-      lastArchivesJson = "";
       loadJobs();
-      loadArchives(true);
     }
 
     async function deleteJobLog(jobId) {
       await fetch(`/api/jobs/${jobId}`, { method: 'DELETE' });
       lastJobsJson = "";
       loadJobs();
-      showToast('Removed from live feed (saved in Archive Vault)');
-    }
-
-    async function deleteArchiveItem(jobId) {
-      await fetch(`/api/archives/${jobId}`, { method: 'DELETE' });
-      lastArchivesJson = "";
-      await loadArchives(true);
-      showToast('Deleted record from Archive');
     }
 
     async function clearAllJobs() {
       await fetch('/api/jobs', { method: 'DELETE' });
       lastJobsJson = "";
       loadJobs();
-      showToast('Live feed cleared! All engagements remain in Archive.');
+      showToast('Feed purged clean!');
     }
 
     async function deployAgent(swarmMode = false) {
@@ -558,20 +267,17 @@
             agent_id: document.getElementById('agent_id').value,
             post_url: postUrl,
             post_text: document.getElementById('post_text').value.trim(),
-            persona: document.getElementById('persona').value.trim(),
-            tone: document.getElementById('tone').value.trim(),
-            language: document.getElementById('language').value,
+            persona: document.getElementById('persona').value,
+            tone: document.getElementById('tone').value,
             do_like: document.getElementById('do_like').checked,
             do_comment: document.getElementById('do_comment').checked,
             auto_failover: document.getElementById('auto_failover').checked
           })
         });
         const data = await res.json();
-        showToast(data.message || 'Dispatched & Archived!');
+        showToast(data.message || 'Dispatched!');
         lastJobsJson = "";
-        lastArchivesJson = "";
         await loadJobs();
-        await loadArchives();
       } finally {
         btn.disabled = false;
         btn.innerText = '🚀 Like, Comment & Capture Proof';
@@ -594,25 +300,21 @@
         const safeComment = (j.comment || '').replace(/[`'"]/g, "");
         const logsHtml = (j.logs || []).map(l => `<div>${l}</div>`).join('');
         const isDone = (j.status || '').includes('Completed');
-        const langBadge = j.language ? `<span class="text-[10px] font-mono bg-sky-500/15 text-sky-300 border border-sky-500/30 px-2 py-0.5 rounded-md">🌐 ${j.language}</span>` : '';
-        const personaBadge = j.persona ? `<span class="text-[10px] font-mono bg-purple-500/15 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-md">🎭 ${j.persona}</span>` : '';
         return `
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2 flex-wrap">
+            <div class="flex items-center gap-2">
               <span class="font-mono text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">${j.agent_id}</span>
               <span class="text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">👤 ${j.account_name} <span class="text-slate-400 font-mono text-[10px]">(${j.fb_uid || ''})</span></span>
-              ${langBadge}
-              ${personaBadge}
             </div>
             <div class="flex items-center gap-2">
               <button onclick="editJobComment('${j.id}', '${safeComment}')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-700 cursor-pointer">✏️ Edit</button>
-              <button onclick="deleteJobLog('${j.id}')" class="text-[11px] bg-red-500/10 hover:bg-red-500/20 text-red-300 px-2.5 py-1 rounded-lg border border-red-500/30 cursor-pointer">🗑️ Hide</button>
+              <button onclick="deleteJobLog('${j.id}')" class="text-[11px] bg-red-500/10 hover:bg-red-500/20 text-red-300 px-2.5 py-1 rounded-lg border border-red-500/30 cursor-pointer">🗑️ Delete</button>
               <span class="text-xs font-mono px-2.5 py-1 rounded-full ${isDone ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300 animate-pulse'}">${j.status}</span>
             </div>
           </div>
           <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-3.5">
-            <div class="text-[11px] font-mono uppercase text-slate-400 mb-1">💬 AI Generated Comment (${j.tone || 'Authentic'})</div>
+            <div class="text-[11px] font-mono uppercase text-slate-400 mb-1">💬 AI Generated Comment Record</div>
             <div class="text-sm text-emerald-300 font-medium">"${j.comment || ''}"</div>
           </div>
           <div class="bg-black/70 border border-slate-800 rounded-xl p-3 font-mono text-xs text-slate-300 space-y-1 max-h-44 overflow-y-auto">
@@ -631,134 +333,9 @@
       `}).join('');
     }
 
-    async function loadArchives(forceRender = false) {
-      const res = await fetch('/api/archives');
-      cachedArchives = await res.json();
-      document.getElementById('archiveBadge').innerText = `${cachedArchives.length} Saved`;
-
-      const rawJson = JSON.stringify(cachedArchives);
-      if (!forceRender && rawJson === lastArchivesJson) return;
-      lastArchivesJson = rawJson;
-
-      document.getElementById('archStatTotal').innerText = cachedArchives.length;
-      document.getElementById('archStatLikes').innerText = cachedArchives.filter(a => a.do_like !== false).length;
-      document.getElementById('archStatComments').innerText = cachedArchives.filter(a => a.do_comment !== false && a.comment).length;
-      const uniqueLangs = new Set(cachedArchives.map(a => a.language || 'English'));
-      document.getElementById('archStatLangs').innerText = uniqueLangs.size;
-
-      renderArchives();
-    }
-
-    function renderArchives() {
-      const container = document.getElementById('archiveContainer');
-      if (!container) return;
-      const q = (document.getElementById('archiveSearch')?.value || '').toLowerCase().trim();
-      const agentFilter = document.getElementById('archiveAgentFilter')?.value || 'ALL';
-
-      const filtered = cachedArchives.filter(a => {
-        if (agentFilter !== 'ALL' && a.agent_id !== agentFilter) return false;
-        if (!q) return true;
-        const hay = `${a.agent_id} ${a.account_name} ${a.fb_uid} ${a.post_url} ${a.comment} ${a.language} ${a.persona} ${a.tone} ${a.status}`.toLowerCase();
-        return hay.includes(q);
-      });
-
-      if (!filtered.length) {
-        container.innerHTML = `<div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-10 text-center text-slate-500 text-sm">No archived engagements match your filter yet.</div>`;
-        return;
-      }
-
-      container.innerHTML = filtered.map(a => {
-        const safeComment = (a.comment || '').replace(/[`'"]/g, "");
-        const timeStr = a.archived_at || (a.timestamp ? new Date(a.timestamp).toLocaleString() : 'Saved');
-        return `
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-3 hover:border-slate-700 transition">
-          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="font-mono text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">${a.agent_id}</span>
-              <span class="text-sm font-bold text-emerald-300">👤 ${a.account_name || 'Authenticated Owner'}</span>
-              <span class="text-xs font-mono text-slate-400">ID: ${a.fb_uid || 'Unlinked'}</span>
-              <span class="text-[10px] font-mono bg-sky-500/15 text-sky-300 border border-sky-500/30 px-2 py-0.5 rounded-md">🌐 ${a.language || 'English'}</span>
-              ${a.persona ? `<span class="text-[10px] font-mono bg-purple-500/15 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-md">🎭 ${a.persona}</span>` : ''}
-              <span class="text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md">${a.do_like !== false ? '👍 Liked' : ''} ${a.do_comment !== false ? '• 💬 Commented' : ''}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-[11px] font-mono text-slate-400">🕒 ${timeStr}</span>
-              <button onclick="editJobComment('${a.id}', '${safeComment}')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-700 cursor-pointer">✏️ Edit</button>
-              <button onclick="deleteArchiveItem('${a.id}')" class="text-[11px] bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 px-2.5 py-1 rounded-lg border border-rose-500/30 cursor-pointer">🗑️</button>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-            <div class="lg:col-span-7 space-y-2">
-              <div class="text-xs font-mono text-sky-400 break-all">
-                🔗 Target: <a href="${a.post_url}" target="_blank" class="underline hover:text-sky-300">${a.post_url}</a>
-              </div>
-              <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
-                <div class="text-[10px] font-mono uppercase text-slate-400 mb-1">💬 Archived AI Comment (${a.tone || a.status || 'Completed'})</div>
-                <div class="text-sm text-emerald-300 font-medium">"${a.comment || ''}"</div>
-              </div>
-              <details class="bg-black/60 border border-slate-800/80 rounded-xl p-2.5 text-xs font-mono text-slate-400">
-                <summary class="cursor-pointer text-slate-300">View Execution Logs (${(a.logs || []).length} steps)</summary>
-                <div class="mt-2 space-y-1 text-[11px]">
-                  ${(a.logs || []).map(l => `<div>${l}</div>`).join('')}
-                </div>
-              </details>
-            </div>
-            <div class="lg:col-span-5">
-              ${a.screenshot ? `
-                <div>
-                  <div class="text-[10px] font-mono uppercase text-slate-400 mb-1 flex justify-between">
-                    <span>📸 Saved Proof Screenshot</span>
-                    <a href="${a.screenshot}" target="_blank" class="text-indigo-400 hover:underline">Open Fullscreen ↗</a>
-                  </div>
-                  <img src="${a.screenshot}" class="rounded-xl border border-slate-700 w-full max-h-52 object-cover object-top shadow-lg" />
-                </div>
-              ` : `<div class="text-xs text-slate-500 font-mono p-6 border border-dashed border-slate-800 rounded-xl text-center">Screenshot pending...</div>`}
-            </div>
-          </div>
-        </div>
-      `}).join('');
-    }
-
-    function exportArchiveCSV() {
-      if (!cachedArchives.length) {
-        showToast('No archived engagements to export yet!', 'info');
-        return;
-      }
-      const headers = ['Job ID', 'Archived At', 'Agent ID', 'Account Owner', 'Facebook UID', 'Persona', 'Reply Tone', 'Language', 'Target URL', 'Liked', 'Commented', 'Comment Text', 'Status', 'Screenshot'];
-      const rows = cachedArchives.map(a => [
-        a.id,
-        a.archived_at || '',
-        a.agent_id,
-        a.account_name,
-        a.fb_uid,
-        a.persona || '',
-        a.tone || '',
-        a.language || 'English',
-        a.post_url,
-        a.do_like !== false ? 'Yes' : 'No',
-        a.do_comment !== false ? 'Yes' : 'No',
-        (a.comment || '').replace(/"/g, '""'),
-        a.status,
-        a.screenshot || ''
-      ]);
-      const csvContent = [headers, ...rows].map(r => r.map(v => `"${v ?? ''}"`).join(',')).join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `bot_engagement_archive_${Date.now()}.csv`;
-      a.click();
-      showToast('Exported Engagement Archive CSV!');
-    }
-
     loadAccounts();
     loadJobs();
-    loadArchives();
-    setInterval(() => {
-      loadJobs();
-      loadArchives();
-    }, 1500);
+    setInterval(loadJobs, 1500);
   </script>
 </body>
 </html>
