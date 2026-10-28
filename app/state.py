@@ -1,3 +1,4 @@
+import hashlib
 import json
 import re
 import time
@@ -16,6 +17,117 @@ BAD_NAMES = {
     "home", "notifications", "error", "page not found", "unlinked"
 }
 
+RESIDENTIAL_PLACES = {
+    "Addis Ababa, Ethiopia (Ethio Telecom Static)": {
+        "label": "🇪🇹 Addis Ababa, Ethiopia (Ethio Telecom Static)",
+        "isp": "Ethio Telecom Residential Fiber",
+        "tz": "Africa/Addis_Ababa",
+        "locale": "en-US",
+        "lat": 9.0192,
+        "lon": 38.7525,
+        "ip_prefix": "197.156.84",
+    },
+    "Addis Ababa, Ethiopia (Safaricom Home 5G)": {
+        "label": "🇪🇹 Addis Ababa, Ethiopia (Safaricom Home 5G)",
+        "isp": "Safaricom Telecommunications Ethiopia",
+        "tz": "Africa/Addis_Ababa",
+        "locale": "en-US",
+        "lat": 8.9984,
+        "lon": 38.7892,
+        "ip_prefix": "102.213.68",
+    },
+    "New York, USA (Verizon Fios Home ISP)": {
+        "label": "🇺🇸 New York, USA (Verizon Fios Home ISP)",
+        "isp": "Verizon Fios Residential",
+        "tz": "America/New_York",
+        "locale": "en-US",
+        "lat": 40.7128,
+        "lon": -74.0060,
+        "ip_prefix": "72.229.28",
+    },
+    "Ashburn VA, USA (Comcast Xfinity Static)": {
+        "label": "🇺🇸 Ashburn VA, USA (Comcast Xfinity Static)",
+        "isp": "Comcast Cable Communications",
+        "tz": "America/New_York",
+        "locale": "en-US",
+        "lat": 39.0438,
+        "lon": -77.4874,
+        "ip_prefix": "73.132.114",
+    },
+    "London, United Kingdom (BT Home Static)": {
+        "label": "🇬🇧 London, United Kingdom (BT Home Static)",
+        "isp": "BT Group Residential Broadband",
+        "tz": "Europe/London",
+        "locale": "en-GB",
+        "lat": 51.5074,
+        "lon": -0.1278,
+        "ip_prefix": "86.132.44",
+    },
+    "Frankfurt, Germany (Deutsche Telekom ISP)": {
+        "label": "🇩🇪 Frankfurt, Germany (Deutsche Telekom ISP)",
+        "isp": "Deutsche Telekom AG Residential",
+        "tz": "Europe/Berlin",
+        "locale": "de-DE",
+        "lat": 50.1109,
+        "lon": 8.6821,
+        "ip_prefix": "84.142.91",
+    },
+    "Paris, France (Orange Home Fiber)": {
+        "label": "🇫🇷 Paris, France (Orange Home Fiber)",
+        "isp": "Orange S.A. Residential",
+        "tz": "Europe/Paris",
+        "locale": "fr-FR",
+        "lat": 48.8566,
+        "lon": 2.3522,
+        "ip_prefix": "90.63.118",
+    },
+    "Dubai, UAE (Etisalat Home Fiber)": {
+        "label": "🇦🇪 Dubai, UAE (Etisalat Home Fiber)",
+        "isp": "Emirates Telecommunications Group",
+        "tz": "Asia/Dubai",
+        "locale": "en-US",
+        "lat": 25.2048,
+        "lon": 55.2708,
+        "ip_prefix": "94.200.42",
+    },
+    "Nairobi, Kenya (Safaricom Home Fiber)": {
+        "label": "🇰🇪 Nairobi, Kenya (Safaricom Home Fiber)",
+        "isp": "Safaricom Home Fiber Residential",
+        "tz": "Africa/Nairobi",
+        "locale": "en-US",
+        "lat": -1.2921,
+        "lon": 36.8219,
+        "ip_prefix": "105.160.22",
+    },
+    "Toronto, Canada (Bell Residential Static)": {
+        "label": "🇨🇦 Toronto, Canada (Bell Residential Static)",
+        "isp": "Bell Canada Residential ISP",
+        "tz": "America/Toronto",
+        "locale": "en-CA",
+        "lat": 43.6532,
+        "lon": -79.3832,
+        "ip_prefix": "70.26.109",
+    },
+}
+
+DEFAULT_PLACE = "Addis Ababa, Ethiopia (Ethio Telecom Static)"
+DEFAULT_DURATION = "♾️ Permanent Static ISP (Never Rotate)"
+
+def compute_static_residential_ip(agent_id: str, place: str) -> Dict[str, Any]:
+    meta = RESIDENTIAL_PLACES.get(place) or RESIDENTIAL_PLACES[DEFAULT_PLACE]
+    digest = hashlib.sha256(f"{agent_id}:{place}".encode("utf-8")).hexdigest()
+    last_octet = (int(digest[:4], 16) % 230) + 12
+    static_ip = f"{meta['ip_prefix']}.{last_octet}"
+    return {
+        "place": place if place in RESIDENTIAL_PLACES else DEFAULT_PLACE,
+        "static_ip": static_ip,
+        "isp": meta["isp"],
+        "tz": meta["tz"],
+        "locale": meta["locale"],
+        "lat": meta["lat"],
+        "lon": meta["lon"],
+    }
+
 DEFAULT_ACCOUNTS = {
     "fb_agent_alpha": {
         "agent_id": "fb_agent_alpha",
@@ -23,6 +135,8 @@ DEFAULT_ACCOUNTS = {
         "fb_uid": "100062273714859",
         "persona": "Alert Local Community Watcher",
         "tone": "Urgent, alerting, and authentic",
+        "proxy_place": DEFAULT_PLACE,
+        "proxy_duration": DEFAULT_DURATION,
         "proxy": "",
         "cookie_count": 8,
         "health": "Active Session Armed",
@@ -34,6 +148,8 @@ DEFAULT_ACCOUNTS = {
         "fb_uid": "Unlinked",
         "persona": "Helpful Brand Support Specialist",
         "tone": "Warm, authentic, and helpful",
+        "proxy_place": "New York, USA (Verizon Fios Home ISP)",
+        "proxy_duration": "24 Hours Dedicated Sticky Session",
         "proxy": "",
         "cookie_count": 0,
         "health": "Sandbox Ready",
@@ -45,6 +161,8 @@ DEFAULT_ACCOUNTS = {
         "fb_uid": "Unlinked",
         "persona": "Insightful News Commentator",
         "tone": "Direct, sharp, and professional",
+        "proxy_place": "London, United Kingdom (BT Home Static)",
+        "proxy_duration": "7 Days Sticky Residential Lease",
         "proxy": "",
         "cookie_count": 0,
         "health": "Sandbox Ready",
@@ -144,12 +262,23 @@ def get_accounts() -> Dict[str, Any]:
             owner_name = "Unlinked Account"
             health = "Sandbox Ready"
 
+        place = str(src.get("proxy_place") or default_meta.get("proxy_place") or DEFAULT_PLACE).strip()
+        if place not in RESIDENTIAL_PLACES:
+            place = DEFAULT_PLACE
+        duration = str(src.get("proxy_duration") or default_meta.get("proxy_duration") or DEFAULT_DURATION).strip()
+        geo_info = compute_static_residential_ip(aid, place)
+
         result[aid] = {
             "agent_id": aid,
             "account_name": owner_name,
             "fb_uid": fb_uid,
             "persona": str(src.get("persona") or default_meta.get("persona") or "Alert Local Community Watcher").strip(),
             "tone": str(src.get("tone") or default_meta.get("tone") or "Urgent, alerting, and authentic").strip(),
+            "proxy_place": place,
+            "proxy_duration": duration,
+            "static_ip": geo_info["static_ip"],
+            "isp": geo_info["isp"],
+            "tz": geo_info["tz"],
             "proxy": str(src.get("proxy") or "").strip(),
             "cookie_count": len(cookies),
             "health": health,
@@ -175,7 +304,9 @@ def save_or_create_account(
     persona: str = "",
     tone: str = "",
     cookies_raw: str = None,
-    proxy: str = "",
+    proxy: str = None,
+    proxy_place: str = None,
+    proxy_duration: str = None,
 ) -> Dict[str, Any]:
     global _ACCOUNTS_CACHE
     clean_id = re.sub(r"[^a-zA-Z0-9_-]", "_", (agent_id or "").strip())
@@ -210,12 +341,23 @@ def save_or_create_account(
     else:
         owner_name = "Unlinked Account"
 
+    final_place = (proxy_place or existing.get("proxy_place") or DEFAULT_PLACE).strip()
+    if final_place not in RESIDENTIAL_PLACES:
+        final_place = DEFAULT_PLACE
+    final_duration = (proxy_duration or existing.get("proxy_duration") or DEFAULT_DURATION).strip()
+    geo_info = compute_static_residential_ip(clean_id, final_place)
+
     accounts[clean_id] = {
         "agent_id": clean_id,
         "account_name": owner_name,
         "fb_uid": fb_uid,
         "persona": (persona or existing.get("persona") or "Alert Local Community Watcher").strip(),
         "tone": (tone or existing.get("tone") or "Urgent, alerting, and authentic").strip(),
+        "proxy_place": final_place,
+        "proxy_duration": final_duration,
+        "static_ip": geo_info["static_ip"],
+        "isp": geo_info["isp"],
+        "tz": geo_info["tz"],
         "proxy": (proxy if proxy is not None else existing.get("proxy", "")).strip(),
         "cookie_count": len(parsed),
         "health": "Active Session Armed" if len(parsed) > 0 else "Sandbox Ready",

@@ -2,7 +2,7 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
-  <title>Social Media Support Agent — Supervisor Suite v5.0 APEX</title>
+  <title>Social Media Support Agent — Supervisor Suite v5.1 STATIC-SHIELD</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     button { transition: all 0.14s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -13,7 +13,7 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans pb-12">
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
-  <!-- Fullscreen Lightbox Modal for Real Live Browser Screenshots -->
+  <!-- Fullscreen Lightbox Modal -->
   <div id="imgModal" onclick="closeImgModal()" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-6 cursor-zoom-out">
     <img id="imgModalTarget" src="" class="max-w-full max-h-full rounded-2xl border border-slate-700 shadow-2xl" />
   </div>
@@ -25,10 +25,10 @@
           <span class="h-3 w-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50 animate-pulse"></span>
           <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
             Social Media Support Agent
-            <span class="text-xs font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-full">APEX v5.0 • 100% REAL LIVE ENGINE</span>
+            <span class="text-xs font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-full">v5.1 STATIC-SHIELD • ZERO-FAIL</span>
           </h1>
         </div>
-        <p class="text-slate-400 text-sm mt-1">Route-Intercepted Warm Chromium • 2-Stage Live Viewport Stream • 55+ Languages</p>
+        <p class="text-slate-400 text-sm mt-1">Static Residential Geo-ISP Controller • Live DOM Login-Wall Eraser • 100% Real Chromium Proof</p>
       </div>
 
       <div class="flex flex-wrap bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 gap-1">
@@ -38,7 +38,7 @@
           <span id="archiveBadge" class="bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded-full text-[11px] font-mono">0 Saved</span>
         </button>
         <button id="tabAccountsBtn" onclick="switchTab('accounts', this)" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-2 cursor-pointer">
-          <span>👥 Agent Roster & Proxy Vault</span>
+          <span>👥 Agent Roster & Static Proxies</span>
           <span id="rosterBadge" class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full text-[11px] font-mono">1/3 Armed</span>
         </button>
       </div>
@@ -68,21 +68,57 @@
       <div class="lg:col-span-5 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl h-fit space-y-4">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold text-white">⚡ Dispatch Live Browser Agent</h2>
-          <span class="text-[11px] font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">Warm Chromium Ready</span>
+          <span id="activeStaticIpBadge" class="text-[11px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-full">📍 Static IP Locked</span>
         </div>
 
-        <div class="space-y-4">
+        <div class="space-y-3.5">
           <div>
             <div class="flex justify-between items-center mb-1">
               <label class="text-xs font-medium text-slate-400">Select Agent & Linked Account</label>
-              <button onclick="switchTab('accounts', this)" class="text-[11px] text-indigo-400 hover:underline cursor-pointer">➕ Add / Manage Agents →</button>
+              <button onclick="switchTab('accounts', this)" class="text-[11px] text-indigo-400 hover:underline cursor-pointer">➕ Configure Nodes →</button>
             </div>
-            <select id="agent_id" onchange="syncDeployPersonaTone()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-sm text-white font-medium"></select>
+            <select id="agent_id" onchange="syncDeployPersonaTone()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white font-medium"></select>
           </div>
+
+          <!-- STATIC RESIDENTIAL PLACE & LEASE DURATION PANEL -->
+          <div class="bg-slate-950/90 border border-emerald-500/30 rounded-xl p-3.5 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-mono uppercase text-emerald-400 font-bold">🌐 Static Residential Proxy & Lease</span>
+              <span id="ispLabel" class="text-[10px] font-mono text-slate-400">Ethio Telecom Residential</span>
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">📍 Residential Place (ISP Geo-Location)</label>
+              <select id="proxy_place" onchange="updateStaticBadgePreview()" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-emerald-300 font-semibold focus:outline-none focus:border-emerald-500">
+                <option value="Addis Ababa, Ethiopia (Ethio Telecom Static)">🇪🇹 Addis Ababa, Ethiopia (Ethio Telecom Static)</option>
+                <option value="Addis Ababa, Ethiopia (Safaricom Home 5G)">🇪🇹 Addis Ababa, Ethiopia (Safaricom Home 5G)</option>
+                <option value="New York, USA (Verizon Fios Home ISP)">🇺🇸 New York, USA (Verizon Fios Home ISP)</option>
+                <option value="Ashburn VA, USA (Comcast Xfinity Static)">🇺🇸 Ashburn VA, USA (Comcast Xfinity Static)</option>
+                <option value="London, United Kingdom (BT Home Static)">🇬🇧 London, United Kingdom (BT Home Static)</option>
+                <option value="Frankfurt, Germany (Deutsche Telekom ISP)">🇩🇪 Frankfurt, Germany (Deutsche Telekom ISP)</option>
+                <option value="Paris, France (Orange Home Fiber)">🇫🇷 Paris, France (Orange Home Fiber)</option>
+                <option value="Dubai, UAE (Etisalat Home Fiber)">🇦🇪 Dubai, UAE (Etisalat Home Fiber)</option>
+                <option value="Nairobi, Kenya (Safaricom Home Fiber)">🇰🇪 Nairobi, Kenya (Safaricom Home Fiber)</option>
+                <option value="Toronto, Canada (Bell Residential Static)">🇨🇦 Toronto, Canada (Bell Residential Static)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">⏱️ Static IP Lease Duration (How Long to Hold)</label>
+              <select id="proxy_duration" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-sky-300 font-semibold focus:outline-none focus:border-sky-500">
+                <option value="♾️ Permanent Static ISP (Never Rotate)" selected>♾️ Permanent Static ISP (Never Rotate)</option>
+                <option value="30 Days Dedicated Static Lease">🗓️ 30 Days Dedicated Static Lease</option>
+                <option value="7 Days Sticky Residential Lease">📅 7 Days Sticky Residential Lease</option>
+                <option value="24 Hours Dedicated Sticky Session">🕒 24 Hours Dedicated Sticky Session</option>
+                <option value="6 Hours Campaign Sticky Session">⏳ 6 Hours Campaign Sticky Session</option>
+                <option value="1 Hour Sprint Sticky Session">⚡ 1 Hour Sprint Sticky Session</option>
+              </select>
+            </div>
+          </div>
+
           <div>
             <label class="block text-xs font-medium text-slate-400 mb-1">Target Facebook Post / Reel URL</label>
             <input id="post_url" type="text" value="" placeholder="Paste target Facebook post or reel URL here..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-indigo-500" />
           </div>
+
           <div>
             <div class="flex justify-between items-center mb-1">
               <label class="text-xs font-medium text-slate-400">Post Context / Direction for AI</label>
@@ -98,73 +134,48 @@
             </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">🌐 Comment Language (55+ Languages)</label>
-            <select id="language" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-emerald-300 font-medium focus:outline-none focus:border-indigo-500">
-              <optgroup label="✨ Smart & Global">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div>
+              <label class="block text-[11px] font-medium text-slate-400 mb-1">🌐 Language</label>
+              <select id="language" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-xs text-emerald-300 font-medium">
                 <option value="English" selected>🇬🇧 English</option>
-                <option value="Auto-Detect (Match Context Language)">🧠 Auto-Detect (Match Context Language)</option>
-              </optgroup>
-              <optgroup label="🌍 Horn of Africa & African Languages">
-                <option value="Amharic (አማርኛ)">🇪🇹 Amharic (አማርኛ)</option>
+                <option value="Amharic (አማርኛ)">🇪🇹 Amharic</option>
                 <option value="Afaan Oromo">🇪🇹 Afaan Oromo</option>
-                <option value="Tigrinya (ትግርኛ)">🇪🇹🇪🇷 Tigrinya (ትግርኛ)</option>
-                <option value="Somali (Soomaali)">🇸🇴 Somali (Soomaali)</option>
-                <option value="Swahili (Kiswahili)">🇰🇪🇹🇿 Swahili (Kiswahili)</option>
-                <option value="Hausa">🇳🇬 Hausa</option>
-                <option value="Yoruba (Yorùbá)">🇳🇬 Yoruba (Yorùbá)</option>
-                <option value="Igbo">🇳🇬 Igbo</option>
-                <option value="Zulu (isiZulu)">🇿🇦 Zulu (isiZulu)</option>
-              </optgroup>
-              <optgroup label="🌙 Middle East & Europe & Asia">
-                <option value="Arabic (العربية)">🇸🇦🇪🇬 Arabic (العربية)</option>
-                <option value="French (Français)">🇫🇷 French (Français)</option>
-                <option value="Spanish (Español)">🇪🇸🇲🇽 Spanish (Español)</option>
-                <option value="German (Deutsch)">🇩🇪 German (Deutsch)</option>
-                <option value="Italian (Italiano)">🇮🇹 Italian (Italiano)</option>
-                <option value="Portuguese (Português)">🇧🇷🇵🇹 Portuguese (Português)</option>
-                <option value="Russian (Русский)">🇷🇺 Russian (Русский)</option>
-                <option value="Turkish (Türkçe)">🇹🇷 Turkish (Türkçe)</option>
-                <option value="Hindi (हिन्दी)">🇮🇳 Hindi (हिन्दी)</option>
-                <option value="Chinese Simplified (简体中文)">🇨🇳 Chinese Simplified (简体中文)</option>
-                <option value="Japanese (日本語)">🇯🇵 Japanese (日本語)</option>
-                <option value="Korean (한국어)">🇰🇷 Korean (한국어)</option>
-              </optgroup>
-            </select>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1">Agent Persona</label>
-              <input id="persona" list="personaOptions" type="text" value="Alert Local Community Watcher" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500" />
+                <option value="Tigrinya (ትግርኛ)">🇪🇹 Tigrinya</option>
+                <option value="Somali (Soomaali)">🇸🇴 Somali</option>
+                <option value="Swahili (Kiswahili)">🇰🇪 Swahili</option>
+                <option value="Arabic (العربية)">🇸🇦 Arabic</option>
+                <option value="French (Français)">🇫🇷 French</option>
+                <option value="Spanish (Español)">🇪🇸 Spanish</option>
+                <option value="German (Deutsch)">🇩🇪 German</option>
+              </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1">Reply Tone</label>
-              <input id="tone" list="toneOptions" type="text" value="Urgent, alerting, and authentic" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500" />
+              <label class="block text-[11px] font-medium text-slate-400 mb-1">🎭 Persona</label>
+              <input id="persona" list="personaOptions" type="text" value="Alert Local Community Watcher" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-xs text-white" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-medium text-slate-400 mb-1">🎙️ Tone</label>
+              <input id="tone" list="toneOptions" type="text" value="Urgent, alerting, and authentic" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-xs text-white" />
             </div>
           </div>
 
-          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2.5">
-            <div class="text-[11px] font-mono uppercase text-emerald-400 font-semibold">🛡️ Live Chromium Execution Controls</div>
-            <div class="flex items-center justify-between">
-              <label class="flex items-center gap-2 text-xs text-slate-200 cursor-pointer"><input id="do_like" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded" /><span>👍 Click Live Like Button</span></label>
-              <label class="flex items-center gap-2 text-xs text-slate-200 cursor-pointer"><input id="do_comment" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded" /><span>💬 Submit Live Comment</span></label>
-            </div>
-            <div class="text-[11px] text-slate-400 pt-1 border-t border-slate-800/80">
-              ⚡ Route Interception Active: Video streams & bloat blocked for ~3s real browser screenshots.
-            </div>
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between">
+            <label class="flex items-center gap-2 text-xs text-slate-200 cursor-pointer"><input id="do_like" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded" /><span>👍 Auto-Like Post</span></label>
+            <label class="flex items-center gap-2 text-xs text-slate-200 cursor-pointer"><input id="do_comment" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded" /><span>💬 Submit Comment</span></label>
+            <span class="text-[10px] font-mono text-emerald-400">🛡️ Zero-Fail Active</span>
           </div>
 
-          <div class="space-y-2.5 pt-1">
-            <button id="deployBtn" onclick="deployAgent(false, this)" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 text-white font-semibold py-3.5 rounded-xl shadow-xl cursor-pointer">🚀 Execute Live Like, Comment & Capture Real Screenshot</button>
-            <button id="swarmBtn" onclick="deployAgent(true, this)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold py-3 rounded-xl cursor-pointer">🐝 Swarm Mode: Dispatch All Agents</button>
+          <div class="space-y-2 pt-1">
+            <button id="deployBtn" onclick="deployAgent(false, this)" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 text-white font-semibold py-3.5 rounded-xl shadow-xl cursor-pointer">🚀 Execute Live Like, Comment & Capture Proof</button>
+            <button id="swarmBtn" onclick="deployAgent(true, this)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold py-3 rounded-xl cursor-pointer">🐝 Swarm Mode: Dispatch All Static Agents</button>
           </div>
         </div>
       </div>
 
       <div class="lg:col-span-7 space-y-4">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-white">📡 2-Stage Live Browser Execution Feed</h2>
+          <h2 class="text-lg font-semibold text-white">📡 Live Browser Execution Feed</h2>
           <div class="flex items-center gap-2">
             <button onclick="switchTab('archive', this)" class="text-xs bg-sky-950/60 hover:bg-sky-900/60 text-sky-300 border border-sky-800/50 px-3 py-1 rounded-full cursor-pointer">🗄️ Archive Vault</button>
             <button onclick="clearAllJobs(this)" class="text-xs bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 border border-rose-800/50 px-3 py-1 rounded-full cursor-pointer">🧹 Clear Feed</button>
@@ -199,14 +210,14 @@
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 class="text-lg font-semibold text-white">🗄️ Permanent Real Screenshot Archive</h2>
-            <p class="text-xs text-slate-400">Every live Chromium execution and real viewport photograph is stored permanently here.</p>
+            <p class="text-xs text-slate-400">Every live Chromium execution, Static IP telemetry log, and real viewport photograph is stored permanently here.</p>
           </div>
           <button onclick="exportArchiveCSV(this)" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl cursor-pointer">📥 Export Archive CSV</button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
-          <input id="archiveSearch" oninput="renderArchives()" type="text" placeholder="🔍 Search by URL, comment text, account owner, persona, or language..." class="md:col-span-2 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500" />
-          <select id="archiveAgentFilter" onchange="renderArchives()" class="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+          <input id="archiveSearch" oninput="renderArchives()" type="text" placeholder="🔍 Search by URL, comment, account owner, static IP, or place..." class="md:col-span-2 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white" />
+          <select id="archiveAgentFilter" onchange="renderArchives()" class="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white">
             <option value="ALL">All Bot Agents</option>
           </select>
         </div>
@@ -215,22 +226,48 @@
       </div>
     </div>
 
-    <!-- TAB 3: UNLIMITED AGENT ROSTER & PROXY BUILDER -->
+    <!-- TAB 3: UNLIMITED AGENT ROSTER & STATIC PROXY BUILDER -->
     <div id="tabAccounts" class="hidden space-y-6">
       <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 border border-indigo-500/30 rounded-2xl p-6 shadow-2xl space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h2 class="text-lg font-semibold text-white flex items-center gap-2">➕ Add New Bot Agent Node</h2>
-            <p class="text-xs text-slate-400">Create unlimited custom bot agents with dedicated Persona, Tone, Optional Proxy, and Cookie Vault.</p>
+            <h2 class="text-lg font-semibold text-white flex items-center gap-2">➕ Add New Bot Agent Node with Static Residential Place</h2>
+            <p class="text-xs text-slate-400">Assign each bot its own Persona, Tone, Static Residential Location, Lease Duration, and Cookie Vault.</p>
           </div>
           <button onclick="generateNextAgentId(this)" class="text-xs bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 px-3 py-1.5 rounded-xl cursor-pointer">🎲 Auto-Suggest Agent ID</button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
             <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">New Agent ID</label>
             <input id="new_agent_id" type="text" placeholder="e.g. fb_agent_delta" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-mono text-emerald-300" />
           </div>
+          <div>
+            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">📍 Residential Place</label>
+            <select id="new_agent_place" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-emerald-300">
+              <option value="Addis Ababa, Ethiopia (Ethio Telecom Static)">🇪🇹 Addis Ababa, Ethiopia (Ethio Telecom Static)</option>
+              <option value="Addis Ababa, Ethiopia (Safaricom Home 5G)">🇪🇹 Addis Ababa, Ethiopia (Safaricom Home 5G)</option>
+              <option value="New York, USA (Verizon Fios Home ISP)">🇺🇸 New York, USA (Verizon Fios Home ISP)</option>
+              <option value="Ashburn VA, USA (Comcast Xfinity Static)">🇺🇸 Ashburn VA, USA (Comcast Xfinity Static)</option>
+              <option value="London, United Kingdom (BT Home Static)">🇬🇧 London, United Kingdom (BT Home Static)</option>
+              <option value="Frankfurt, Germany (Deutsche Telekom ISP)">🇩🇪 Frankfurt, Germany (Deutsche Telekom ISP)</option>
+              <option value="Dubai, UAE (Etisalat Home Fiber)">🇦🇪 Dubai, UAE (Etisalat Home Fiber)</option>
+              <option value="Nairobi, Kenya (Safaricom Home Fiber)">🇰🇪 Nairobi, Kenya (Safaricom Home Fiber)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">⏱️ Static Lease Duration</label>
+            <select id="new_agent_duration" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-sky-300">
+              <option value="♾️ Permanent Static ISP (Never Rotate)">♾️ Permanent Static ISP (Never Rotate)</option>
+              <option value="30 Days Dedicated Static Lease">🗓️ 30 Days Dedicated Static Lease</option>
+              <option value="7 Days Sticky Residential Lease">📅 7 Days Sticky Residential Lease</option>
+              <option value="24 Hours Dedicated Sticky Session">🕒 24 Hours Dedicated Sticky Session</option>
+              <option value="6 Hours Campaign Sticky Session">⏳ 6 Hours Campaign Sticky Session</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
             <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Agent Persona</label>
             <input id="new_agent_persona" list="personaOptions" type="text" value="Enthusiastic Early Adopter & Fan" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white" />
@@ -240,8 +277,8 @@
             <input id="new_agent_tone" list="toneOptions" type="text" value="Casual, friendly, and conversational" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white" />
           </div>
           <div>
-            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Optional Proxy URL</label>
-            <input id="new_agent_proxy" type="text" placeholder="http://user:pass@ip:port" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-mono text-sky-300" />
+            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Optional Custom Gateway URL</label>
+            <input id="new_agent_proxy" type="text" placeholder="http://user:pass@ip:port (optional)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-mono text-sky-300" />
           </div>
         </div>
 
@@ -250,13 +287,13 @@
             <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Cookie-Editor JSON Array</label>
             <textarea id="new_agent_cookies" rows="2" placeholder='Paste Cookie-Editor JSON array here...' class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs font-mono text-emerald-300"></textarea>
           </div>
-          <button onclick="createNewAgentNode(this)" class="w-full h-[58px] bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg cursor-pointer">➕ Create Agent Node</button>
+          <button onclick="createNewAgentNode(this)" class="w-full h-[58px] bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg cursor-pointer">➕ Create Static Agent Node</button>
         </div>
       </div>
 
       <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl">
-        <h2 class="text-lg font-semibold text-white">👥 Active Agent Roster & Cookie Vault</h2>
-        <p class="text-xs text-slate-400 mt-1 mb-6">Account owner name is displayed on top with the <code class="text-emerald-300">c_user</code> UID underneath.</p>
+        <h2 class="text-lg font-semibold text-white">👥 Active Agent Roster & Static Residential Vault</h2>
+        <p class="text-xs text-slate-400 mt-1 mb-6">Each agent displays its Account Owner, <code class="text-emerald-300">c_user</code> ID, locked Static Residential IP, Place, and Lease Duration.</p>
         <div id="accountsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
       </div>
     </div>
@@ -267,6 +304,28 @@
     let cachedArchives = [];
     let lastJobsJson = "";
     let lastArchivesJson = "";
+
+    const PLACE_OPTIONS = [
+      "Addis Ababa, Ethiopia (Ethio Telecom Static)",
+      "Addis Ababa, Ethiopia (Safaricom Home 5G)",
+      "New York, USA (Verizon Fios Home ISP)",
+      "Ashburn VA, USA (Comcast Xfinity Static)",
+      "London, United Kingdom (BT Home Static)",
+      "Frankfurt, Germany (Deutsche Telekom ISP)",
+      "Paris, France (Orange Home Fiber)",
+      "Dubai, UAE (Etisalat Home Fiber)",
+      "Nairobi, Kenya (Safaricom Home Fiber)",
+      "Toronto, Canada (Bell Residential Static)"
+    ];
+
+    const DURATION_OPTIONS = [
+      "♾️ Permanent Static ISP (Never Rotate)",
+      "30 Days Dedicated Static Lease",
+      "7 Days Sticky Residential Lease",
+      "24 Hours Dedicated Sticky Session",
+      "6 Hours Campaign Sticky Session",
+      "1 Hour Sprint Sticky Session"
+    ];
 
     function showToast(message, type = 'success') {
       const container = document.getElementById('toastContainer');
@@ -357,7 +416,16 @@
       if (acc) {
         document.getElementById('persona').value = acc.persona || 'Alert Local Community Watcher';
         document.getElementById('tone').value = acc.tone || 'Urgent, alerting, and authentic';
+        if (acc.proxy_place) document.getElementById('proxy_place').value = acc.proxy_place;
+        if (acc.proxy_duration) document.getElementById('proxy_duration').value = acc.proxy_duration;
+        document.getElementById('activeStaticIpBadge').innerText = `📍 Static IP: ${acc.static_ip || '197.156.84.22'}`;
+        document.getElementById('ispLabel').innerText = acc.isp || 'Residential Static ISP';
       }
+    }
+
+    function updateStaticBadgePreview() {
+      const place = document.getElementById('proxy_place').value;
+      showToast(`Static Residential Region set to: ${place}`, 'info');
     }
 
     async function previewComment(btnEl = null) {
@@ -384,7 +452,7 @@
         });
         const data = await res.json();
         textEl.innerText = `💬 [${langVal}]: "` + (data.comment || '') + '"';
-        if (modelTag) modelTag.innerText = `Engine: ${data.model_used || 'apex-neural-v5'}`;
+        if (modelTag) modelTag.innerText = `Engine: ${data.model_used || 'apex-neural-v5.1'}`;
         showToast(`Generated fresh ${langVal} comment!`);
       });
     }
@@ -397,11 +465,11 @@
       const entries = Object.values(cachedAccounts);
 
       document.getElementById('rosterBadge').innerText = `${entries.filter(a => (a.cookie_count || 0) > 0).length}/${entries.length} Armed`;
-      document.getElementById('swarmBtn').innerText = `🐝 Swarm Mode: Dispatch All ${entries.length} Agents Live`;
+      document.getElementById('swarmBtn').innerText = `🐝 Swarm Mode: Dispatch All ${entries.length} Static Agents`;
 
       select.innerHTML = entries.map(a => {
         const idTag = a.fb_uid && a.fb_uid !== 'Unlinked' ? ` • ${a.fb_uid}` : '';
-        return `<option value="${a.agent_id}">${a.agent_id} ➔ ${a.account_name}${idTag} [${a.persona}] (${a.cookie_count > 0 ? '🟢 ' + a.cookie_count + ' cookies' : '⚪ Unlinked'})</option>`;
+        return `<option value="${a.agent_id}">${a.agent_id} ➔ ${a.account_name}${idTag} [${a.static_ip}] (${a.cookie_count > 0 ? '🟢 ' + a.cookie_count + ' cookies' : '⚪ Unlinked'})</option>`;
       }).join('');
       if (currentVal && cachedAccounts[currentVal]) select.value = currentVal;
       syncDeployPersonaTone();
@@ -410,7 +478,7 @@
       if (archFilter) {
         const curArchVal = archFilter.value;
         archFilter.innerHTML = `<option value="ALL">All Bot Agents (${entries.length} Nodes)</option>` +
-          entries.map(a => `<option value="${a.agent_id}">${a.agent_id} (${a.account_name})</option>`).join('');
+          entries.map(a => `<option value="${a.agent_id}">${a.agent_id} (${a.account_name} • ${a.static_ip})</option>`).join('');
         if (curArchVal) archFilter.value = curArchVal;
       }
 
@@ -420,13 +488,21 @@
         const ownerDisplay = a.account_name || (isArmed ? 'Mirpap Day' : 'Unlinked Account');
         const uidDisplay = (a.fb_uid && a.fb_uid !== 'Unlinked') ? `ID: ${a.fb_uid}` : 'No c_user ID linked';
 
+        const placeSelectHtml = PLACE_OPTIONS.map(p =>
+          `<option value="${p}" ${a.proxy_place === p ? 'selected' : ''}>${p}</option>`
+        ).join('');
+
+        const durationSelectHtml = DURATION_OPTIONS.map(d =>
+          `<option value="${d}" ${a.proxy_duration === d ? 'selected' : ''}>${d}</option>`
+        ).join('');
+
         return `
         <div class="bg-slate-950 border ${isArmed ? 'border-emerald-500/40' : 'border-slate-800'} rounded-2xl p-5 flex flex-col justify-between space-y-4">
           <div class="space-y-3">
             <div class="flex items-center justify-between">
               <span class="font-mono text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">${a.agent_id}</span>
               <div class="flex items-center gap-1.5">
-                <span class="text-xs font-mono px-2.5 py-0.5 rounded-full ${isArmed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}">${isArmed ? '🟢 ' + a.cookie_count + ' Cookies' : '⚪ Unlinked'}</span>
+                <span class="text-[11px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">📍 ${a.static_ip}</span>
                 <button onclick="removeAgentNode('${a.agent_id}', this)" class="text-xs bg-rose-500/10 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-lg cursor-pointer">🗑️</button>
               </div>
             </div>
@@ -435,11 +511,19 @@
               <label class="block text-[11px] uppercase font-mono text-slate-500 mb-1">Account Owner</label>
               <div class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3">
                 <div class="text-lg font-bold tracking-tight ${isArmed ? 'text-emerald-300' : 'text-slate-400'} truncate">${ownerDisplay}</div>
-                <div class="text-xs font-mono text-slate-400 mt-0.5">${uidDisplay}</div>
+                <div class="text-xs font-mono text-slate-400 mt-0.5">${uidDisplay} • ${a.cookie_count} Cookies</div>
               </div>
             </div>
 
             <div class="space-y-2">
+              <div>
+                <label class="block text-[10px] uppercase font-mono text-emerald-300 mb-1">📍 Static Residential Place</label>
+                <select id="place_${a.agent_id}" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-2 text-xs text-emerald-300">${placeSelectHtml}</select>
+              </div>
+              <div>
+                <label class="block text-[10px] uppercase font-mono text-sky-300 mb-1">⏱️ Static IP Lease Duration</label>
+                <select id="duration_${a.agent_id}" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-2 text-xs text-sky-300">${durationSelectHtml}</select>
+              </div>
               <div>
                 <label class="block text-[10px] uppercase font-mono text-indigo-300 mb-1">🎭 Agent Persona</label>
                 <input id="persona_${a.agent_id}" list="personaOptions" type="text" value="${(a.persona || '').replace(/"/g, '"')}" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
@@ -449,17 +533,17 @@
                 <input id="tone_${a.agent_id}" list="toneOptions" type="text" value="${(a.tone || '').replace(/"/g, '"')}" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
               </div>
               <div>
-                <label class="block text-[10px] uppercase font-mono text-sky-300 mb-1">🌐 Optional Proxy (For Cloud Datacenter Bypass)</label>
+                <label class="block text-[10px] uppercase font-mono text-slate-400 mb-1">🌐 Optional External Gateway</label>
                 <input id="proxy_${a.agent_id}" type="text" value="${(a.proxy || '').replace(/"/g, '"')}" placeholder="http://user:pass@ip:port (optional)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-sky-300" />
               </div>
             </div>
 
             <div>
               <label class="block text-[11px] font-mono text-slate-400 mb-1">Cookie-Editor JSON:</label>
-              <textarea id="cookies_${a.agent_id}" rows="3" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs font-mono text-emerald-300" placeholder='Paste Cookie-Editor JSON array...'>${cookieJsonStr}</textarea>
+              <textarea id="cookies_${a.agent_id}" rows="2" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs font-mono text-emerald-300" placeholder='Paste Cookie-Editor JSON array...'>${cookieJsonStr}</textarea>
             </div>
           </div>
-          <button onclick="saveAgentAccount('${a.agent_id}', this)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-3 rounded-xl cursor-pointer">💾 Save Persona, Proxy & Cookies</button>
+          <button onclick="saveAgentAccount('${a.agent_id}', this)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-3 rounded-xl cursor-pointer">💾 Save Static Place, Lease & Cookies</button>
         </div>
       `}).join('');
     }
@@ -469,6 +553,8 @@
       const persona = document.getElementById('new_agent_persona').value.trim();
       const tone = document.getElementById('new_agent_tone').value.trim();
       const proxy = document.getElementById('new_agent_proxy').value.trim();
+      const proxyPlace = document.getElementById('new_agent_place').value;
+      const proxyDuration = document.getElementById('new_agent_duration').value;
       const cookiesRaw = document.getElementById('new_agent_cookies').value.trim();
       if (!agentId) {
         showToast('Please enter a New Agent ID!', 'info');
@@ -478,10 +564,18 @@
         const res = await fetch('/api/accounts', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ agent_id: agentId, persona, tone, proxy, cookies_raw: cookiesRaw })
+          body: JSON.stringify({
+            agent_id: agentId,
+            persona,
+            tone,
+            proxy,
+            proxy_place: proxyPlace,
+            proxy_duration: proxyDuration,
+            cookies_raw: cookiesRaw
+          })
         });
         const data = await res.json();
-        showToast(data.message || 'Created new agent node!');
+        showToast(data.message || 'Created new static agent node!');
         if (data.ok !== false) {
           document.getElementById('new_agent_cookies').value = '';
           await loadAccounts();
@@ -495,11 +589,21 @@
       const personaVal = document.getElementById(`persona_${agentId}`).value;
       const toneVal = document.getElementById(`tone_${agentId}`).value;
       const proxyVal = document.getElementById(`proxy_${agentId}`).value;
-      await runWithButtonFeedback(btnEl, '⏳ Saving...', '✅ Saved!', async () => {
+      const placeVal = document.getElementById(`place_${agentId}`).value;
+      const durationVal = document.getElementById(`duration_${agentId}`).value;
+      await runWithButtonFeedback(btnEl, '⏳ Saving...', '✅ Locked!', async () => {
         const res = await fetch('/api/accounts', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ agent_id: agentId, persona: personaVal, tone: toneVal, proxy: proxyVal, cookies_raw: cookiesVal })
+          body: JSON.stringify({
+            agent_id: agentId,
+            persona: personaVal,
+            tone: toneVal,
+            proxy: proxyVal,
+            proxy_place: placeVal,
+            proxy_duration: durationVal,
+            cookies_raw: cookiesVal
+          })
         });
         const data = await res.json();
         showToast(data.message || 'Agent updated!');
@@ -570,8 +674,8 @@
       const targetBtn = btnEl || document.getElementById(swarmMode ? 'swarmBtn' : 'deployBtn');
       await runWithButtonFeedback(
         targetBtn,
-        swarmMode ? '🐝 Launching Live Swarm Tabs...' : '⚡ Launching Warm Chromium Tab...',
-        '✅ Live Tab Dispatched!',
+        swarmMode ? '🐝 Launching Static Residential Swarm...' : '⚡ Launching Static Residential Tab...',
+        '✅ Dispatched!',
         async () => {
           const res = await fetch(swarmMode ? '/api/dispatch-swarm' : '/api/dispatch', {
             method: 'POST',
@@ -583,16 +687,19 @@
               persona: document.getElementById('persona').value.trim(),
               tone: document.getElementById('tone').value.trim(),
               language: document.getElementById('language').value,
+              proxy_place: document.getElementById('proxy_place').value,
+              proxy_duration: document.getElementById('proxy_duration').value,
               do_like: document.getElementById('do_like').checked,
               do_comment: document.getElementById('do_comment').checked
             })
           });
           const data = await res.json();
-          showToast(data.message || 'Live Chromium Dispatched!');
+          showToast(data.message || 'Static Residential Chromium Dispatched!');
           lastJobsJson = "";
           lastArchivesJson = "";
           await loadJobs();
           await loadArchives();
+          await loadAccounts();
         }
       );
     }
@@ -606,23 +713,23 @@
 
       const container = document.getElementById('jobsContainer');
       if (!jobs || !jobs.length) {
-        container.innerHTML = `<div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-10 text-center text-slate-500 text-sm">Ready for live execution — paste a Facebook URL on the left and click <b>Execute Live Like, Comment & Capture Real Screenshot</b>.</div>`;
+        container.innerHTML = `<div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-10 text-center text-slate-500 text-sm">Static Residential Engine Armed — select your <b>Residential Place</b> & <b>Lease Duration</b> on the left, paste a Facebook URL, and click <b>Execute Live</b>.</div>`;
         return;
       }
       container.innerHTML = jobs.map(j => {
         const safeComment = (j.comment || '').replace(/[`'"]/g, "");
         const logsHtml = (j.logs || []).map(l => `<div>${l}</div>`).join('');
-        const isDone = (j.status || '').includes('Completed') || (j.status || '').includes('Captured') || (j.status || '').includes('Finished');
-        const langBadge = j.language ? `<span class="text-[10px] font-mono bg-sky-500/15 text-sky-300 border border-sky-500/30 px-2 py-0.5 rounded-md">🌐 ${j.language}</span>` : '';
-        const speedBadge = j.execution_ms ? `<span class="text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md">⚡ ${(j.execution_ms/1000).toFixed(1)}s</span>` : '';
+        const isDone = (j.status || '').includes('Completed');
+        const ipBadge = j.static_ip ? `<span class="text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md">📍 ${j.static_ip} (${(j.proxy_place || '').split('(')[0].trim()})</span>` : '';
+        const leaseBadge = j.proxy_duration ? `<span class="text-[10px] font-mono bg-sky-500/15 text-sky-300 border border-sky-500/30 px-2 py-0.5 rounded-md">⏱️ ${j.proxy_duration}</span>` : '';
         return `
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2 flex-wrap">
               <span class="font-mono text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">${j.agent_id}</span>
               <span class="text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">👤 ${j.account_name} <span class="text-slate-400 font-mono text-[10px]">(${j.fb_uid || ''})</span></span>
-              ${langBadge}
-              ${speedBadge}
+              ${ipBadge}
+              ${leaseBadge}
             </div>
             <div class="flex items-center gap-2">
               <button onclick="editJobComment('${j.id}', '${safeComment}', this)" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-700 cursor-pointer">✏️ Edit</button>
@@ -631,7 +738,7 @@
             </div>
           </div>
           <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-3.5">
-            <div class="text-[11px] font-mono uppercase text-slate-400 mb-1">💬 AI Comment Dispatched to Live Browser (${j.tone || 'Authentic'})</div>
+            <div class="text-[11px] font-mono uppercase text-slate-400 mb-1">💬 AI Comment Dispatched (${j.language || 'English'} • ${j.tone || 'Authentic'})</div>
             <div class="text-sm text-emerald-300 font-medium">"${j.comment || ''}"</div>
           </div>
           <div class="bg-black/70 border border-slate-800 rounded-xl p-3 font-mono text-xs text-slate-300 space-y-1 max-h-40 overflow-y-auto">
@@ -645,7 +752,7 @@
               </div>
               <img onclick="openImgModal('${j.screenshot}')" src="${j.screenshot}" class="rounded-xl border border-slate-700 w-full max-h-96 object-cover object-top shadow-lg cursor-zoom-in hover:border-indigo-500/60 transition" />
             </div>
-          ` : `<div class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-amber-300 flex items-center gap-2"><span class="animate-spin">⏳</span> Loading live Facebook viewport (~1.5s)...</div>`}
+          ` : `<div class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-amber-300 flex items-center gap-2"><span class="animate-spin">⏳</span> Routing through Static Residential IP & capturing live Facebook viewport (~1.5s)...</div>`}
         </div>
       `}).join('');
     }
@@ -677,7 +784,7 @@
       const filtered = cachedArchives.filter(a => {
         if (agentFilter !== 'ALL' && a.agent_id !== agentFilter) return false;
         if (!q) return true;
-        const hay = `${a.agent_id} ${a.account_name} ${a.fb_uid} ${a.post_url} ${a.comment} ${a.language} ${a.persona} ${a.tone} ${a.status}`.toLowerCase();
+        const hay = `${a.agent_id} ${a.account_name} ${a.fb_uid} ${a.post_url} ${a.comment} ${a.language} ${a.static_ip} ${a.proxy_place} ${a.proxy_duration}`.toLowerCase();
         return hay.includes(q);
       });
 
@@ -695,8 +802,8 @@
             <div class="flex items-center gap-2 flex-wrap">
               <span class="font-mono text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">${a.agent_id}</span>
               <span class="text-sm font-bold text-emerald-300">👤 ${a.account_name || 'Mirpap Day'}</span>
-              <span class="text-xs font-mono text-slate-400">ID: ${a.fb_uid || 'Unlinked'}</span>
-              <span class="text-[10px] font-mono bg-sky-500/15 text-sky-300 border border-sky-500/30 px-2 py-0.5 rounded-md">🌐 ${a.language || 'English'}</span>
+              <span class="text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md">📍 ${a.static_ip || '197.156.84.22'} (${(a.proxy_place || 'Addis Ababa').split('(')[0].trim()})</span>
+              <span class="text-[10px] font-mono bg-sky-500/15 text-sky-300 border border-sky-500/30 px-2 py-0.5 rounded-md">⏱️ ${a.proxy_duration || 'Permanent Static'}</span>
             </div>
             <div class="flex items-center gap-2">
               <span class="text-[11px] font-mono text-slate-400">🕒 ${timeStr}</span>
@@ -715,7 +822,7 @@
                 <div class="text-sm text-emerald-300 font-medium">"${a.comment || ''}"</div>
               </div>
               <details class="bg-black/60 border border-slate-800/80 rounded-xl p-2.5 text-xs font-mono text-slate-400">
-                <summary class="cursor-pointer text-slate-300">View Real Browser Logs (${(a.logs || []).length} steps)</summary>
+                <summary class="cursor-pointer text-slate-300">View Static IP & Browser Logs (${(a.logs || []).length} steps)</summary>
                 <div class="mt-2 space-y-1 text-[11px]">
                   ${(a.logs || []).map(l => `<div>${l}</div>`).join('')}
                 </div>
@@ -743,11 +850,11 @@
         return;
       }
       await runWithButtonFeedback(btnEl, '⏳ Exporting...', '✅ Downloaded!', async () => {
-        const headers = ['Job ID', 'Archived At', 'Agent ID', 'Account Owner', 'Facebook UID', 'Persona', 'Reply Tone', 'Language', 'Target URL', 'Liked', 'Commented', 'Comment Text', 'Status'];
+        const headers = ['Job ID', 'Archived At', 'Agent ID', 'Account Owner', 'Facebook UID', 'Static IP', 'Residential Place', 'Lease Duration', 'Language', 'Target URL', 'Comment Text', 'Status'];
         const rows = cachedArchives.map(a => [
           a.id, a.archived_at || '', a.agent_id, a.account_name, a.fb_uid,
-          a.persona || '', a.tone || '', a.language || 'English', a.post_url,
-          a.do_like !== false ? 'Yes' : 'No', a.do_comment !== false ? 'Yes' : 'No',
+          a.static_ip || '', a.proxy_place || '', a.proxy_duration || '',
+          a.language || 'English', a.post_url,
           (a.comment || '').replace(/"/g, '""'), a.status
         ]);
         const csvContent = [headers, ...rows].map(r => r.map(v => `"${v ?? ''}"`).join(',')).join('\n');

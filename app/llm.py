@@ -142,7 +142,7 @@ async def generate_comment(
                 cand = f"{p1}{ctx_part}{p2}".strip()
                 if cand not in USED_COMMENTS:
                     USED_COMMENTS.add(cand)
-                    return {"comment": cand, "model_used": "apex-neural-v5", "language": lang_clean}
+                    return {"comment": cand, "model_used": "apex-neural-v5.1", "language": lang_clean}
 
     tone_lower = (tone or "").lower()
     if "warm" in tone_lower or "helpful" in tone_lower or "empathetic" in tone_lower:
@@ -165,7 +165,7 @@ async def generate_comment(
         candidate = f"{o} {m} {c}".strip()
         if candidate not in USED_COMMENTS:
             USED_COMMENTS.add(candidate)
-            return {"comment": candidate, "model_used": "apex-neural-v5", "language": lang_clean}
+            return {"comment": candidate, "model_used": "apex-neural-v5.1", "language": lang_clean}
 
     fallback = f"{random.choice(openers)} {random.choice(CLOSERS)}"
-    return {"comment": fallback, "model_used": "apex-neural-v5", "language": lang_clean}
+    return {"comment": fallback, "model_used": "apex-neural-v5.1", "language": lang_clean}

@@ -20,6 +20,7 @@ from app.state import (
     get_archives,
     upsert_archive,
     delete_archive,
+    compute_static_residential_ip,
 )
 from app.llm import generate_comment
 from app.worker import execute_automation_job, get_warm_browser
@@ -29,20 +30,21 @@ DASHBOARD_PATH = BASE_DIR / "dashboard.html"
 SCREENSHOTS_DIR = BASE_DIR / "screenshots"
 SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="Social Media Support Agent — Supervisor Suite v5.0 APEX", version="5.0.0")
+app = FastAPI(title="Social Media Support Agent — Supervisor Suite v5.1 STATIC-SHIELD", version="5.1.0")
 app.mount("/screenshots", StaticFiles(directory=str(SCREENSHOTS_DIR)), name="screenshots")
 
 @app.on_event("startup")
 async def startup_event():
     for existing_job in get_jobs():
         upsert_archive(existing_job)
-    # Pre-warm Chromium at startup so first real click has 0ms browser launch overhead
     asyncio.create_task(get_warm_browser())
 
 class AccountSavePayload(BaseModel):
     agent_id: str
     persona: Optional[str] = "Alert Local Community Watcher"
     tone: Optional[str] = "Urgent, alerting, and authentic"
+    proxy_place: Optional[str] = "Addis Ababa, Ethiopia (Ethio Telecom Static)"
+    proxy_duration: Optional[str] = "♾️ Permanent Static ISP (Never Rotate)"
     proxy: Optional[str] = ""
     cookies_raw: Optional[str] = None
 
@@ -61,6 +63,8 @@ class DispatchPayload(BaseModel):
     persona: Optional[str] = ""
     tone: Optional[str] = ""
     language: Optional[str] = "English"
+    proxy_place: Optional[str] = ""
+    proxy_duration: Optional[str] = ""
     do_like: bool = True
     do_comment: bool = True
 
@@ -84,11 +88,13 @@ async def api_save_account(payload: AccountSavePayload):
             persona=payload.persona or "Alert Local Community Watcher",
             tone=payload.tone or "Urgent, alerting, and authentic",
             cookies_raw=payload.cookies_raw,
-            proxy=payload.proxy or "",
+            proxy=payload.proxy,
+            proxy_place=payload.proxy_place,
+            proxy_duration=payload.proxy_duration,
         )
         return {
             "ok": True,
-            "message": f"Saved {updated['agent_id']} ➔ {updated['account_name']} ({updated['cookie_count']} cookies)",
+            "message": f"Saved {updated['agent_id']} ➔ {updated['account_name']} (Static IP: {updated['static_ip']})",
             "account": updated,
         }
     except Exception as e:
@@ -127,7 +133,7 @@ async def api_preview(payload: PreviewPayload):
     return {
         "ok": True,
         "comment": res["comment"],
-        "model_used": res.get("model_used", "apex-neural-v5"),
+        "model_used": res.get("model_used", "apex-neural-v5.1"),
         "language": res.get("language", payload.language),
     }
 
@@ -139,10 +145,23 @@ async def _queue_agent_job(agent_id: str, payload: DispatchPayload, use_agent_ow
     if use_agent_own_profile:
         chosen_persona = acc.get("persona") or "Alert Local Community Watcher"
         chosen_tone = acc.get("tone") or "Urgent, alerting, and authentic"
+        chosen_place = acc.get("proxy_place") or "Addis Ababa, Ethiopia (Ethio Telecom Static)"
+        chosen_duration = acc.get("proxy_duration") or "♾️ Permanent Static ISP (Never Rotate)"
     else:
         chosen_persona = (payload.persona or acc.get("persona") or "Alert Local Community Watcher").strip()
         chosen_tone = (payload.tone or acc.get("tone") or "Urgent, alerting, and authentic").strip()
+        chosen_place = (payload.proxy_place or acc.get("proxy_place") or "Addis Ababa, Ethiopia (Ethio Telecom Static)").strip()
+        chosen_duration = (payload.proxy_duration or acc.get("proxy_duration") or "♾️ Permanent Static ISP (Never Rotate)").strip()
+        # Persist place & duration back to agent profile
+        save_or_create_account(
+            agent_id=agent_id,
+            persona=chosen_persona,
+            tone=chosen_tone,
+            proxy_place=chosen_place,
+            proxy_duration=chosen_duration,
+        )
 
+    geo = compute_static_residential_ip(agent_id, chosen_place)
     ai_res = await generate_comment(
         post_url=payload.post_url,
         context=payload.post_text or "",
@@ -170,14 +189,17 @@ async def _queue_agent_job(agent_id: str, payload: DispatchPayload, use_agent_ow
         "persona": chosen_persona,
         "tone": chosen_tone,
         "language": chosen_lang,
+        "proxy_place": chosen_place,
+        "proxy_duration": chosen_duration,
+        "static_ip": geo["static_ip"],
         "do_like": payload.do_like,
         "do_comment": payload.do_comment,
         "comment": comment_text,
         "execution_ms": 0,
-        "status": "Launching Live Tab...",
+        "status": f"Connecting Static IP ({geo['static_ip']})...",
         "logs": [
             f"[*] Dispatched {agent_id} ({acc_name} • ID: {fb_uid}) for {payload.post_url}",
-            f"[+] Instant Neural v5 generated unique [{chosen_lang}] comment in 1ms."
+            f"[+] Generated unique [{chosen_lang}] comment via Instant Neural v5.1."
         ],
         "screenshot": None,
     }
@@ -195,6 +217,10 @@ async def _queue_agent_job(agent_id: str, payload: DispatchPayload, use_agent_ow
             do_like=payload.do_like,
             do_comment=payload.do_comment,
             proxy=proxy_url,
+            proxy_place=chosen_place,
+            proxy_duration=chosen_duration,
+            persona=chosen_persona,
+            language=chosen_lang,
         )
     )
     return job_record
@@ -202,7 +228,7 @@ async def _queue_agent_job(agent_id: str, payload: DispatchPayload, use_agent_ow
 @app.post("/api/dispatch")
 async def api_dispatch(payload: DispatchPayload):
     job = await _queue_agent_job(payload.agent_id, payload, use_agent_own_profile=False)
-    return {"ok": True, "message": f"Live Chromium executing for {payload.agent_id}!", "job": job}
+    return {"ok": True, "message": f"Launched {payload.agent_id} on Static IP {job['static_ip']}!", "job": job}
 
 @app.post("/api/dispatch-swarm")
 async def api_dispatch_swarm(payload: DispatchPayload):
@@ -211,7 +237,7 @@ async def api_dispatch_swarm(payload: DispatchPayload):
     for aid in accounts.keys():
         job = await _queue_agent_job(aid, payload, use_agent_own_profile=True)
         jobs.append(job)
-    return {"ok": True, "message": f"Swarm launched across all {len(jobs)} live browser tabs!", "jobs": jobs}
+    return {"ok": True, "message": f"Swarm launched across all {len(jobs)} static residential nodes!", "jobs": jobs}
 
 @app.put("/api/jobs/{job_id}")
 async def api_edit_job(job_id: str, payload: dict):
