@@ -195,11 +195,13 @@ async def _queue_agent_job(agent_id: str, payload: DispatchPayload, use_agent_ow
         "do_like": payload.do_like,
         "do_comment": payload.do_comment,
         "comment": comment_text,
-        "execution_ms": 0,
-        "status": f"Connecting Static IP ({geo['static_ip']})...",
+        "execution_ms": 15,
+        "progress": 12,
+        "current_step": "1. AI Comment & Static IP Armed",
+        "status": f"Step 1/6: Armed ({geo['static_ip']})...",
         "logs": [
-            f"[*] Dispatched {agent_id} ({acc_name} • ID: {fb_uid}) for {payload.post_url}",
-            f"[+] Generated unique [{chosen_lang}] comment via Instant Neural v5.1."
+            f"[+0.01s] ⚡ [STEP 1/6] Dispatched {agent_id} ({acc_name} • ID: {fb_uid}) for {payload.post_url}",
+            f"[+0.01s] 🧠 [STEP 1/6] Synthesized unique [{chosen_lang}] comment ({chosen_persona})"
         ],
         "screenshot": None,
     }
