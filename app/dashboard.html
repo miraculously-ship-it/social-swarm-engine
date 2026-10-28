@@ -709,6 +709,51 @@
       }, 100);
     }
 
+    let optimisticTimer = null;
+
+    function injectOptimisticTelemetryCard(agentId, postUrl, lang, place, duration) {
+      const acc = cachedAccounts[agentId] || { account_name: 'Mirpap Day', fb_uid: '100062273714859', static_ip: '197.156.84.22' };
+      const container = document.getElementById('jobsContainer');
+      const startMs = Date.now();
+      const cardHtml = `
+        <div id="optimisticCard" class="bg-slate-900 border-2 border-indigo-500/80 rounded-2xl p-5 shadow-2xl space-y-3 animate-pulse">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-mono text-xs bg-indigo-500/30 text-indigo-200 px-2.5 py-1 rounded-md border border-indigo-400/40">${agentId}</span>
+              <span class="text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">👤 ${acc.account_name} (${acc.fb_uid})</span>
+              <span class="text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md">📍 ${acc.static_ip || '197.156.84.22'}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="optClock" class="text-xs font-mono bg-indigo-950 text-indigo-300 border border-indigo-500/40 px-2.5 py-1 rounded-full">⏱️ 0.0s</span>
+              <span class="text-xs font-mono px-3 py-1 rounded-full bg-amber-500/20 text-amber-300">⚡ Initializing Pipeline...</span>
+            </div>
+          </div>
+          <div class="w-full bg-slate-950 rounded-full h-2.5 border border-slate-800 overflow-hidden">
+            <div id="optBar" class="bg-gradient-to-r from-indigo-500 via-sky-400 to-emerald-400 h-2.5 rounded-full transition-all duration-200" style="width: 14%"></div>
+          </div>
+          <div class="bg-black/90 border border-slate-800 rounded-xl p-3.5 font-mono text-xs space-y-1.5 text-slate-200">
+            <div class="text-emerald-400">[+0.00s] ⚡ [STEP 1/6] Button clicked — locking Static Residential Node (${place})...</div>
+            <div class="text-sky-300">[+0.01s] 🧠 [STEP 1/6] Synthesizing unique [${lang}] comment & arming Cookie Vault (${duration})...</div>
+            <div id="optLiveLine" class="text-amber-300">[+0.02s] 🖥️ [STEP 2/6] Opening warm stealth Chromium tab for ${postUrl}...</div>
+          </div>
+        </div>
+      `;
+      if (container.innerHTML.includes('Static Residential Engine Armed')) {
+        container.innerHTML = cardHtml;
+      } else {
+        container.insertAdjacentHTML('afterbegin', cardHtml);
+      }
+      if (optimisticTimer) clearInterval(optimisticTimer);
+      optimisticTimer = setInterval(() => {
+        const el = document.getElementById('optClock');
+        const bar = document.getElementById('optBar');
+        if (!el) { clearInterval(optimisticTimer); return; }
+        const elapsed = ((Date.now() - startMs) / 1000).toFixed(1);
+        el.innerText = `⏱️ ${elapsed}s`;
+        if (bar) bar.style.width = `${Math.min(45, 14 + elapsed * 18)}%`;
+      }, 100);
+    }
+
     async function deployAgent(swarmMode = false, btnEl = null) {
       const postUrl = document.getElementById('post_url').value.trim();
       if (!postUrl) {
