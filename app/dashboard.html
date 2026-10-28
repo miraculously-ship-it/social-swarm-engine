@@ -350,7 +350,7 @@
             btn.classList.remove('btn-flash-ok');
             btn.innerHTML = origHtml;
             btn.disabled = false;
-          }, 350);
+          }, 800);
         } else {
           btn.innerHTML = origHtml;
           btn.disabled = false;
@@ -664,96 +664,6 @@
       });
     }
 
-    let optimisticTimer = null;
-
-    function injectOptimisticTelemetryCard(agentId, postUrl, lang, place, duration) {
-      const acc = cachedAccounts[agentId] || { account_name: 'Mirpap Day', fb_uid: '100062273714859', static_ip: '197.156.84.22' };
-      const container = document.getElementById('jobsContainer');
-      const startMs = Date.now();
-      const cardHtml = `
-        <div id="optimisticCard" class="bg-slate-900 border-2 border-indigo-500/80 rounded-2xl p-5 shadow-2xl space-y-3 animate-pulse">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="font-mono text-xs bg-indigo-500/30 text-indigo-200 px-2.5 py-1 rounded-md border border-indigo-400/40">${agentId}</span>
-              <span class="text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">👤 ${acc.account_name} (${acc.fb_uid})</span>
-              <span class="text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md">📍 ${acc.static_ip || '197.156.84.22'}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span id="optClock" class="text-xs font-mono bg-indigo-950 text-indigo-300 border border-indigo-500/40 px-2.5 py-1 rounded-full">⏱️ 0.0s</span>
-              <span class="text-xs font-mono px-3 py-1 rounded-full bg-amber-500/20 text-amber-300">⚡ Initializing Pipeline...</span>
-            </div>
-          </div>
-          <div class="w-full bg-slate-950 rounded-full h-2.5 border border-slate-800 overflow-hidden">
-            <div id="optBar" class="bg-gradient-to-r from-indigo-500 via-sky-400 to-emerald-400 h-2.5 rounded-full transition-all duration-200" style="width: 14%"></div>
-          </div>
-          <div class="bg-black/90 border border-slate-800 rounded-xl p-3.5 font-mono text-xs space-y-1.5 text-slate-200">
-            <div class="text-emerald-400">[+0.00s] ⚡ [STEP 1/6] Button clicked — locking Static Residential Node (${place})...</div>
-            <div class="text-sky-300">[+0.01s] 🧠 [STEP 1/6] Synthesizing unique [${lang}] comment & arming Cookie Vault (${duration})...</div>
-            <div id="optLiveLine" class="text-amber-300">[+0.02s] 🖥️ [STEP 2/6] Opening warm stealth Chromium tab for ${postUrl}...</div>
-          </div>
-        </div>
-      `;
-      if (container.innerHTML.includes('Static Residential Engine Armed')) {
-        container.innerHTML = cardHtml;
-      } else {
-        container.insertAdjacentHTML('afterbegin', cardHtml);
-      }
-      if (optimisticTimer) clearInterval(optimisticTimer);
-      optimisticTimer = setInterval(() => {
-        const el = document.getElementById('optClock');
-        const bar = document.getElementById('optBar');
-        if (!el) { clearInterval(optimisticTimer); return; }
-        const elapsed = ((Date.now() - startMs) / 1000).toFixed(1);
-        el.innerText = `⏱️ ${elapsed}s`;
-        if (bar) bar.style.width = `${Math.min(45, 14 + elapsed * 18)}%`;
-      }, 100);
-    }
-
-    let optimisticTimer = null;
-
-    function injectOptimisticTelemetryCard(agentId, postUrl, lang, place, duration) {
-      const acc = cachedAccounts[agentId] || { account_name: 'Mirpap Day', fb_uid: '100062273714859', static_ip: '197.156.84.22' };
-      const container = document.getElementById('jobsContainer');
-      const startMs = Date.now();
-      const cardHtml = `
-        <div id="optimisticCard" class="bg-slate-900 border-2 border-indigo-500/80 rounded-2xl p-5 shadow-2xl space-y-3 animate-pulse">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="font-mono text-xs bg-indigo-500/30 text-indigo-200 px-2.5 py-1 rounded-md border border-indigo-400/40">${agentId}</span>
-              <span class="text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">👤 ${acc.account_name} (${acc.fb_uid})</span>
-              <span class="text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md">📍 ${acc.static_ip || '197.156.84.22'}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span id="optClock" class="text-xs font-mono bg-indigo-950 text-indigo-300 border border-indigo-500/40 px-2.5 py-1 rounded-full">⏱️ 0.0s</span>
-              <span class="text-xs font-mono px-3 py-1 rounded-full bg-amber-500/20 text-amber-300">⚡ Initializing Pipeline...</span>
-            </div>
-          </div>
-          <div class="w-full bg-slate-950 rounded-full h-2.5 border border-slate-800 overflow-hidden">
-            <div id="optBar" class="bg-gradient-to-r from-indigo-500 via-sky-400 to-emerald-400 h-2.5 rounded-full transition-all duration-200" style="width: 14%"></div>
-          </div>
-          <div class="bg-black/90 border border-slate-800 rounded-xl p-3.5 font-mono text-xs space-y-1.5 text-slate-200">
-            <div class="text-emerald-400">[+0.00s] ⚡ [STEP 1/6] Button clicked — locking Static Residential Node (${place})...</div>
-            <div class="text-sky-300">[+0.01s] 🧠 [STEP 1/6] Synthesizing unique [${lang}] comment & arming Cookie Vault (${duration})...</div>
-            <div id="optLiveLine" class="text-amber-300">[+0.02s] 🖥️ [STEP 2/6] Opening warm stealth Chromium tab for ${postUrl}...</div>
-          </div>
-        </div>
-      `;
-      if (container.innerHTML.includes('Static Residential Engine Armed')) {
-        container.innerHTML = cardHtml;
-      } else {
-        container.insertAdjacentHTML('afterbegin', cardHtml);
-      }
-      if (optimisticTimer) clearInterval(optimisticTimer);
-      optimisticTimer = setInterval(() => {
-        const el = document.getElementById('optClock');
-        const bar = document.getElementById('optBar');
-        if (!el) { clearInterval(optimisticTimer); return; }
-        const elapsed = ((Date.now() - startMs) / 1000).toFixed(1);
-        el.innerText = `⏱️ ${elapsed}s`;
-        if (bar) bar.style.width = `${Math.min(45, 14 + elapsed * 18)}%`;
-      }, 100);
-    }
-
     async function deployAgent(swarmMode = false, btnEl = null) {
       const postUrl = document.getElementById('post_url').value.trim();
       if (!postUrl) {
@@ -761,59 +671,37 @@
         document.getElementById('post_url').focus();
         return;
       }
-      const agentId = document.getElementById('agent_id').value;
-      const langVal = document.getElementById('language').value;
-      const placeVal = document.getElementById('proxy_place').value;
-      const durVal = document.getElementById('proxy_duration').value;
-
-      // 0ms Instant Visual Telemetry Card before network round-trip!
-      lastJobsJson = "";
-      injectOptimisticTelemetryCard(agentId, postUrl, langVal, placeVal, durVal);
-
       const targetBtn = btnEl || document.getElementById(swarmMode ? 'swarmBtn' : 'deployBtn');
       await runWithButtonFeedback(
         targetBtn,
-        swarmMode ? '🐝 Streaming Live Swarm Telemetry...' : '⚡ Streaming Live Process Logs...',
+        swarmMode ? '🐝 Launching Static Residential Swarm...' : '⚡ Launching Static Residential Tab...',
         '✅ Dispatched!',
         async () => {
           const res = await fetch(swarmMode ? '/api/dispatch-swarm' : '/api/dispatch', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-              agent_id: agentId,
+              agent_id: document.getElementById('agent_id').value,
               post_url: postUrl,
               post_text: document.getElementById('post_text').value.trim(),
               persona: document.getElementById('persona').value.trim(),
               tone: document.getElementById('tone').value.trim(),
-              language: langVal,
-              proxy_place: placeVal,
-              proxy_duration: durVal,
+              language: document.getElementById('language').value,
+              proxy_place: document.getElementById('proxy_place').value,
+              proxy_duration: document.getElementById('proxy_duration').value,
               do_like: document.getElementById('do_like').checked,
               do_comment: document.getElementById('do_comment').checked
             })
           });
           const data = await res.json();
-          showToast(data.message || 'Live Chromium Process Streaming!');
+          showToast(data.message || 'Static Residential Chromium Dispatched!');
           lastJobsJson = "";
           lastArchivesJson = "";
           await loadJobs();
           await loadArchives();
+          await loadAccounts();
         }
       );
-    }
-
-    function formatLogLine(line) {
-      const safe = (line || '').replace(/</g, '<').replace(/>/g, '>');
-      if (safe.includes('🏁') || safe.includes('✅') || safe.includes('👍') || safe.includes('💬')) {
-        return `<div class="text-emerald-300 font-medium">${safe}</div>`;
-      }
-      if (safe.includes('📸') || safe.includes('🌐') || safe.includes('🍪')) {
-        return `<div class="text-sky-300">${safe}</div>`;
-      }
-      if (safe.includes('📡') || safe.includes('🚀') || safe.includes('🖥️')) {
-        return `<div class="text-indigo-300">${safe}</div>`;
-      }
-      return `<div class="text-slate-300">${safe}</div>`;
     }
 
     async function loadJobs() {
@@ -823,48 +711,25 @@
       if (rawJson === lastJobsJson) return;
       lastJobsJson = rawJson;
 
-      if (optimisticTimer) {
-        clearInterval(optimisticTimer);
-        optimisticTimer = null;
-      }
-
       const container = document.getElementById('jobsContainer');
       if (!jobs || !jobs.length) {
         container.innerHTML = `<div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-10 text-center text-slate-500 text-sm">Static Residential Engine Armed — select your <b>Residential Place</b> & <b>Lease Duration</b> on the left, paste a Facebook URL, and click <b>Execute Live</b>.</div>`;
         return;
       }
-
-      const stepLabels = [
-        { p: 10, label: '1. AI & Vault' },
-        { p: 30, label: '2. Static IP' },
-        { p: 45, label: '3. Chromium' },
-        { p: 70, label: '4. Bypass' },
-        { p: 90, label: '5. Engage' },
-        { p: 100, label: '6. HD Proof' }
-      ];
-
       container.innerHTML = jobs.map(j => {
         const safeComment = (j.comment || '').replace(/[`'"]/g, "");
-        const logsHtml = (j.logs || []).map(l => formatLogLine(l)).join('');
+        const logsHtml = (j.logs || []).map(l => `<div>${l}</div>`).join('');
         const isDone = (j.status || '').includes('Completed');
-        const prog = isDone ? 100 : (j.progress || 15);
-        const curStepText = j.current_step || (isDone ? '6. Completed & Archived (100%)' : 'Executing Live Pipeline...');
-        const secText = j.execution_ms ? `${(j.execution_ms / 1000).toFixed(2)}s` : '0.10s';
         const ipBadge = j.static_ip ? `<span class="text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md">📍 ${j.static_ip} (${(j.proxy_place || '').split('(')[0].trim()})</span>` : '';
-
-        const pillsHtml = stepLabels.map(st => {
-          const active = prog >= st.p;
-          return `<span class="text-[10px] font-mono px-2 py-0.5 rounded-md border ${active ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold' : 'bg-slate-950 text-slate-500 border-slate-800'}">${active ? '✓ ' : ''}${st.label}</span>`;
-        }).join('');
-
+        const leaseBadge = j.proxy_duration ? `<span class="text-[10px] font-mono bg-sky-500/15 text-sky-300 border border-sky-500/30 px-2 py-0.5 rounded-md">⏱️ ${j.proxy_duration}</span>` : '';
         return `
-        <div class="bg-slate-900 border ${isDone ? 'border-slate-800' : 'border-indigo-500/70 shadow-indigo-500/10'} rounded-2xl p-5 shadow-xl space-y-3 transition-all">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2 flex-wrap">
               <span class="font-mono text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">${j.agent_id}</span>
               <span class="text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">👤 ${j.account_name} <span class="text-slate-400 font-mono text-[10px]">(${j.fb_uid || ''})</span></span>
               ${ipBadge}
-              <span class="text-[11px] font-mono bg-slate-950 text-sky-300 border border-slate-800 px-2 py-0.5 rounded-md">⏱️ ${secText}</span>
+              ${leaseBadge}
             </div>
             <div class="flex items-center gap-2">
               <button onclick="editJobComment('${j.id}', '${safeComment}', this)" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-700 cursor-pointer">✏️ Edit</button>
@@ -872,47 +737,26 @@
               <span class="text-xs font-mono px-2.5 py-1 rounded-full ${isDone ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300 animate-pulse'}">${j.status}</span>
             </div>
           </div>
-
-          <!-- 6-Stage Pipeline Progress Tracker -->
-          <div class="bg-slate-950/90 border border-slate-800/90 rounded-xl p-3 space-y-2">
-            <div class="flex items-center justify-between text-[11px] font-mono">
-              <span class="${isDone ? 'text-emerald-400' : 'text-amber-300'} font-semibold">⚙️ ${curStepText}</span>
-              <span class="text-slate-400">${prog}% Complete</span>
-            </div>
-            <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
-              <div class="bg-gradient-to-r from-indigo-500 via-sky-400 to-emerald-400 h-2 rounded-full transition-all duration-300" style="width: ${prog}%"></div>
-            </div>
-            <div class="flex flex-wrap gap-1.5 pt-1">
-              ${pillsHtml}
-            </div>
-          </div>
-
-          <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-3">
-            <div class="text-[10px] font-mono uppercase text-slate-400 mb-1">💬 AI Comment Dispatched (${j.language || 'English'} • ${j.tone || 'Authentic'})</div>
+          <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-3.5">
+            <div class="text-[11px] font-mono uppercase text-slate-400 mb-1">💬 AI Comment Dispatched (${j.language || 'English'} • ${j.tone || 'Authentic'})</div>
             <div class="text-sm text-emerald-300 font-medium">"${j.comment || ''}"</div>
           </div>
-
-          <!-- Live Color-Coded Auto-Scrolling Process Console -->
-          <div class="bg-black/90 border border-slate-800 rounded-xl p-3.5 font-mono text-xs space-y-1.5 max-h-56 overflow-y-auto shadow-inner">
-            <div class="text-[10px] uppercase text-slate-500 border-b border-slate-800/80 pb-1 mb-1 flex justify-between">
-              <span>🖥️ Live Process Telemetry Stream (${(j.logs || []).length} events)</span>
-              <span class="${isDone ? 'text-emerald-400' : 'text-amber-400 animate-pulse'}">${isDone ? '● STREAM COMPLETE' : '● LIVE STREAMING...'}</span>
-            </div>
+          <div class="bg-black/70 border border-slate-800 rounded-xl p-3 font-mono text-xs text-slate-300 space-y-1 max-h-40 overflow-y-auto">
             ${logsHtml}
           </div>
-
           ${j.screenshot ? `
             <div>
               <div class="text-[11px] font-mono uppercase text-slate-400 mb-1.5 flex items-center justify-between">
-                <span class="text-emerald-400 font-semibold">📸 ${isDone ? 'Stage 2: Final 100% Real Live Viewport Screenshot' : 'Stage 1: Live Browser Viewport Preview (Updating...)'}</span>
+                <span class="text-emerald-400 font-semibold">📸 100% Real Live Chromium Viewport Screenshot</span>
                 <button onclick="openImgModal('${j.screenshot}')" class="text-indigo-400 hover:underline cursor-pointer">🔍 Expand Fullscreen</button>
               </div>
               <img onclick="openImgModal('${j.screenshot}')" src="${j.screenshot}" class="rounded-xl border border-slate-700 w-full max-h-96 object-cover object-top shadow-lg cursor-zoom-in hover:border-indigo-500/60 transition" />
             </div>
-          ` : `<div class="bg-slate-950 border border-indigo-500/30 rounded-xl p-4 text-xs font-mono text-indigo-300 flex items-center justify-between"><div class="flex items-center gap-2.5"><span class="inline-block h-2.5 w-2.5 rounded-full bg-indigo-400 animate-ping"></span><span>Warm Chromium rendering live Facebook DOM via Static IP ${j.static_ip || ''}...</span></div><span class="text-slate-500">${prog}%</span></div>`}
+          ` : `<div class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-amber-300 flex items-center gap-2"><span class="animate-spin">⏳</span> Routing through Static Residential IP & capturing live Facebook viewport (~1.5s)...</div>`}
         </div>
       `}).join('');
     }
+
     async function loadArchives(forceRender = false) {
       const res = await fetch('/api/archives');
       cachedArchives = await res.json();
@@ -1030,7 +874,7 @@
     setInterval(() => {
       loadJobs();
       loadArchives();
-    }, 350);
+    }, 800);
   </script>
 </body>
 </html>

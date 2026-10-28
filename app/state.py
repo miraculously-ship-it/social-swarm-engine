@@ -437,8 +437,6 @@ def append_job_log(
     screenshot: str = None,
     account_name: str = None,
     execution_ms: int = None,
-    progress: int = None,
-    current_step: str = None,
 ) -> None:
     jobs = get_jobs()
     target_job = None
@@ -454,10 +452,6 @@ def append_job_log(
                 j["account_name"] = account_name
             if execution_ms is not None:
                 j["execution_ms"] = execution_ms
-            if progress is not None:
-                j["progress"] = progress
-            if current_step is not None:
-                j["current_step"] = current_step
             target_job = j
             break
     save_jobs(jobs)
