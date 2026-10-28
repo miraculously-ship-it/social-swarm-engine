@@ -2,7 +2,6 @@ import json
 import re
 import time
 from datetime import datetime
-import httpx
 from pathlib import Path
 from typing import Dict, Any, List
 
@@ -24,6 +23,7 @@ DEFAULT_ACCOUNTS = {
         "fb_uid": "100062273714859",
         "persona": "Alert Local Community Watcher",
         "tone": "Urgent, alerting, and authentic",
+        "proxy": "",
         "cookie_count": 8,
         "health": "Active Session Armed",
         "cookies": []
@@ -34,6 +34,7 @@ DEFAULT_ACCOUNTS = {
         "fb_uid": "Unlinked",
         "persona": "Helpful Brand Support Specialist",
         "tone": "Warm, authentic, and helpful",
+        "proxy": "",
         "cookie_count": 0,
         "health": "Sandbox Ready",
         "cookies": []
@@ -44,13 +45,14 @@ DEFAULT_ACCOUNTS = {
         "fb_uid": "Unlinked",
         "persona": "Insightful News Commentator",
         "tone": "Direct, sharp, and professional",
+        "proxy": "",
         "cookie_count": 0,
         "health": "Sandbox Ready",
         "cookies": []
     }
 }
 
-_ACCOUNTS_CACHE: Dict[str, Any] = {}
+_ACCOUNTS_CACHE: Dict[str, Any] = None
 _JOBS_CACHE: List[Dict[str, Any]] = None
 _ARCHIVES_CACHE: List[Dict[str, Any]] = None
 
@@ -65,8 +67,11 @@ def _read_json(path: Path, default: Any) -> Any:
         return default
 
 def _write_json(path: Path, data: Any) -> None:
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except Exception:
+        pass
 
 def is_valid_owner_name(name: str) -> bool:
     if not name:
@@ -77,8 +82,6 @@ def is_valid_owner_name(name: str) -> bool:
     for bad in BAD_NAMES:
         if bad == clean or bad in clean:
             return False
-    if clean.startswith("fb_account_") or clean.startswith("unlinked") or clean.startswith("fb_user_"):
-        return False
     return True
 
 def normalize_playwright_cookies(raw_cookies: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -112,50 +115,13 @@ def extract_uid_from_cookies(cookies: List[Dict[str, Any]]) -> str:
             return str(c["value"]).strip()
     return "Unlinked"
 
-def fetch_owner_name_from_fb(cookies: List[Dict[str, Any]], fb_uid: str) -> str:
-    if fb_uid == "Unlinked" or not cookies:
-        return "Unlinked Account"
-    if fb_uid == "100062273714859":
-        return "Mirpap Day"
-    jar = {c["name"]: str(c["value"]) for c in cookies if isinstance(c, dict) and c.get("name") and c.get("value")}
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-    }
-    patterns = [
-        r'"CurrentUserInitialData"\s*,\s*\[\]\s*,\s*\{[^}]*?"NAME"\s*:\s*"([^"]+)"',
-        r'"USER_ID"\s*:\s*"' + re.escape(fb_uid) + r'"\s*,\s*"NAME"\s*:\s*"([^"]+)"',
-        r'"Actor"\s*:\s*\{\s*"__typename"\s*:\s*"User"\s*,\s*"id"\s*:\s*"' + re.escape(fb_uid) + r'"\s*,\s*"name"\s*:\s*"([^"]+)"',
-    ]
-    for url in ("https://www.facebook.com/", f"https://mbasic.facebook.com/{fb_uid}"):
-        try:
-            with httpx.Client(cookies=jar, headers=headers, follow_redirects=True, timeout=2.5) as client:
-                resp = client.get(url)
-                if resp.status_code == 200:
-                    text = resp.text
-                    for pat in patterns:
-                        m = re.search(pat, text)
-                        if m and m.group(1):
-                            decoded = json.loads(f'"{m.group(1)}"').strip()
-                            if is_valid_owner_name(decoded):
-                                return decoded
-        except Exception:
-            continue
-    return f"Verified Owner ({fb_uid[-4:]})"
-
 def get_accounts() -> Dict[str, Any]:
     global _ACCOUNTS_CACHE
-    if _ACCOUNTS_CACHE:
+    if _ACCOUNTS_CACHE is not None:
         return _ACCOUNTS_CACHE
 
     raw = _read_json(ACCOUNTS_FILE, DEFAULT_ACCOUNTS)
-    if isinstance(raw, list):
-        accounts = {item.get("agent_id") or item.get("id"): item for item in raw if isinstance(item, dict)}
-    elif isinstance(raw, dict) and len(raw) > 0:
-        accounts = raw
-    else:
-        accounts = DEFAULT_ACCOUNTS.copy()
+    accounts = raw if isinstance(raw, dict) and raw else DEFAULT_ACCOUNTS.copy()
 
     result = {}
     for aid, src in accounts.items():
@@ -164,7 +130,7 @@ def get_accounts() -> Dict[str, Any]:
         default_meta = DEFAULT_ACCOUNTS.get(aid, {})
         cookies = src.get("cookies", []) if isinstance(src.get("cookies"), list) else []
         fb_uid = extract_uid_from_cookies(cookies)
-        saved_name = re.sub(r"\(\d+\)", "", str(src.get("account_name") or "")).strip()
+        saved_name = str(src.get("account_name") or "").strip()
 
         if fb_uid != "Unlinked":
             if fb_uid == "100062273714859" and (not is_valid_owner_name(saved_name) or saved_name == "Authenticated Owner"):
@@ -172,21 +138,19 @@ def get_accounts() -> Dict[str, Any]:
             elif is_valid_owner_name(saved_name):
                 owner_name = saved_name
             else:
-                owner_name = f"Verified Owner ({fb_uid[-4:]})"
+                owner_name = f"FB User ({fb_uid[-4:]})"
             health = "Active Session Armed"
         else:
             owner_name = "Unlinked Account"
             health = "Sandbox Ready"
 
-        persona = str(src.get("persona") or default_meta.get("persona") or "Alert Local Community Watcher").strip()
-        tone = str(src.get("tone") or default_meta.get("tone") or "Urgent, alerting, and authentic").strip()
-
         result[aid] = {
             "agent_id": aid,
             "account_name": owner_name,
             "fb_uid": fb_uid,
-            "persona": persona,
-            "tone": tone,
+            "persona": str(src.get("persona") or default_meta.get("persona") or "Alert Local Community Watcher").strip(),
+            "tone": str(src.get("tone") or default_meta.get("tone") or "Urgent, alerting, and authentic").strip(),
+            "proxy": str(src.get("proxy") or "").strip(),
             "cookie_count": len(cookies),
             "health": health,
             "cookies": cookies,
@@ -211,6 +175,7 @@ def save_or_create_account(
     persona: str = "",
     tone: str = "",
     cookies_raw: str = None,
+    proxy: str = "",
 ) -> Dict[str, Any]:
     global _ACCOUNTS_CACHE
     clean_id = re.sub(r"[^a-zA-Z0-9_-]", "_", (agent_id or "").strip())
@@ -236,22 +201,22 @@ def save_or_create_account(
     fb_uid = extract_uid_from_cookies(parsed)
     if fb_uid != "Unlinked":
         prev_name = existing.get("account_name", "")
-        if existing.get("fb_uid") == fb_uid and is_valid_owner_name(prev_name) and prev_name not in ("Authenticated Owner", "Unlinked Account"):
+        if fb_uid == "100062273714859":
+            owner_name = "Mirpap Day"
+        elif existing.get("fb_uid") == fb_uid and is_valid_owner_name(prev_name):
             owner_name = prev_name
         else:
-            owner_name = fetch_owner_name_from_fb(parsed, fb_uid)
+            owner_name = f"FB User ({fb_uid[-4:]})"
     else:
         owner_name = "Unlinked Account"
-
-    final_persona = (persona or existing.get("persona") or "Alert Local Community Watcher").strip()
-    final_tone = (tone or existing.get("tone") or "Urgent, alerting, and authentic").strip()
 
     accounts[clean_id] = {
         "agent_id": clean_id,
         "account_name": owner_name,
         "fb_uid": fb_uid,
-        "persona": final_persona,
-        "tone": final_tone,
+        "persona": (persona or existing.get("persona") or "Alert Local Community Watcher").strip(),
+        "tone": (tone or existing.get("tone") or "Urgent, alerting, and authentic").strip(),
+        "proxy": (proxy if proxy is not None else existing.get("proxy", "")).strip(),
         "cookie_count": len(parsed),
         "health": "Active Session Armed" if len(parsed) > 0 else "Sandbox Ready",
         "cookies": parsed,
@@ -289,41 +254,20 @@ def upsert_archive(job: Dict[str, Any]) -> None:
         return
     archives = get_archives()
     now_str = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-    archive_entry = {
-        "id": job["id"],
-        "timestamp": job.get("timestamp") or int(time.time() * 1000),
-        "archived_at": job.get("archived_at") or now_str,
-        "agent_id": job.get("agent_id", "fb_agent_alpha"),
-        "account_name": job.get("account_name", "Mirpap Day"),
-        "fb_uid": job.get("fb_uid", "Unlinked"),
-        "post_url": job.get("post_url", ""),
-        "post_text": job.get("post_text", ""),
-        "persona": job.get("persona", ""),
-        "tone": job.get("tone", ""),
-        "language": job.get("language", "English"),
-        "do_like": job.get("do_like", True),
-        "do_comment": job.get("do_comment", True),
-        "comment": job.get("comment", ""),
-        "status": job.get("status", "Completed"),
-        "screenshot": job.get("screenshot"),
-        "logs": job.get("logs", []),
-    }
-    replaced = False
+    archive_entry = dict(job)
+    archive_entry["archived_at"] = job.get("archived_at") or now_str
     for idx, existing in enumerate(archives):
         if existing.get("id") == job["id"]:
-            archive_entry["archived_at"] = existing.get("archived_at") or now_str
             archives[idx] = archive_entry
-            replaced = True
-            break
-    if not replaced:
-        archives.insert(0, archive_entry)
+            save_archives(archives)
+            return
+    archives.insert(0, archive_entry)
     save_archives(archives)
 
 def delete_archive(job_id: str) -> bool:
     archives = get_archives()
-    new_arch = [a for a in archives if a.get("id") != job_id]
-    save_archives(new_arch)
-    return len(new_arch) < len(archives)
+    save_archives([a for a in archives if a.get("id") != job_id])
+    return True
 
 def get_jobs() -> List[Dict[str, Any]]:
     global _JOBS_CACHE
@@ -344,18 +288,28 @@ def add_job(job: Dict[str, Any]) -> Dict[str, Any]:
     upsert_archive(job)
     return job
 
-def append_job_log(job_id: str, line: str, status: str = None, screenshot: str = None, account_name: str = None) -> None:
+def append_job_log(
+    job_id: str,
+    line: str,
+    status: str = None,
+    screenshot: str = None,
+    account_name: str = None,
+    execution_ms: int = None,
+) -> None:
     jobs = get_jobs()
     target_job = None
     for j in jobs:
         if j.get("id") == job_id:
-            j.setdefault("logs", []).append(line)
+            if line:
+                j.setdefault("logs", []).append(line)
             if status:
                 j["status"] = status
             if screenshot:
                 j["screenshot"] = screenshot
             if account_name:
                 j["account_name"] = account_name
+            if execution_ms is not None:
+                j["execution_ms"] = execution_ms
             target_job = j
             break
     save_jobs(jobs)
@@ -384,9 +338,8 @@ def update_job(job_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
 
 def delete_job(job_id: str) -> bool:
     jobs = get_jobs()
-    new_jobs = [j for j in jobs if j.get("id") != job_id]
-    save_jobs(new_jobs)
-    return len(new_jobs) < len(jobs)
+    save_jobs([j for j in jobs if j.get("id") != job_id])
+    return True
 
 def clear_jobs() -> None:
     save_jobs([])

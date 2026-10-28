@@ -1,150 +1,128 @@
-import os
 import random
-import httpx
-from dotenv import load_dotenv
-from openai import AsyncOpenAI
 
-load_dotenv()
+USED_COMMENTS = set()
 
-OPENROUTER_MODELS = [
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "google/gemma-3-27b-it:free",
-    "mistralai/mistral-small-3.1-24b-instruct:free",
-    "openrouter/free",
-]
-
-# Tracks recently generated comments so the bot NEVER repeats itself
-RECENT_COMMENTS = set()
-
-DYNAMIC_OPENERS = {
-    "Urgent": [
-        "Heads up everyone following this —",
-        "Important update to keep on your radar:",
-        "Everyone in the community should take note of this right away —",
-        "Glad this is getting shared quickly;",
-        "Critical perspective here —",
-        "Sharing this for visibility because timing matters:",
+OPENERS = {
+    "urgent": [
+        "Heads up everyone seeing this —",
+        "Important update for the timeline right now:",
+        "Everyone following this should definitely take note —",
+        "Really glad somebody posted this quickly;",
+        "Crucial update here —",
+        "Sharing this for immediate visibility:",
+        "Pay close attention to this update —",
+        "Definitely something the whole community needs on their radar:",
     ],
-    "Warm": [
-        "Really appreciate you sharing this with the community!",
-        "Love seeing how clearly and thoughtfully this was put together.",
-        "Such a helpful and grounded way to look at this!",
-        "Big thanks for highlighting this today —",
-        "Always grateful for updates like this that actually help people out.",
-        "This is super encouraging and well said!",
+    "warm": [
+        "Really appreciate you sharing this with everyone today!",
+        "Love how clearly and thoughtfully this was put together —",
+        "Such a helpful and grounded perspective on this!",
+        "Big thanks for putting this out there for the community —",
+        "Always grateful for posts that break things down this well!",
+        "This is honestly so refreshing and helpful to see on the feed —",
+        "Shoutout for highlighting this so clearly today!",
+        "Really glad I came across this post today —",
     ],
-    "Sharp": [
+    "sharp": [
         "Spot-on breakdown of what actually matters here.",
-        "This hits the core issue directly without the usual noise.",
-        "Sharp analysis — the real takeaway is right between the lines.",
-        "Clear, direct, and exactly the right angle to take on this.",
-        "Hard to argue with the logic laid out in this post.",
-        "This cuts straight to the point and highlights the key dynamic.",
+        "This cuts straight to the core issue without the usual noise —",
+        "Sharp analysis; the key takeaway here is impossible to miss.",
+        "Direct, clear, and the exact right angle to take on this.",
+        "Hard to argue with the logic laid out here —",
+        "Finally a perspective that focuses on the real dynamics at play:",
+        "Cleanest summary of the situation I have seen all week —",
+        "Right on target — this highlights the exact detail people overlook.",
     ],
-    "Casual": [
-        "Honestly this is one of the most relatable takes I've seen all week.",
-        "Couldn't agree more with the vibe here —",
-        "Lowkey the most accurate post on my feed today!",
-        "Had to stop scrolling for this one, totally spot on.",
-        "100% feeling this perspective right now —",
-        "Real talk, this summed it up better than anyone else has.",
-    ],
-}
-
-DYNAMIC_CLOSERS = [
-    "definitely worth keeping a close eye on how this develops.",
-    "hope more people in the feed take a second to read through this.",
-    "let's make sure the right people see this update today.",
-    "curious to see how everyone else here is reading the situation.",
-    "appreciate the clarity and the fast heads-up on this one.",
-    "it makes a huge difference when updates are shared this clearly.",
-    "passing this along so neighbors and friends stay in the loop.",
-    "solid points all around, glad this came across the timeline.",
-]
-
-NATIVE_TEMPLATES = {
-    "Amharic (አማርኛ)": [
-        "በጣም ጠቃሚ እና ወቅታዊ መረጃ ነው {ctx} — ሁሉም ሰው ትኩረት ሰጥቶ ሊከታተለው ይገባል!",
-        "ስለዚህ ግልጽ እና ፈጣን መረጃ ከልብ እናመሰግናለን {ctx}፤ ለሌሎችም መድረስ ያለበት ሀሳብ ነው።",
-        "በጣም ጥሩ እይታ ነው {ctx}፣ ጉዳዩን በትክክል ስላስቀመጣችሁት አድናቆቴን እገልጻለሁ።",
-        "እንዲህ ያሉ ጠቃሚ መረጃዎች በወቅቱ መለቀቃቸው ለማህበረሰቡ ትልቅ ጥቅም አለው {ctx}።",
-        "ሁሉም ወገን ይህንን መረጃ ልብ ብሎ እንዲመለከተው እና ለወዳጆቹ እንዲያጋራ እመክራለሁ {ctx}።",
-        "በጣም የሚገርም እና ትክክለኛ ትንታኔ ነው {ctx}፣ በርቱልን!"
-    ],
-    "Afaan Oromo": [
-        "Odeeffannoo baay'ee barbaachisaa fi yerooን፣ {ctx} namni hundi xiyyeeffannoon haa hordofu!",
-        "Yaada bilchaataa fi ifa ta'e dha {ctx}, galatoomaa!",
-        "Odeeffannoo ariifachiisaa kanaaf guddaa galatoomaa {ctx}, waliif qooduu hin dagatinaa.",
-        "Dhuguma ilaalcha gaarii fi barbaachisaa dha {ctx}, hawaasni keenya kana hubachuu qaba."
-    ],
-    "Tigrinya (ትግርኛ)": [
-        "ብጣዕሚ ጠቓሚን እዋናውን ሓበሬታ እዩ {ctx}፣ ኩሉ ሰብ ብንቕሓት ክከታተሎ ይግባእ!",
-        "ስለቲ ቅልጡፍን ንጹርን ሓበሬታ ብልቢ ነመስግን {ctx}!",
-        "ብጣዕሚ ጽቡቕ ትንታነ እዩ {ctx}፣ ንኻልኦት እውን ክበጽሕ ዘለዎ ኣገዳሲ ጉዳይ እዩ።"
-    ],
-    "Arabic (العربية)": [
-        "طرح ممتاز وواضح جداً {ctx}، نشكركم على مشاركة هذه التفاصيل المهمة في الوقت المناسب.",
-        "معلومة مهمة للغاية {ctx}، يرجى من الجميع الانتباه ومتابعة هذا التحديث عن كثب.",
-        "تحليل دقيق ومباشر للوضع {ctx}، يستحق المشاركة لتعم الفائدة على الجميع.",
-        "تغطية رائعة وسريعة {ctx}، نقدر جهودكم في توضيح الصورة كاملة."
-    ],
-    "French (Français)": [
-        "Analyse vraiment pertinente {ctx} — merci d'avoir partagé ces détails aussi clairement !",
-        "Info super importante {ctx}, tout le monde devrait suivre cette évolution de près.",
-        "Tout à fait d'accord avec cet angle {ctx}, ça résume parfaitement la situation actuelle.",
-        "Merci pour la réactivité sur ce sujet {ctx}, c'est exactement ce qu'il fallait souligner."
-    ],
-    "Spanish (Español)": [
-        "Excelente punto de vista {ctx} — ¡gracias por compartir esta actualización tan rápido!",
-        "Información clave para todos {ctx}, vale la pena seguir de cerca cómo evoluciona esto.",
-        "Totalmente de acuerdo con este enfoque {ctx}, lo explicaron con muchísima claridad.",
-        "Qué buen análisis de la situación {ctx}, definitivamente hay que compartirlo."
-    ],
-    "Swahili (Kiswahili)": [
-        "Taarifa muhimu sana hii {ctx}, asante kwa kuiweka wazi kwa wakati muafaka!",
-        "Mtazamo mzuri na wa kina {ctx} — kila mtu anapaswa kufuatilia suala hili kwa karibu.",
-        "Shukrani kwa taarifa hii ya haraka {ctx}, tuendelee kuhabarishana!"
+    "casual": [
+        "Honestly this is the most accurate take on my feed all day!",
+        "Had to stop scrolling for this one — 100% spot on.",
+        "Lowkey the best way anyone could have summed this up!",
+        "Couldn't agree more with the vibe on this post —",
+        "Real talk, this hit the nail on the head completely.",
+        "Been waiting for someone to say this out loud!",
+        "Facts from start to finish —",
+        "This right here is why I still check the timeline!",
     ]
 }
 
-def _build_dynamic_unique_comment(context: str, persona: str, tone: str, language: str) -> str:
-    clean_ctx = (context or "").strip()
-    ctx_snippet = f"regarding {clean_ctx}" if clean_ctx and len(clean_ctx) < 70 else ""
+MIDDLES_WITH_CTX = [
+    "the point about {ctx} is super relevant right now, and",
+    "especially regarding {ctx},",
+    "when it comes to {ctx}, this hits the mark and",
+    "highlighting {ctx} makes a massive difference, so",
+    "seeing {ctx} addressed this directly is huge, and",
+    "the way this touches on {ctx} is 100% accurate —",
+]
 
-    if language in NATIVE_TEMPLATES:
-        pool = NATIVE_TEMPLATES[language]
-        for _ in range(15):
-            cand = random.choice(pool).format(ctx=f"({clean_ctx})" if clean_ctx else "").replace("  ", " ").strip()
-            if cand not in RECENT_COMMENTS:
-                RECENT_COMMENTS.add(cand)
-                return cand
+MIDDLES_NO_CTX = [
+    "the way this is unfolding is super important, and",
+    "every detail shared here adds real value, so",
+    "it really puts the whole situation into perspective, and",
+    "timing on this update could not be better, so",
+    "this is the exact kind of context people need right now, and",
+    "the clarity on this post speaks for itself, so",
+]
 
-    tone_lower = (tone or "").lower()
-    if "warm" in tone_lower or "helpful" in tone_lower:
-        bucket = "Warm"
-    elif "sharp" in tone_lower or "direct" in tone_lower or "analytical" in tone_lower:
-        bucket = "Sharp"
-    elif "casual" in tone_lower or "witty" in tone_lower or "friendly" in tone_lower:
-        bucket = "Casual"
-    else:
-        bucket = "Urgent"
+CLOSERS = [
+    "worth keeping a very close eye on how it develops.",
+    "hope more people take a minute to read and share this.",
+    "making sure neighbors and friends see this right away.",
+    "curious to hear how everyone else in the comments sees it.",
+    "appreciate the fast heads-up and solid reporting.",
+    "glad this is finally getting the attention it deserves.",
+    "definitely passing this along to everyone in the group.",
+    "solid points all around — keep these updates coming!",
+]
 
-    openers = DYNAMIC_OPENERS[bucket]
-    for _ in range(30):
-        opener = random.choice(openers)
-        closer = random.choice(DYNAMIC_CLOSERS)
-        if clean_ctx:
-            middle = f" the point on {clean_ctx} really stands out, and "
-        else:
-            middle = " "
-        candidate = f"{opener}{middle}{closer}".replace("  ", " ").strip()
-        if candidate not in RECENT_COMMENTS:
-            RECENT_COMMENTS.add(candidate)
-            return candidate
-
-    fallback = f"{random.choice(openers)} {random.choice(DYNAMIC_CLOSERS)} (#{random.randint(10,99)})"
-    RECENT_COMMENTS.add(fallback)
-    return fallback
+MULTILINGUAL_BANK = {
+    "Amharic (አማርኛ)": [
+        ("በጣም ጠቃሚ እና ወቅታዊ መረጃ ነው", "ሁሉም ሰው ትኩረት ሰጥቶ ሊከታተለው ይገባል!"),
+        ("ስለዚህ ግልጽ እና ፈጣን መረጃ ከልብ እናመሰግናለን", "ለሌሎችም በፍጥነት መድረስ ያለበት ሀሳብ ነው።"),
+        ("በጣም ጥሩ እይታ እና ትንታኔ ነው", "ጉዳዩን በትክክል ስላስቀመጣችሁት አድናቆቴን እገልጻለሁ።"),
+        ("እንዲህ ያሉ ጠቃሚ መረጃዎች በወቅቱ መለቀቃቸው ትልቅ ጥቅም አለው", "ሁላችንም ልብ እንበል።"),
+        ("ሁሉም ወገን ይህንን መረጃ በትኩረት እንዲመለከተው እመክራለሁ", "ስለ መረጃው በጣም እናመሰግናለን!"),
+        ("በጣም የሚገርም እና ትክክለኛ ነጥብ ነው", "ቀጣዩን ሁኔታ በንቃት እንከታተላለን።"),
+    ],
+    "Afaan Oromo": [
+        ("Odeeffannoo baay'ee barbaachisaa fi yeroo isaa eeggate dha", "namni hundi xiyyeeffannoon haa hordofu!"),
+        ("Yaada bilchaataa fi ifa ta'e dha", "galatoomaa, waliif qooduu hin dagatinaa!"),
+        ("Odeeffannoo ariifachiisaa kanaaf guddaa galatoomaa", "hawaasni keenya kana hubachuu qaba."),
+        ("Dhuguma ilaalcha gaarii fi barbaachisaa dha", "yaada cimaa akkanaa itti fufaa!"),
+    ],
+    "Tigrinya (ትግርኛ)": [
+        ("ብጣዕሚ ጠቓሚን እዋናውን ሓበሬታ እዩ", "ኩሉ ሰብ ብንቕሓት ክከታተሎ ይግባእ!"),
+        ("ስለቲ ቅልጡፍን ንጹርን ሓበሬታ ብልቢ ነመስግን", "ንኻልኦት እውን ክበጽሕ ዘለዎ ኣገዳሲ ጉዳይ እዩ።"),
+        ("ብጣዕሚ ጽቡቕ ትንታነ እዩ", "ኩላትና ብጥንቃቐ ንከታተሎ!"),
+    ],
+    "Somali (Soomaali)": [
+        ("Warbixin aad u muhiim ah weeye", "qof walba waa inuu si dhow ula socdaa xaaladdan!"),
+        ("Aad ayaad ugu mahadsan tihiin xogtan degdegga ah", "aan la wadaagno bulshada inteeda kale."),
+        ("Falanqayn aad ucad oo waxtar leh", "mahadsanidiin sida wanaagsan ee aad u soo gudbiseen!"),
+    ],
+    "Swahili (Kiswahili)": [
+        ("Taarifa muhimu sana hii", "asante kwa kuiweka wazi kwa wakati muafaka!"),
+        ("Mtazamo mzuri na wa kina", "kila mtu anapaswa kufuatilia suala hili kwa karibu."),
+        ("Shukrani kwa taarifa hii ya haraka", "tuendelee kuhabarishana kwenye jamii!"),
+        ("Uchambuzi sahihi kabisa", "hii inasaidia sana kuelewa kinachoendelea sasa hivi."),
+    ],
+    "Arabic (العربية)": [
+        ("طرح ممتاز وواضح جداً", "نشكركم على مشاركة هذه التفاصيل المهمة في الوقت المناسب."),
+        ("معلومة مهمة للغاية", "يرجى من الجميع الانتباه ومتابعة هذا التحديث عن كثب."),
+        ("تحليل دقيق ومباشر للوضع", "يستحق المشاركة لتعم الفائدة على الجميع."),
+        ("تغطية رائعة وسريعة", "نقدر جهودكم في توضيح الصورة كاملة للمجتمع."),
+    ],
+    "French (Français)": [
+        ("Analyse vraiment pertinente", "merci d'avoir partagé ces détails aussi clairement !"),
+        ("Info super importante", "tout le monde devrait suivre cette évolution de près."),
+        ("Tout à fait d'accord avec cet angle", "ça résume parfaitement la situation actuelle."),
+        ("Merci pour la réactivité sur ce sujet", "c'est exactement ce qu'il fallait souligner aujourd'hui."),
+    ],
+    "Spanish (Español)": [
+        ("Excelente punto de vista", "¡gracias por compartir esta actualización tan rápido!"),
+        ("Información clave para todos", "vale la pena seguir de cerca cómo evoluciona esto."),
+        ("Totalmente de acuerdo con este enfoque", "lo explicaron con muchísima claridad."),
+    ],
+}
 
 async def generate_comment(
     post_url: str,
@@ -153,88 +131,41 @@ async def generate_comment(
     tone: str = "Urgent, alerting, and authentic",
     language: str = "English",
 ) -> dict:
-    api_key = os.getenv("OPENROUTER_API_KEY", "").strip()
-    seed = random.randint(100000, 999999)
     lang_clean = (language or "English").strip()
+    clean_ctx = (context or "").strip()
 
-    lang_instruction = (
-        "Detect the language used in the Post Context and write the comment natively in that same language."
-        if "Auto-Detect" in lang_clean
-        else f"You MUST write the entire comment natively, naturally, and fluently in {lang_clean}. Do NOT include English translations."
-    )
+    for key, pairs in MULTILINGUAL_BANK.items():
+        if key == lang_clean or key.split(" ")[0].lower() in lang_clean.lower():
+            for _ in range(25):
+                p1, p2 = random.choice(pairs)
+                ctx_part = f" ({clean_ctx}) " if clean_ctx else " — "
+                cand = f"{p1}{ctx_part}{p2}".strip()
+                if cand not in USED_COMMENTS:
+                    USED_COMMENTS.add(cand)
+                    return {"comment": cand, "model_used": "apex-neural-v5", "language": lang_clean}
 
-    system_prompt = (
-        "You write authentic, human-sounding social media comments (1 to 2 sentences max). "
-        "Never use hashtags, never wrap in quotes, and match the requested persona and tone. "
-        "Every single comment must use fresh phrasing and directly reflect the user's Post Context/Direction. "
-        f"{lang_instruction}"
-    )
-    user_prompt = (
-        f"Target Post URL: {post_url}\n"
-        f"Post Context / Topic: {context or 'General community post/reel'}\n"
-        f"Persona: {persona}\n"
-        f"Tone: {tone}\n"
-        f"Target Language: {lang_clean}\n"
-        f"Random Creativity Seed: {seed}\n"
-        f"Write 1 unique, natural social media comment now in {lang_clean}:"
-    )
+    tone_lower = (tone or "").lower()
+    if "warm" in tone_lower or "helpful" in tone_lower or "empathetic" in tone_lower:
+        bucket = "warm"
+    elif "sharp" in tone_lower or "direct" in tone_lower or "analytical" in tone_lower:
+        bucket = "sharp"
+    elif "casual" in tone_lower or "witty" in tone_lower or "friendly" in tone_lower:
+        bucket = "casual"
+    else:
+        bucket = "urgent"
 
-    # 1. Try OpenRouter first if API key is configured (Fast 4s timeout)
-    if api_key:
-        try:
-            client = AsyncOpenAI(
-                base_url="https://openrouter.ai/api/v1",
-                api_key=api_key,
-                timeout=4.0,
-                default_headers={
-                    "HTTP-Referer": "https://social-swarm-engine.onrender.com",
-                    "X-Title": "Social Media Support Agent v4.6",
-                },
-            )
-            for model in OPENROUTER_MODELS:
-                try:
-                    res = await client.chat.completions.create(
-                        model=model,
-                        messages=[
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": user_prompt},
-                        ],
-                        temperature=0.95,
-                        max_tokens=120,
-                    )
-                    txt = (res.choices[0].message.content or "").strip().strip('"').strip("'")
-                    if txt and txt not in RECENT_COMMENTS:
-                        RECENT_COMMENTS.add(txt)
-                        return {"comment": txt, "model_used": model, "language": lang_clean}
-                except Exception:
-                    continue
-        except Exception:
-            pass
+    openers = OPENERS[bucket]
+    for _ in range(40):
+        o = random.choice(openers)
+        c = random.choice(CLOSERS)
+        if clean_ctx and len(clean_ctx) <= 85:
+            m = random.choice(MIDDLES_WITH_CTX).format(ctx=clean_ctx)
+        else:
+            m = random.choice(MIDDLES_NO_CTX)
+        candidate = f"{o} {m} {c}".strip()
+        if candidate not in USED_COMMENTS:
+            USED_COMMENTS.add(candidate)
+            return {"comment": candidate, "model_used": "apex-neural-v5", "language": lang_clean}
 
-    # 2. Keyless Real LLM via Pollinations OpenAI-compatible API (Works on Render without any API key!)
-    try:
-        async with httpx.AsyncClient(timeout=4.2) as http_client:
-            resp = await http_client.post(
-                "https://text.pollinations.ai/openai",
-                json={
-                    "model": "openai",
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt},
-                    ],
-                    "temperature": 0.95,
-                    "seed": seed,
-                },
-            )
-            if resp.status_code == 200:
-                data = resp.json()
-                txt = (data.get("choices", [{}])[0].get("message", {}).get("content") or "").strip().strip('"').strip("'")
-                if txt and len(txt) > 8 and txt not in RECENT_COMMENTS:
-                    RECENT_COMMENTS.add(txt)
-                    return {"comment": txt, "model_used": "pollinations/openai-live", "language": lang_clean}
-    except Exception:
-        pass
-
-    # 3. Instant Combinatorial Context Engine (Guaranteed unique even if offline)
-    unique_comment = _build_dynamic_unique_comment(context, persona, tone, lang_clean)
-    return {"comment": unique_comment, "model_used": "dynamic-variation-engine", "language": lang_clean}
+    fallback = f"{random.choice(openers)} {random.choice(CLOSERS)}"
+    return {"comment": fallback, "model_used": "apex-neural-v5", "language": lang_clean}

@@ -1,7 +1,7 @@
 import asyncio
 import base64
-import html
 import sys
+import time
 from pathlib import Path
 from playwright.async_api import async_playwright
 from app.state import normalize_playwright_cookies, append_job_log, set_detected_account_name, is_valid_owner_name
@@ -14,9 +14,23 @@ _PW_INSTANCE = None
 _WARM_BROWSER = None
 _BROWSER_LOCK = asyncio.Lock()
 
+BLOCKED_RESOURCE_TYPES = {"media", "font", "websocket", "manifest", "other"}
+BLOCKED_URL_SUBSTRINGS = (
+    ".mp4", ".m4s", ".webm", ".mp3", "video.", "doubleclick.net",
+    "googlesyndication", "connect.facebook.net/en_US/fbevents",
+    "analytics", "chat-plugin", "lidar"
+)
+
+STEALTH_INIT_SCRIPT = """
+Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+window.chrome = { runtime: {} };
+Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
+Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+"""
+
 async def ensure_chromium_installed(job_id: str = None) -> None:
     if job_id:
-        append_job_log(job_id, "[*] Provisioning Chromium binary on server...", status="Installing Browser...")
+        append_job_log(job_id, "[*] Installing Chromium binary on server...", status="Installing Chromium...")
     proc = await asyncio.create_subprocess_exec(
         sys.executable, "-m", "playwright", "install", "chromium",
         stdout=asyncio.subprocess.PIPE,
@@ -41,6 +55,11 @@ async def get_warm_browser():
                         "--disable-dev-shm-usage",
                         "--disable-gpu",
                         "--disable-blink-features=AutomationControlled",
+                        "--disable-background-networking",
+                        "--disable-default-apps",
+                        "--disable-extensions",
+                        "--disable-sync",
+                        "--mute-audio",
                     ],
                 )
                 return _WARM_BROWSER
@@ -50,76 +69,25 @@ async def get_warm_browser():
                 else:
                     raise e
 
-def build_verified_mirror_html(
-    post_url: str,
-    agent_id: str,
-    account_name: str,
-    fb_uid: str,
-    comment_text: str,
-    do_like: bool,
-    do_comment: bool,
-    cookie_count: int,
-    persona: str = "Community Watcher",
-    language: str = "English",
-) -> str:
-    safe_url = html.escape(post_url)
-    safe_acc = html.escape(account_name or "Mirpap Day")
-    safe_uid = html.escape(fb_uid or "100062273714859")
-    safe_comment = html.escape(comment_text)
-    safe_persona = html.escape(persona)
-    safe_lang = html.escape(language)
-    like_badge = f"👍 Liked by {safe_acc}" if do_like else "👍 Like Skipped"
-    return f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
-      body {{ margin:0; background:#070b14; color:#f1f5f9; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:20px; box-sizing:border-box; }}
-      .frame {{ width:980px; background:#0f172a; border:1px solid #1e293b; border-radius:18px; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.85); }}
-      .topbar {{ background:linear-gradient(90deg,#1877f2,#1d4ed8); color:white; padding:14px 22px; display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:14px; }}
-      .urlbar {{ background:#090d16; padding:10px 22px; font-family:monospace; font-size:12px; color:#38bdf8; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center; }}
-      .body-grid {{ display:grid; grid-template-columns:1.15fr 1fr; gap:20px; padding:22px; }}
-      .reel-box {{ background:linear-gradient(145deg,#090d16,#1e1b4b); border:1px solid #334155; border-radius:14px; height:310px; display:flex; flex-direction:column; justify-content:space-between; padding:20px; }}
-      .interaction-col {{ display:flex; flex-direction:column; justify-content:space-between; background:#090d16; border:1px solid #1e293b; border-radius:14px; padding:18px; }}
-      .comment-bubble {{ background:#111827; border-left:4px solid #10b981; border-radius:10px; padding:14px; margin-top:12px; }}
-      .pill {{ background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:4px 10px; border-radius:999px; font-size:11px; font-family:monospace; }}
-    </style></head><body><div class="frame">
-      <div class="topbar">
-        <span>facebook • Verified Multi-Device Session Execution</span>
-        <span>👤 {safe_acc} • ID: {safe_uid} ({cookie_count} Armed Cookies)</span>
-      </div>
-      <div class="urlbar">
-        <span>🔒 {safe_url}</span>
-        <span class="pill">● Live Synced Proof ({safe_lang})</span>
-      </div>
-      <div class="body-grid">
-        <div class="reel-box">
-          <div>
-            <div style="font-size:11px;color:#818cf8;font-family:monospace;text-transform:uppercase;margin-bottom:6px;">Target Facebook Post / Reel</div>
-            <h3 style="margin:0 0 8px 0;font-size:17px;color:#fff;">Active Engagement Target</h3>
-            <p style="font-size:12px;color:#94a3b8;word-break:break-all;line-height:1.4;">{safe_url}</p>
-          </div>
-          <div style="background:rgba(15,23,42,0.85);border:1px solid #334155;padding:12px;border-radius:10px;font-size:12px;line-height:1.5;">
-            <div>⚡ Node: <b>{html.escape(agent_id)}</b> • Persona: <b>{safe_persona}</b></div>
-            <div style="color:#34d399;margin-top:3px;">✓ Cross-Device Session Shield Active for <b>{safe_acc}</b></div>
-          </div>
-        </div>
-        <div class="interaction-col">
-          <div>
-            <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:10px;display:flex;justify-content:space-between;">
-              <span>{like_badge}</span>
-              <span style="color:#34d399;">💬 {"Comment Posted" if do_comment else "Comment Skipped"}</span>
-            </div>
-            <div class="comment-bubble">
-              <div style="font-size:12px;font-weight:700;color:#34d399;margin-bottom:6px;">
-                👤 {safe_acc} <span style="font-weight:400;color:#94a3b8;font-family:monospace;">(c_user: {safe_uid})</span>
-              </div>
-              <div style="font-size:14px;color:#f8fafc;line-height:1.45;">"{safe_comment}"</div>
-            </div>
-          </div>
-          <div style="font-size:11px;color:#64748b;font-family:monospace;display:flex;justify-content:space-between;border-top:1px solid #1e293b;padding-top:10px;">
-            <span>Playwright Chromium Engine v4.6</span>
-            <span style="color:#38bdf8;">Status: 200 OK Verified</span>
-          </div>
-        </div>
-      </div>
-    </div></body></html>"""
+async def _fast_route_interceptor(route):
+    req = route.request
+    if req.resource_type in BLOCKED_RESOURCE_TYPES:
+        await route.abort()
+        return
+    url_low = req.url.lower()
+    if any(b in url_low for b in BLOCKED_URL_SUBSTRINGS):
+        await route.abort()
+        return
+    await route.continue_()
+
+async def _capture_live_viewport_b64(page, save_path: Path = None) -> str:
+    img_bytes = await page.screenshot(
+        path=str(save_path) if save_path else None,
+        type="jpeg",
+        quality=82,
+        full_page=False,
+    )
+    return "data:image/jpeg;base64," + base64.b64encode(img_bytes).decode("ascii")
 
 async def execute_automation_job(
     job_id: str,
@@ -131,123 +99,194 @@ async def execute_automation_job(
     cookies: list,
     do_like: bool = True,
     do_comment: bool = True,
-    auto_failover: bool = True,
-    persona: str = "Alert Local Community Watcher",
-    language: str = "English",
+    proxy: str = "",
 ) -> None:
+    t0 = time.perf_counter()
     screenshot_name = f"{job_id}_{agent_id}.jpg"
     screenshot_path = SCREENSHOTS_DIR / screenshot_name
     pw_cookies = normalize_playwright_cookies(cookies or [])
 
-    append_job_log(job_id, f"[*] Armed {len(pw_cookies)} cookies for {account_name} ({fb_uid}). Attaching warm browser...", status="Executing Fast-Path...")
+    append_job_log(
+        job_id,
+        f"[*] Armed {len(pw_cookies)} session cookies ({account_name} • {fb_uid}). Opening warm stealth tab...",
+        status="Opening Live Tab...",
+    )
 
+    context = None
     try:
         browser = await get_warm_browser()
-        context = await browser.new_context(
-            viewport={"width": 1100, "height": 640},
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        )
+        ctx_kwargs = {
+            "viewport": {"width": 1280, "height": 800},
+            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "locale": "en-US",
+        }
+        if proxy and proxy.strip():
+            ctx_kwargs["proxy"] = {"server": proxy.strip()}
+            append_job_log(job_id, f"[+] Bound residential proxy: {proxy.strip()}")
+
+        context = await browser.new_context(**ctx_kwargs)
+        await context.add_init_script(STEALTH_INIT_SCRIPT)
+        await context.route("**/*", _fast_route_interceptor)
 
         if pw_cookies:
             await context.add_cookies(pw_cookies)
 
         page = await context.new_page()
+        append_job_log(job_id, f"[*] Navigating live to {post_url} (blocking heavy video bloat)...", status="Loading Live Facebook...")
 
-        live_blocked = False
-        # Ultra-fast navigation attempt (max 4.2 seconds so it NEVER hangs on Render or secondary devices)
+        await page.goto(post_url, wait_until="domcontentloaded", timeout=10000)
+        await page.wait_for_timeout(600)
+
+        # Stage 1: Dismiss soft popups/dialogs & stream immediate live Stage-1 screenshot to UI
+        await page.evaluate("""() => {
+            const closeSelectors = [
+                'div[aria-label="Close"]',
+                'div[role="dialog"] div[aria-label="Close"]',
+                'div[aria-label="Decline optional cookies"]',
+                'div[aria-label="Allow all cookies"]'
+            ];
+            for (const sel of closeSelectors) {
+                const el = document.querySelector(sel);
+                if (el) { try { el.click(); } catch(e) {} }
+            }
+        }""")
+
+        # Extract real logged-in Facebook owner name if present in DOM
         try:
-            await page.goto(post_url, wait_until="domcontentloaded", timeout=4200)
-            await page.wait_for_timeout(500)
-
-            is_login_url = "/login" in page.url or "login.php" in page.url
-            password_fields = await page.locator('input[type="password"], input[name="pass"]').count()
-
-            if is_login_url or password_fields > 0 or len(pw_cookies) == 0:
-                live_blocked = True
-                append_job_log(job_id, "[⚡] Cross-device/cloud session wall detected — switching to Instant Verified Proof.")
-            else:
-                # Quick owner check
-                try:
-                    detected_owner = await page.evaluate("""() => {
-                        try {
-                            const d = window.require && window.require("CurrentUserInitialData");
-                            if (d && d.NAME) return d.NAME;
-                        } catch (e) {}
-                        return null;
-                    }""")
-                    if detected_owner and is_valid_owner_name(detected_owner):
-                        account_name = detected_owner.strip()
-                        set_detected_account_name(agent_id, account_name)
-                except Exception:
-                    pass
-
-                liked = False
-                if do_like:
-                    for sel in ['div[aria-label="Like"]', 'div[role="button"][aria-label*="Like"]']:
-                        loc = page.locator(sel).first
-                        if await loc.count() > 0:
-                            try:
-                                await loc.click(timeout=900)
-                                liked = True
-                                append_job_log(job_id, "[+] Liked live target post.")
-                                break
-                            except Exception:
-                                pass
-
-                commented = False
-                if do_comment and comment_text:
-                    for sel in ['div[role="textbox"]', 'textarea[placeholder*="comment" i]']:
-                        loc = page.locator(sel).first
-                        if await loc.count() > 0:
-                            try:
-                                await loc.click(timeout=900)
-                                await loc.fill(comment_text, timeout=900)
-                                await page.keyboard.press("Enter")
-                                commented = True
-                                append_job_log(job_id, "[+] Submitted AI comment on live target.")
-                                break
-                            except Exception:
-                                pass
-
-                # If Facebook's reel layout hid the comment box or blocked cloud IP interaction, engage shield
-                if (do_like and not liked) and (do_comment and not commented):
-                    live_blocked = True
-                    append_job_log(job_id, "[⚡] FB Reel view locked on cloud IP — rendering verified session proof.")
-
+            detected_owner = await page.evaluate("""() => {
+                try {
+                    const d = window.require && window.require("CurrentUserInitialData");
+                    if (d && d.NAME) return d.NAME;
+                } catch (e) {}
+                return null;
+            }""")
+            if detected_owner and is_valid_owner_name(detected_owner):
+                account_name = detected_owner.strip()
+                set_detected_account_name(agent_id, account_name)
+                append_job_log(job_id, f"[+] Live DOM verified account owner: {account_name} ({fb_uid})", account_name=account_name)
         except Exception:
-            live_blocked = True
-            append_job_log(job_id, "[⚡] Fast-path timeout reached — engaging Instant Auto-Failover Shield.")
+            pass
 
-        if auto_failover and live_blocked:
-            mirror_html = build_verified_mirror_html(
-                post_url=post_url,
-                agent_id=agent_id,
-                account_name=account_name,
-                fb_uid=fb_uid,
-                comment_text=comment_text,
-                do_like=do_like,
-                do_comment=do_comment,
-                cookie_count=len(pw_cookies),
-                persona=persona,
-                language=language,
+        # Stream Stage-1 Live Preview Screenshot immediately so user sees the real browser right away!
+        stage1_b64 = await _capture_live_viewport_b64(page)
+        ms_stage1 = int((time.perf_counter() - t0) * 1000)
+        append_job_log(
+            job_id,
+            f"[📸] Stage 1: Live Facebook viewport loaded in {ms_stage1}ms. Executing actions...",
+            status="Interacting on Live Page...",
+            screenshot=stage1_b64,
+            execution_ms=ms_stage1,
+        )
+
+        # Check if Facebook showed a login screen
+        login_wall = await page.evaluate("""() => {
+            const u = window.location.href.toLowerCase();
+            if (u.includes('/login') || u.includes('login.php')) return true;
+            const passInputs = document.querySelectorAll('input[type="password"], input[name="pass"]');
+            const hasComposer = document.querySelector('div[role="textbox"], [aria-label*="comment" i], [aria-label*="Like" i]');
+            return (passInputs.length > 0 && !hasComposer);
+        }""")
+
+        if login_wall:
+            append_job_log(
+                job_id,
+                "[!] Notice: Facebook served a login prompt on this IP/cookie session. Refresh cookies or run locally for authenticated state.",
             )
-            await page.set_content(mirror_html, wait_until="domcontentloaded")
-            final_status = f"Completed (Verified • {account_name})"
-        else:
-            final_status = f"Completed (Live • {account_name})"
 
-        # Capture fast JPEG bytes + embed as instant Base64 Data URI so Feed & Archive load in 0ms!
-        img_bytes = await page.screenshot(path=str(screenshot_path), type="jpeg", quality=82, full_page=False)
-        b64_str = base64.b64encode(img_bytes).decode("ascii")
-        data_uri = f"data:image/jpeg;base64,{b64_str}"
+        # Fast Single-Pass Like Execution
+        liked_ok = False
+        if do_like:
+            liked_ok = await page.evaluate("""() => {
+                const candidates = [
+                    ...document.querySelectorAll('div[aria-label="Like"][role="button"]'),
+                    ...document.querySelectorAll('div[aria-label*="Like" i][role="button"]'),
+                    ...document.querySelectorAll('span')
+                ];
+                for (const el of candidates) {
+                    const label = (el.getAttribute && el.getAttribute('aria-label')) || '';
+                    const txt = (el.innerText || '').trim();
+                    if (label === 'Like' || label.startsWith('Like') || txt === 'Like') {
+                        const btn = el.closest('[role="button"]') || el;
+                        btn.scrollIntoView({block: 'center'});
+                        btn.click();
+                        return true;
+                    }
+                }
+                return false;
+            }""")
+            if liked_ok:
+                append_job_log(job_id, "[+] Clicked Like button on live Facebook page!")
+                await page.wait_for_timeout(350)
+            else:
+                append_job_log(job_id, "[i] Like button not exposed on current view layout.")
+
+        # Fast Comment Execution (Focus + Keyboard Type + Enter)
+        commented_ok = False
+        if do_comment and comment_text:
+            # First click any "Comment" icon if the textbox is collapsed (e.g., on Reels)
+            await page.evaluate("""() => {
+                const cBtns = document.querySelectorAll('div[aria-label="Comment"][role="button"], div[aria-label*="Leave a comment" i][role="button"]');
+                for (const b of cBtns) {
+                    try { b.click(); break; } catch(e) {}
+                }
+            }""")
+            await page.wait_for_timeout(350)
+
+            box_Selectors = [
+                'div[role="textbox"][aria-label*="comment" i]',
+                'div[role="textbox"][contenteditable="true"]',
+                'textarea[placeholder*="comment" i]',
+                'div[contenteditable="true"]',
+            ]
+            for sel in box_Selectors:
+                loc = page.locator(sel).first
+                if await loc.count() > 0:
+                    try:
+                        await loc.scroll_into_view_if_needed(timeout=1000)
+                        await loc.click(timeout=1200)
+                        await page.keyboard.type(comment_text, delay=8)
+                        await page.wait_for_timeout(200)
+                        await page.keyboard.press("Enter")
+                        await page.wait_for_timeout(900)
+                        commented_ok = True
+                        append_job_log(job_id, "[+] Typed and submitted AI comment on live Facebook page!")
+                        break
+                    except Exception:
+                        continue
+
+            if not commented_ok:
+                append_job_log(job_id, "[i] Live comment input box not unlocked on this post view.")
+
+        # Stage 2: Capture Final 100% Real Live Browser Screenshot
+        final_b64 = await _capture_live_viewport_b64(page, save_path=screenshot_path)
+        total_ms = int((time.perf_counter() - t0) * 1000)
+
+        if liked_ok or commented_ok:
+            final_status = f"Completed Live ({total_ms/1000:.1f}s • {account_name})"
+        elif login_wall:
+            final_status = f"Live Captured (Login Wall • {total_ms/1000:.1f}s)"
+        else:
+            final_status = f"Live Captured ({total_ms/1000:.1f}s • {account_name})"
 
         append_job_log(
             job_id,
-            f"[📸] Instant HD Proof captured ({len(img_bytes)//1024} KB) — synced to Feed & Archive!",
+            f"[📸] Stage 2: Final 100% real live browser screenshot captured in {total_ms}ms!",
             status=final_status,
-            screenshot=data_uri,
+            screenshot=final_b64,
+            execution_ms=total_ms,
         )
-        await context.close()
 
     except Exception as err:
-        append_job_log(job_id, f"[!] Notice: {str(err)[:85]}", status=f"Completed ({account_name})")
+        total_ms = int((time.perf_counter() - t0) * 1000)
+        append_job_log(
+            job_id,
+            f"[!] Live Browser Notice ({total_ms}ms): {str(err)[:110]}",
+            status=f"Finished ({total_ms/1000:.1f}s)",
+            execution_ms=total_ms,
+        )
+    finally:
+        if context:
+            try:
+                await context.close()
+            except Exception:
+                pass
